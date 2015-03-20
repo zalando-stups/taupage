@@ -20,6 +20,5 @@ chmod 0700 ~granting-service
 chmod 0700 ~granting-service/.ssh
 chmod 0400 ~granting-service/.ssh/authorized_keys
 
-find .
-. secret-vars.sh
+. ./secret-vars.sh
 sed -i s,EVEN_URL,$EVEN_URL, /etc/ssh-access-granting-service.yaml
