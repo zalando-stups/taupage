@@ -24,13 +24,19 @@ set -e
 # reset path
 cd $(dirname $0)
 
+if [ ! -f "$secret_dir/secret-vars.sh" ]; then
+    echo "Missing secret-vars.sh in secret dir" >&2
+    exit 1
+fi
+
+
 # create server
 echo "Starting a base server..."
 result=$(aws ec2 run-instances \
     --image-id $base_ami \
     --count 1 \
     --associate-public-ip-address \
-    --instance-type t2.micro \
+    --instance-type $instance_type \
     --key-name $keypair \
     --security-group-ids $security_group \
     --output json \
@@ -78,7 +84,8 @@ tar c -C runtime . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
 echo "Uploading secret/* files to server..."
-tar c $secret_dir | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
+tar c -C $secret_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
+ssh $ssh_args ubuntu@$ip find /tmp/build
 
 # execute setup script
 echo "Executing setup script..."
