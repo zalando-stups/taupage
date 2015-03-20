@@ -43,7 +43,7 @@ result=$(aws ec2 run-instances \
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
 echo "Instance: $instanceid"
 
-aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=AMI Test"
+aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Test"
 
 while [ true ]; do
 	result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)

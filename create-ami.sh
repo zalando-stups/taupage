@@ -40,7 +40,7 @@ result=$(aws ec2 run-instances \
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
 echo "Instance: $instanceid"
 
-aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=AMI Builder"
+aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Builder"
 
 while [ true ]; do
 	result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
@@ -77,6 +77,8 @@ echo "Uploading runtime/* files to server..."
 tar c -C runtime . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
+echo "Uploading secret/* files to server..."
+tar c $secret_dir | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
 
 # execute setup script
 echo "Executing setup script..."
@@ -98,7 +100,7 @@ ssh $ssh_args ubuntu@$ip sudo rm -rf /tmp/build
 # sleep 15
 
 # create ami
-ami_name="Zalando-AMI-$(date +%Y%m%d-%H%M%S)"
+ami_name="Taupage-AMI-$(date +%Y%m%d-%H%M%S)"
 echo "Creating $ami_name ..."
 result=$(aws ec2 create-image \
     --region $region \
