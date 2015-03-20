@@ -1,0 +1,14 @@
+#!/bin/bash
+
+Bold='\e[1m'
+BBlue='\e[1;34m'
+BRed='\e[1;31m'
+Color_Off='\e[0m'
+
+echo -e "${Bold}         _____                                   "
+echo -e "${Bold}Welcome /__   \\__ _ _   _ _ __   __ _  __ _  ___ "
+echo -e "${Bold}     to   / /\\/ _\` | | | | '_ \\ / _\` |/ _\` |/ _ \\"
+echo -e "${Bold}  STUPS  / / | (_| | |_| | |_) | (_| | (_| |  __/"
+echo -e "${Bold}         \\/   \\__,_|\\__,_| .__/ \\__,_|\\__, |\\___|"
+echo -e "${Bold}                         |_|          |___/      "
+echo -e "${BRed}        All actions will be logged!${Color_Off}"
