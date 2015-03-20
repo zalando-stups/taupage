@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+'''
+Docker runtime script: load /etc/zalando.yaml and run the Docker container
+'''
+
+import argparse
+import os
+import pwd
+import subprocess
+import yaml
+
+
+def get_env_options(config: dict):
+    '''build Docker environment options'''
+    for key, val in config.get('environment', {}).items():
+        yield '-e'
+        yield '{}={}'.format(key, val)
+
+
+def get_volume_options(config: dict):
+    '''build Docker volume mount options'''
+    for path, mount in config.get('mounts', {}).items():
+        yield '-v'
+        # TODO: where is the host directory?
+        yield '{}:{}'.format('/tmp-todo', path)
+
+
+def get_port_options(config: dict):
+    for host_port, container_port in config.get('ports', {}).items():
+        yield '-p'
+        yield '{}:{}'.format(host_port, container_port)
+
+
+def get_other_options(config: dict):
+    if not config.get('root'):
+        # Docker only accepts UNIX user IDs (not names)
+        entry = pwd.getpwnam('application')
+        yield '-u'
+        yield str(entry.pw_uid)
+
+    for t in 'add', 'drop':
+        for cap in config.get('capabilities_{}'.format(t), []):
+            yield '--cap-{}={}'.format(t, cap)
+
+
+def setup_container_logging(container_id: str):
+    log_path = '/var/lib/docker/containers/{id}/{id}-json.log'.format(id=container_id.strip())
+    link_path = '/var/log/application.log'
+    print('Linking container log file {} to {}'.format(log_path, link_path))
+    os.symlink(log_path, link_path)
+
+
+def main(args):
+
+    with open(args.config) as fd:
+        config = yaml.safe_load(fd)
+
+    cmd = ['docker', 'run', '-d']
+    for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+        cmd += list(f(config))
+    cmd += [config['source']]
+
+    print('Starting Docker container: {}'.format(' '.join(cmd)))
+    if not args.dry_run:
+        out = subprocess.check_output(cmd)
+        container_id = out.decode('utf-8').strip()
+        print('Container {} is running'.format(container_id))
+        setup_container_logging(container_id)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', '-c', help='Config file', default='/etc/zalando.yaml')
+    parser.add_argument('--dry-run', help='Print what would be done', action='store_true')
+    args = parser.parse_args()
+    main(args)

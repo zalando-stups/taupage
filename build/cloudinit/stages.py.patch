@@ -1,0 +1,28 @@
+--- stages.py	2014-04-01 20:26:07.000000000 +0200
++++ stages.changed.py	2015-02-11 15:39:28.257049100 +0100
+@@ -35,6 +35,7 @@
+ from cloudinit.handlers import cloud_config as cc_part
+ from cloudinit.handlers import shell_script as ss_part
+ from cloudinit.handlers import upstart_job as up_part
++from cloudinit.handlers import zalando_ami_config as zac_part
+ 
+ from cloudinit import cloud
+ from cloudinit import config
+@@ -344,10 +345,12 @@
+         })
+         # TODO(harlowja) Hmmm, should we dynamically import these??
+         def_handlers = [
+-            cc_part.CloudConfigPartHandler(**opts),
+-            ss_part.ShellScriptPartHandler(**opts),
+-            bh_part.BootHookPartHandler(**opts),
+-            up_part.UpstartJobPartHandler(**opts),
++            # yes, it sucks that this is static
++            #cc_part.CloudConfigPartHandler(**opts),
++            #ss_part.ShellScriptPartHandler(**opts),
++            #bh_part.BootHookPartHandler(**opts),
++            #up_part.UpstartJobPartHandler(**opts),
++            zac_part.ZalandoAMIConfigPartHandler(**opts),
+         ]
+         return def_handlers
+ 
+

@@ -1,0 +1,8 @@
+---
+application_name: senza
+team_name: stups
+stateful: false
+exposed_ports: [8080]
+instance_type: t2.micro
+health_check_http_path: /
+root: true

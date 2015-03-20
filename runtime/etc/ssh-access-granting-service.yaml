@@ -1,0 +1,5 @@
+ssh_access_granting_service_url: TODO
+# all users have superuser rights and can use Docker client
+user_groups:
+  - adm
+  - docker

@@ -1,0 +1,6 @@
+# vim
+*.swp
+
+# IntelliJ IDEA
+/.idea
+/*.iml

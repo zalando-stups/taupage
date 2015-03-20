@@ -1,0 +1,16 @@
+#zalando-ami-config
+
+runtime: Docker
+source: dockerfile/nginx
+
+environment:
+  STAGE: ami-test
+
+root: true
+
+ports:
+  80: 80
+
+ssh_ports:
+  - 22
+  - 2222

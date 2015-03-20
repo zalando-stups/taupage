@@ -1,0 +1,25 @@
+--- __init__.py	2015-02-11 16:16:38.262976655 +0100
++++ __init__.changed.py	2015-02-11 16:16:46.107095760 +0100
+@@ -63,6 +63,7 @@
+     '#cloud-boothook': 'text/cloud-boothook',
+     '#cloud-config-archive': 'text/cloud-config-archive',
+     '#cloud-config-jsonp': 'text/cloud-config-jsonp',
++    '#zalando-ami-config': 'text/x-zalando-ami-config',
+ }
+ 
+ # Sorted longest first
+@@ -191,9 +192,10 @@
+         LOG.debug('content_type "%s" is excluded', content_type)
+         return
+ 
+-    if content_type in PART_CONTENT_TYPES:
+-        walker_handle_handler(data, content_type, filename, payload)
+-        return
++    # we don't want custom part handlers at all
++    #if content_type in PART_CONTENT_TYPES:
++    #    walker_handle_handler(data, content_type, filename, payload)
++    #    return
+     handlers = data['handlers']
+     if content_type in handlers:
+         run_part(handlers[content_type], data['data'], filename,
+

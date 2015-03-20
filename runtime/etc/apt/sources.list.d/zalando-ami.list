@@ -1,0 +1,2 @@
+deb https://get.docker.com/ubuntu docker main
+deb http://apt.newrelic.com/debian/ newrelic non-free
