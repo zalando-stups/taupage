@@ -78,7 +78,7 @@ tar c -C runtime . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
 echo "Uploading secret/* files to server..."
-tar c $secret_dir | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
+tar c $secret_dir | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
 
 # execute setup script
 echo "Executing setup script..."

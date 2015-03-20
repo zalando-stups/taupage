@@ -1,4 +1,4 @@
-ssh_access_granting_service_url: TODO
+ssh_access_granting_service_url: EVEN_URL
 # all users have superuser rights and can use Docker client
 user_groups:
   - adm
