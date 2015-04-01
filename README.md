@@ -1,7 +1,5 @@
 # Zalando AMI generation tooling
 
-See [TODO list](TODO.md) for open tasks.
-
 ## Build a new AMI
 
 You need to be logged in (minion login).
