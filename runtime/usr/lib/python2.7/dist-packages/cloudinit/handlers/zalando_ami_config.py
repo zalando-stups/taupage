@@ -8,7 +8,7 @@ from cloudinit.settings import (PER_ALWAYS)
 
 LOG = logging.getLogger(__name__)
 
-ZALANDO_AMI_CONFIG_PREFIX = "#zalando-ami-config"
+ZALANDO_AMI_CONFIG_PREFIX = "#taupage-ami-config"
 ZALANDO_AMI_CONFIG_MIME_TYPE = handlers.type_from_starts_with(ZALANDO_AMI_CONFIG_PREFIX)
 
 ZALANDO_CONFIG = "/etc/zalando.yaml"

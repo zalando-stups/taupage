@@ -1,4 +1,4 @@
-echo "Patching cloudinit to enable and restrict #zalando-ami-config..."
+echo "Patching cloudinit to enable and restrict #taupage-ami-config..."
 
 # cloudinit is not configurable enough, patch the source for us
 cd /usr/lib/python2.7/dist-packages/cloudinit

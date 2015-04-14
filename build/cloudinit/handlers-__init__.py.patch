@@ -4,14 +4,15 @@
      '#cloud-boothook': 'text/cloud-boothook',
      '#cloud-config-archive': 'text/cloud-config-archive',
      '#cloud-config-jsonp': 'text/cloud-config-jsonp',
-+    '#zalando-ami-config': 'text/x-zalando-ami-config',
++    '#zalando-ami-config': 'text/x-taupage-ami-config',
++    '#taupage-ami-config': 'text/x-taupage-ami-config',
  }
- 
+
  # Sorted longest first
 @@ -191,9 +192,10 @@
          LOG.debug('content_type "%s" is excluded', content_type)
          return
- 
+
 -    if content_type in PART_CONTENT_TYPES:
 -        walker_handle_handler(data, content_type, filename, payload)
 -        return
