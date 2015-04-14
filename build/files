@@ -13,6 +13,8 @@
 /etc/rsyslog.d/22-loggly.conf root:root 0444
 /etc/rsyslog.d/keys root:root 0755
 /etc/rsyslog.d/keys/ca.d root:root 0755
+/etc/rsyslog.conf root:root 0644
+
 /etc/rsyslog.d/keys/ca.d/loggly.crt root:root 0644
 
 /etc/logrotate.d/docker root:root 0644
