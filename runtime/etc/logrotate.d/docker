@@ -1,9 +1,0 @@
-/var/log/application.log {
-        rotate 1
-        daily
-        compress
-        missingok
-        notifempty
-        copytruncate
-        create 640 root root
-}
