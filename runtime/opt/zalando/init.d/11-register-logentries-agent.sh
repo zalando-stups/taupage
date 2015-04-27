@@ -29,7 +29,7 @@ then
 
         echo "register logentries Daemon ...";
         #if custom hostname is set, than register with this name
-        if [ ! -z "$config_logentries_hostname "];
+        if [ ! -z "$config_logentries_hostname" ];
         then
                 #register logentries account with custom hostname
                 le register --account-key=$config_logentries_account_key --name=$config_logentries_hostname
