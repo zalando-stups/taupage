@@ -1,7 +1,10 @@
-#zalando-ami-config
+#taupage-ami-config
+
+application_id: my-nginx-test-app-ami
+application_version: "0.1"
 
 runtime: Docker
-source: dockerfile/nginx
+source: nginx
 
 environment:
   STAGE: ami-test
