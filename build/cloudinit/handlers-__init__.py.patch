@@ -4,7 +4,6 @@
      '#cloud-boothook': 'text/cloud-boothook',
      '#cloud-config-archive': 'text/cloud-config-archive',
      '#cloud-config-jsonp': 'text/cloud-config-jsonp',
-+    '#zalando-ami-config': 'text/x-taupage-ami-config',
 +    '#taupage-ami-config': 'text/x-taupage-ami-config',
  }
 
