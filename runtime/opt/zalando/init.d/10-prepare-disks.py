@@ -1,45 +1,13 @@
 #!/usr/bin/env python3
 
-# read /etc/zalando.yaml
-# for every key in mounts:
-#  if devices.count > 1:
-#    if raid_mode = 0:
-#      create raid 0 setup with all disks
-#    elif raid_mode = 1:
-#      create raid 1 setup with all disks
-#  Default raid_mode: 1
-#    else:
-#      error
-#    if erase_on_boot = true:
-#      format raid or single device
-#    else
-#      mount only
-#    except
-#      act as erase_on_boot = true
-#    mount raid or single device to /mnt/<device-name>
-
-# docker startup script will bind mount /mnt/device-name to its real container destination
-
 import yaml
 import argparse
 import logging
 import sys
+import subprocess
+import os
 
 from yaml.parser import ParserError
-
-# Globals
-DRY_RUN = False
-RAID_LEVEL = 1
-
-def configure_logging(debug=False):
-    """Configures logging environment.
-
-    Defaults to INFO. For DEBUG logging set quiet=False.
-    """
-
-    level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(level=level, format='%(levelname)-7s %(asctime)s.%(msecs)-3d %(message)s',
-                        datefmt='%Y.%m.%d %H:%M:%S')
 
 
 def process_arguments():
@@ -52,8 +20,7 @@ def process_arguments():
 
 
 def load_configuration(filename):
-    """Loads configuration file of Zalando AMI.
-    """
+    '''Loads configuration file of Zalando AMI.'''
     try:
         with open(filename) as f:
             configuration = yaml.safe_load(f)
@@ -68,53 +35,67 @@ def load_configuration(filename):
 
     return configuration
 
-# def prepare_mount(mount_name, mount_config, dry_run=False):
-#     devices = mount_config.get('devices')
-#     if not devices:
-#         error('No devices defined')
-#     if instance
-#     for device in devices:
-#     print('Mounting {}'.format(mount_name))
-#
+
+def has_filesystem(device):
+    proc = subprocess.Popen(["dumpe2fs", device], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, errs = proc.communicate()
+    # print(out)
+    has_filesystem = b"Couldn't find valid filesystem superblock." not in out
+    # print(has_filesystem)
+    return has_filesystem
 
 
-def get_mounts(config):
-    if not 'mounts' in config:
-        logging.debug('No mounts declared in config file')
-        return {}
-
-    return config['mounts']
+def dir_exists(mountpoint):
+    return os.path.isdir(mountpoint)
 
 
-def mount(mount_point, mount_configuration):
-    logging.debug('Mounting %s with configuration %s', mount_point, mount_configuration)
-    if 'erase_on_boot' in mount_configuration and mount_configuration['erase_on_boot'] == 'true':
-        logging.debug('Creating partition %s on device(s) %s', mount_point, mount_configuration[''])
-    pass
+def is_mounted(mountpoint):
+    return os.path.ismount(mountpoint)
+
+
+def format_disks(config, disks=None, erase_on_boot=False, filesystem="ext4", is_mounted=None):
+    '''Formats disks to ext4 if erase_on_boot is True or is_new_disk'''
+    for disk in disks:
+        if (erase_on_boot is True or not has_filesystem(disk)) and is_mounted is False:
+            print(is_mounted)
+            subprocess.check_call(["mkfs." + filesystem, disk])
+        elif is_mounted is True:
+            print("{} is already mounted.".format(disk))
+        else:
+            print("Nothing to do here", disk)
+
+
+def mount_disks(mountpoint=None, disks=None, dir_exists=None, is_mounted=None):
+    '''Mounts formatted disks provided by /etc/zalando.yaml'''
+    for disk in disks:
+        # print("mounting:", disk, "to mountpoint:", mountpoint)
+        if is_mounted is False and dir_exists is False:
+            subprocess.check_call(["mkdir", "-p", mountpoint])
+            subprocess.check_call(["mount", disk, mountpoint])
+        elif is_mounted is False and dir_exists is True:
+            subprocess.check_call(["mount", disk, mountpoint])
+        else:
+            print("Directory {} already exists and device is already mounted.".format(mountpoint))
+
+
+# Todo: Add software RAID (mdadm) configuration of RAID 1, RAID 0
+
+
+def iterate_mounts(config):
+    '''Iterates over mount points file to provide disk device paths'''
+    for mpoint, data in config.get("mounts", {}).items():
+        format_disks(mpoint, data['devices'], data.get("erase_on_boot", False), data.get("filesystem", "ext4"), is_mounted(mpoint))
+        mount_disks(mpoint, data['devices'])
 
 
 def main():
-    global DRY_RUN
 
-    # Process arguments and configure logging
+    # Process arguments
     args = process_arguments()
-    DRY_RUN = args.dry_run
-    configure_logging(args.debug)
-
     # Load configuration from YAML file
     config = load_configuration(args.filename)
-
-    mounts = get_mounts(config)
-
-    logging.debug('Mounts: %s', mounts)
-
-    # No mounts to perform means success
-    if not mounts:
-        return
-
-    for mount_point in mounts:
-        mount(mount_point, mounts[mount_point])
-
+    # Iterate over mount points
+    iterate_mounts(config)
 
 if __name__ == '__main__':
     main()
