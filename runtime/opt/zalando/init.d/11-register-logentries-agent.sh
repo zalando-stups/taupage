@@ -23,34 +23,60 @@ parse_yaml() {
 #read zalando.yaml file
 eval $(parse_yaml /etc/zalando.yaml "config_")
 
+#set more readable variables 
+ACCOUNTKEY=$config_logentries_account_key
+TOKENID=$config_logentries_tokenid
+APPID=$config_application_id
+APPVERSION=$config_application_version
+
+#check if appname and appversion is provided from the yaml
+if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
+then
+	echo "ERROR: no application_id and application_version are in the yaml files";
+	exit 1;
+fi
+
 #if logentries account exists in the yaml file. Register the logentries Daemon to this Account
-if [ ! -z "$config_logentries_account_key" ];
+if [ -n "$ACCOUNTKEY" ];
 then
 
-        echo "register logentries Daemon ...";
-        #if custom hostname is set, than register with this name
-        if [ ! -z "$config_logentries_hostname" ];
-        then
-                #register logentries account with custom hostname
-                le register --account-key=$config_logentries_account_key --name=$config_logentries_hostname
-        else
-                #register logentries account
-                le register --account-key=$config_logentries_account_key
-        fi
+        echo -n "register logentries Daemon ... ";
+        #register logentries account
+        le register --account-key=$ACCOUNTKEY
+	if [ "$?" == "0" ];
+	then
+		echo -n "DONE"
+	else
+		echo -n "ERROR: Register to Logentries account failed";
+		exit 1;
+	fi	
 
         #install logentries daemon
         apt-get install -y -q logentries-daemon
 
-        #add default EC2 followed logfiles
+        #add default EC2 followed logfiles and TokenID to le config 
         le follow /var/log/syslog
         le follow /var/log/auth.log
-        le follow /var/log/boot.log
-        le follow /var/log/cloud-init.log
-        le follow /var/log/application.log
-        le follow "/var/log/upstart/*.log"
 
+	if [ -n "$TOKENID" ];
+	then
+		echo "
+		[$APPID-$APPVERSION-syslog]
+		path = /var/log/syslog
+		token = $TOKENID
+		" >> /etc/le/config
+
+		echo "
+                [$APPID-$APPVERSION-auth]
+                path = /var/log/auth.log
+                token = $TOKENID
+                " >> /etc/le/config
+	else
+		echo "ERROR: no TokenID in .yaml file";
+	fi
+		
         #restart daemon
         service logentries restart
 else 
-	echo "no logentries AccountKey was specify in the .yaml file"
+	echo "no logentries AccountKey was specify in the .yaml file";
 fi
