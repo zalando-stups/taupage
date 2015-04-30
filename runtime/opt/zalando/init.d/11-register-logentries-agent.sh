@@ -43,7 +43,7 @@ then
         echo -n "register logentries Daemon ... ";
         #register logentries account
         le register --account-key=$ACCOUNTKEY
-	if [ "$?" == "0" ];
+	if [ "$?" = "0" ];
 	then
 		echo -n "DONE"
 	else
@@ -60,17 +60,17 @@ then
 
 	if [ -n "$TOKENID" ];
 	then
-		echo "
-		[$APPID-$APPVERSION-syslog]
-		path = /var/log/syslog
-		token = $TOKENID
-		" >> /etc/le/config
+echo "
+[$APPID-$APPVERSION-syslog]
+path = /var/log/syslog
+token = $TOKENID
+" >> /etc/le/config
 
-		echo "
-                [$APPID-$APPVERSION-auth]
-                path = /var/log/auth.log
-                token = $TOKENID
-                " >> /etc/le/config
+echo "
+[$APPID-$APPVERSION-auth]
+path = /var/log/auth.log
+token = $TOKENID
+" >> /etc/le/config
 	else
 		echo "ERROR: no TokenID in .yaml file";
 	fi
