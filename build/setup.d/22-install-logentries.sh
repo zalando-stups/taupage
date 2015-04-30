@@ -5,5 +5,5 @@ echo 'deb http://rep.logentries.com/ trusty main' > /etc/apt/sources.list.d/loge
 gpg --keyserver pgp.mit.edu --recv-keys C43C79AD && gpg -a --export C43C79AD | apt-key add -
 
 #install packages
-apt-get update
+apt-get update -y -q >>install.log
 apt-get install -y -q logentries >>install.log
