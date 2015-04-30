@@ -18,7 +18,7 @@ for script in $(ls init.d); do
     ./init.d/$script
     if [ $? -ne 0 ]; then
         echo "Failed to start $script" >&2
-        ecxit 1
+        exit 1
     fi
 done
 
