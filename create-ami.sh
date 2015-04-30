@@ -144,44 +144,55 @@ aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/n
 # run tests
 ./test.sh $CONFIG_FILE $imageid
 
-# TODO exit if git is dirty
+#if test failed then dont share and copy the image to other regions 
+if [ $? -eq 0 ];
+then
 
-# share ami
-for account in $accounts; do
-    echo "Sharing AMI with account $account ..."
-    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
-done
+	# TODO exit if git is dirty
 
-for target_region in $copy_regions; do
-    echo "Copying AMI to region $target_region ..."
-    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --name $ami_name --description "user_data_version: 1" --output json)
-    target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
+	# share ami
+	for account in $accounts; do
+	    echo "Sharing AMI with account $account ..."
+	    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+	done
 
-    state="no state yet"
-    while [ true ]; do
-        echo "Waiting for AMI creation in $target_region ... ($state)"
+	for target_region in $copy_regions; do
+	    echo "Copying AMI to region $target_region ..."
+	    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --name $ami_name --description "user_data_version: 1" --output json)
+	    target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 
-        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-        state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
+	    state="no state yet"
+	    while [ true ]; do
+		echo "Waiting for AMI creation in $target_region ... ($state)"
 
-        if [ "$state" = "failed" ]; then
-            echo "Image creation failed."
-            exit 1
-        elif [ "$state" = "available" ]; then
-            break
-        fi
+		result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
+		state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
 
-        sleep 10
-    done
+		if [ "$state" = "failed" ]; then
+		    echo "Image creation failed."
+		    exit 1
+		elif [ "$state" = "available" ]; then
+		    break
+		fi
 
-    for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
-    done
-done
+		sleep 10
+	    done
+
+	    for account in $accounts; do
+		echo "Sharing AMI with account $account ..."
+		aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+	    done
+	done
+	# TODO tag current git head with AMI name
+	
+	# finished!
+	echo "AMI $ami_name ($imageid) successfully created and shared."
+
+else 
+
+	echo "AMI $ami_name ($imageid) create failed "
+
+fi
+	
 
 
-# TODO tag current git head with AMI name
-
-# finished!
-echo "AMI $ami_name ($imageid) successfully created and shared."
