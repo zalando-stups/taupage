@@ -25,7 +25,7 @@ eval $(parse_yaml /etc/zalando.yaml "config_")
 
 #set more readable variables 
 ACCOUNTKEY=$config_logentries_account_key
-TOKENID=$config_logentries_tokenid
+TOKENID=$config_logentries_token_id
 APPID=$config_application_id
 APPVERSION=$config_application_version
 
