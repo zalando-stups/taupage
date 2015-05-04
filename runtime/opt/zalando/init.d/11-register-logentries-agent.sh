@@ -33,7 +33,6 @@ APPVERSION=$config_application_version
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
 then
 	echo "ERROR: no application_id and application_version are in the yaml files";
-	exit 1;
 fi
 
 #if logentries account exists in the yaml file. Register the logentries Daemon to this Account
@@ -48,7 +47,6 @@ then
 		echo -n "DONE"
 	else
 		echo -n "ERROR: Register to Logentries account failed";
-		exit 1;
 	fi	
 
         #install logentries daemon
