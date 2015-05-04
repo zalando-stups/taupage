@@ -7,6 +7,7 @@ python-setuptools
 python3-requests
 python3-yaml
 ntp
+logentries
 "
 
 echo "Installing packages..."
