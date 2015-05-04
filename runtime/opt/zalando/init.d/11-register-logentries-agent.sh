@@ -78,5 +78,5 @@ token = $TOKENID
         #restart daemon
         service logentries restart
 else 
-	echo "no logentries AccountKey was specify in the .yaml file";
+	echo "ERROR: no logentries AccountKey was specify in the .yaml file";
 fi
