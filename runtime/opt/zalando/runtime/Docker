@@ -42,6 +42,9 @@ def get_other_options(config: dict):
         for cap in config.get('capabilities_{}'.format(t), []):
             yield '--cap-{}={}'.format(t, cap)
 
+    if config.get('hostname'):
+        yield '--hostname={}'.format(config.get('hostname'))
+
 
 def setup_container_logging(container_id: str):
     log_path = '/var/lib/docker/containers/{id}/{id}-json.log'.format(id=container_id.strip())
