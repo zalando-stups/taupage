@@ -68,14 +68,17 @@ def format_disks(config, disks=None, erase_on_boot=False, filesystem="ext4", is_
 def mount_disks(mountpoint=None, disks=None, dir_exists=None, is_mounted=None):
     '''Mounts formatted disks provided by /etc/zalando.yaml'''
     for disk in disks:
-        # print("mounting:", disk, "to mountpoint:", mountpoint)
+        print("mounting:", disk, "to mountpoint:", mountpoint)
+        print("is_mounted:", is_mounted, "dir_exists", dir_exists)
         if is_mounted is False and dir_exists is False:
             subprocess.check_call(["mkdir", "-p", mountpoint])
             subprocess.check_call(["mount", disk, mountpoint])
         elif is_mounted is False and dir_exists is True:
             subprocess.check_call(["mount", disk, mountpoint])
-        else:
+        elif is_mounted is True and dir_exists is True:
             print("Directory {} already exists and device is already mounted.".format(mountpoint))
+        else:
+            print("Unexpected error while mounting the disks")
 
 
 # Todo: Add software RAID (mdadm) configuration of RAID 1, RAID 0
@@ -85,7 +88,7 @@ def iterate_mounts(config):
     '''Iterates over mount points file to provide disk device paths'''
     for mpoint, data in config.get("mounts", {}).items():
         format_disks(mpoint, data['devices'], data.get("erase_on_boot", False), data.get("filesystem", "ext4"), is_mounted(mpoint))
-        mount_disks(mpoint, data['devices'])
+        mount_disks(mpoint, data['devices'], dir_exists(mpoint), is_mounted(mpoint))
 
 
 def main():
