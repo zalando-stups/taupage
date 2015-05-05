@@ -87,6 +87,9 @@ def mount_disks(mountpoint=None, disks=None, dir_exists=None, is_mounted=None):
 def iterate_mounts(config):
     '''Iterates over mount points file to provide disk device paths'''
     for mpoint, data in config.get("mounts", {}).items():
+        # mount path below /mounts on the host system
+        # (the path specifies the mount point inside the Docker container)
+        mpoint = '/mounts/{}'.format(mpoint)
         format_disks(mpoint, data['devices'], data.get("erase_on_boot", False), data.get("filesystem", "ext4"), is_mounted(mpoint))
         mount_disks(mpoint, data['devices'], dir_exists(mpoint), is_mounted(mpoint))
 
