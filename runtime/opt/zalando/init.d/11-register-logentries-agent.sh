@@ -48,11 +48,8 @@ then
 	else
 		echo -n "ERROR: Register to Logentries account failed";
 	fi	
-
-        #install logentries daemon
-        apt-get install -y -q logentries-daemon
-
-        #add default EC2 followed logfiles and TokenID to le config 
+        
+	#add default EC2 followed logfiles and TokenID to le config 
         le follow /var/log/syslog
         le follow /var/log/auth.log
 
