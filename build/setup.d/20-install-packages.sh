@@ -1,7 +1,6 @@
 pkgs="
 lxc-docker
 rsyslog-gnutls
-newrelic-sysmond
 auditd
 python-setuptools
 python3-requests

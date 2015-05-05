@@ -33,6 +33,7 @@ APPVERSION=$config_application_version
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
 then
 	echo "ERROR: no application_id and application_version are in the yaml files";
+	exit
 fi
 
 #if logentries account exists in the yaml file. Register the logentries Daemon to this Account
@@ -47,6 +48,7 @@ then
 		echo -n "DONE"
 	else
 		echo -n "ERROR: Register to Logentries account failed";
+		exit
 	fi	
         
 	#add default EC2 followed logfiles and TokenID to le config 
@@ -68,10 +70,12 @@ token = $TOKENID
 " >> /etc/le/config
 	else
 		echo "ERROR: no TokenID in .yaml file";
+		exit
 	fi
 		
         #restart daemon
         service logentries restart
 else 
 	echo "ERROR: no logentries AccountKey was specify in the .yaml file";
+	exit
 fi
