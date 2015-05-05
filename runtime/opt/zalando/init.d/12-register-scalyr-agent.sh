@@ -46,7 +46,7 @@ then
 	then
 		echo -n "DONE"
 	else
-		echo -n "ERROR: Register to Logentries account failed";
+		echo -n "ERROR: Register to Scalyr account failed";
 		exit; 
 	fi	
 else 
