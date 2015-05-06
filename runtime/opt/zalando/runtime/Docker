@@ -46,13 +46,6 @@ def get_other_options(config: dict):
         yield '--hostname={}'.format(config.get('hostname'))
 
 
-def setup_container_logging(container_id: str):
-    log_path = '/var/lib/docker/containers/{id}/{id}-json.log'.format(id=container_id.strip())
-    link_path = '/var/log/application.log'
-    print('Linking container log file {} to {}'.format(log_path, link_path))
-    os.symlink(log_path, link_path)
-
-
 def main(args):
 
     with open(args.config) as fd:
@@ -68,7 +61,6 @@ def main(args):
         out = subprocess.check_output(cmd)
         container_id = out.decode('utf-8').strip()
         print('Container {} is running'.format(container_id))
-        setup_container_logging(container_id)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
