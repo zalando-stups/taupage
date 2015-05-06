@@ -71,7 +71,7 @@ fi
 
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\"}, attributes: {appname: \"$APPID\-$APPVERSION\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\"}, attributes: {appname: \"$APPID\"},attributes: {appversion: \"$APPVERSION\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
