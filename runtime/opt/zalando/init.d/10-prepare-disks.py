@@ -92,6 +92,7 @@ def iterate_mounts(config):
         mpoint = '/mounts/{}'.format(mpoint)
         format_disks(mpoint, data['devices'], data.get("erase_on_boot", False), data.get("filesystem", "ext4"), is_mounted(mpoint))
         mount_disks(mpoint, data['devices'], dir_exists(mpoint), is_mounted(mpoint))
+        subprocess.check_call(["chown", "-R", "application:", mpoint])
 
 
 def main():
