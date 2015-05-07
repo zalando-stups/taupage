@@ -5,9 +5,11 @@ auditd
 python-setuptools
 python3-requests
 python3-yaml
+python3-pip
 ntp
 logentries
 logentries-daemon
+mdadm
 "
 
 echo "Installing packages..."
