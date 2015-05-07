@@ -28,6 +28,11 @@ ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 
+#remove "'" from Version number
+APPVERSION="${APPVERSION%\'}"
+APPVERSION="${APPVERSION#\'}"
+
+
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
 then
@@ -71,7 +76,7 @@ fi
 
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\"}, attributes: {appname: \"$APPID\"},attributes: {appversion: \"$APPVERSION\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
