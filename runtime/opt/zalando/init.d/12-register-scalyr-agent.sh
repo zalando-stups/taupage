@@ -28,6 +28,11 @@ ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 
+#remove "'" from Version number
+APPVERSION="${APPVERSION%\'}"
+APPVERSION="${APPVERSION#\'}"
+
+
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
 then
