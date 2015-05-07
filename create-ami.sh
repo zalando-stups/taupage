@@ -158,7 +158,7 @@ then
 
 	for target_region in $copy_regions; do
 	    echo "Copying AMI to region $target_region ..."
-	    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --name $ami_name --description "user_data_version: 1" --output json)
+	    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "user_data_version: 1" --output json)
 	    target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 
 	    state="no state yet"
