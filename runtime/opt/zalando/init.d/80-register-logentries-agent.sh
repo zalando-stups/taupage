@@ -29,6 +29,10 @@ TOKENID=$config_logentries_token_id
 APPID=$config_application_id
 APPVERSION=$config_application_version
 
+#remove "'" from Version number
+APPVERSION="${APPVERSION%\'}"
+APPVERSION="${APPVERSION#\'}"
+
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
 then
@@ -42,7 +46,7 @@ then
 
         echo -n "register logentries Daemon ... ";
         #register logentries account
-        le register --account-key=$ACCOUNTKEY
+        le register --force --account-key=$ACCOUNTKEY
 	if [ "$?" = "0" ];
 	then
 		echo -n "DONE"
@@ -54,6 +58,8 @@ then
 	#add default EC2 followed logfiles and TokenID to le config 
         le follow /var/log/syslog
         le follow /var/log/auth.log
+        le follow /var/log/audit.log
+        le follow /var/log/application.log
 
 	if [ -n "$TOKENID" ];
 	then
@@ -68,6 +74,19 @@ echo "
 path = /var/log/auth.log
 token = $TOKENID
 " >> /etc/le/config
+
+echo "
+[$APPID-$APPVERSION-audit]
+path = /var/log/audit.log
+token = $TOKENID
+" >> /etc/le/config
+
+echo "
+[$APPID-$APPVERSION-application]
+path = /var/log/application.log
+token = $TOKENID
+" >> /etc/le/config
+
 	else
 		echo "ERROR: no TokenID in .yaml file";
 		exit
