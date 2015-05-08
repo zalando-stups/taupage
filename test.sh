@@ -24,11 +24,18 @@ set -e
 # load config
 . ./$CONFIG_FILE
 
+# load volume testing definitions
+. ./volume_testing.sh
+
 echo "Running AMI tests for $AMI_ID"
+
+create_profile_for_volume_attachment
+create_test_volumes
 
 # get a server
 echo "Starting test server..."
 result=$(aws ec2 run-instances \
+    --iam-instance-profile Name=${INSTANCE_PROFILE} \
     --image-id $AMI_ID \
     --count 1 \
     --instance-type t2.micro \
@@ -87,6 +94,10 @@ if [ $DRY_RUN = false ]; then
 else
     echo "Skipping termination of server due to dry run!"
 fi
+
+delete_test_volumes
+
+delete_profile_for_volume_attachment
 
 if [ $TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
