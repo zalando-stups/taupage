@@ -74,6 +74,7 @@ else
 	exit
 fi
 
+#follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
@@ -85,9 +86,37 @@ else
         exit
 fi
 
+
+#follow auth.log 
 echo "";
 echo -n "insert authlog to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
+if [ $? -eq 0 ];
+then
+	echo -n "DONE";
+	echo "";
+else
+	echo -n "ERROR";
+        exit
+fi
+
+#follow audit.log 
+echo "";
+echo -n "insert audit to follow ... ";
+sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
+if [ $? -eq 0 ];
+then
+	echo -n "DONE";
+	echo "";
+else
+	echo -n "ERROR";
+        exit
+fi
+
+#follow application.log 
+echo "";
+echo -n "insert authlog to follow ... ";
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
