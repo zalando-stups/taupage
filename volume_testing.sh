@@ -24,12 +24,16 @@ EOF
 PERMISSIONS_POLICY="permissionspolicy-$AMI_ID"
 cat << EOF > "$PERMISSIONS_POLICY"
 {
-  "Version": "2012-10-17",
-  "Statement": {
-    "Effect": "Allow",
-    "Action": "ec2:AttachVolume",
-    "Resource": "arn:aws:ec2:${region}::volume/*"
-  }
+    "Version": "2012-10-17",
+    "Statement": {
+        "Effect": "Allow",
+        "Action": [
+            "ec2:DescribeVolumes",
+            "ec2:AttachVolume",
+            "ec2:DetachVolume"
+        ],
+        "Resource": "*"
+    }
 }
 EOF
 
