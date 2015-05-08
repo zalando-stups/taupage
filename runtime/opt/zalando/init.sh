@@ -23,7 +23,7 @@ for script in $(ls init.d); do
 done
 
 # runtime execution
-RUNTIME=$(grep -E "^runtime: " /etc/zalando.yaml | cut -d' ' -f 2)
+RUNTIME=$(grep -E "^runtime: " /etc/taupage.yaml | cut -d' ' -f 2)
 
 if [ -z "$RUNTIME" ]; then
     echo "No runtime configuration found!" >&2
@@ -48,8 +48,8 @@ result=$?
 # notify cloud formation
 
 # TODO get it more reliably
-CFN_STACK=$(grep -E "^    stack:" /etc/zalando.yaml | awk '{print $2}')
-CFN_RESOURCE=$(grep -E "^    resource:" /etc/zalando.yaml | awk '{print $2}')
+CFN_STACK=$(grep -E "^    stack:" /etc/taupage.yaml | awk '{print $2}')
+CFN_RESOURCE=$(grep -E "^    resource:" /etc/taupage.yaml | awk '{print $2}')
 
 if [ -z "$CFN_STACK" ] || [ -z "$CFN_RESOURCE" ]; then
     echo "Skipping notification of CloudFormation."
