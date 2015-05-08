@@ -144,7 +144,7 @@ aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/n
 # run tests
 ./test.sh $CONFIG_FILE $imageid
 
-#if test failed then dont share and copy the image to other regions 
+#if test failed then dont share and copy the image to other regions
 if [ $? -eq 0 ];
 then
 
@@ -184,15 +184,15 @@ then
 	    done
 	done
 	# TODO tag current git head with AMI name
-	
+
 	# finished!
 	echo "AMI $ami_name ($imageid) successfully created and shared."
 
-else 
+else
 
 	echo "AMI $ami_name ($imageid) create failed "
 
 fi
-	
+
 
 
