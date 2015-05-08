@@ -11,8 +11,8 @@ from yaml.parser import ParserError
 
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/zalando.yaml')
-    parser.add_argument('-f', '--file', dest='filename', default='/etc/zalando.yaml', help='configuration file in YAML')
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
     parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
     parser.add_argument('--dry-run', action='store_true', help='only do a dry run and output what would be executed')
 
@@ -66,7 +66,7 @@ def format_disks(config, disks=None, erase_on_boot=False, filesystem="ext4", is_
 
 
 def mount_disks(mountpoint=None, disks=None, dir_exists=None, is_mounted=None):
-    '''Mounts formatted disks provided by /etc/zalando.yaml'''
+    '''Mounts formatted disks provided by /etc/taupage.yaml'''
     for disk in disks:
         print("mounting:", disk, "to mountpoint:", mountpoint)
         print("is_mounted:", is_mounted, "dir_exists", dir_exists)

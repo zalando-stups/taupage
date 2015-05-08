@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 ZALANDO_AMI_CONFIG_PREFIX = "#taupage-ami-config"
 ZALANDO_AMI_CONFIG_MIME_TYPE = handlers.type_from_starts_with(ZALANDO_AMI_CONFIG_PREFIX)
 
-ZALANDO_CONFIG = "/etc/zalando.yaml"
+ZALANDO_CONFIG = "/etc/taupage.yaml"
 
 
 class ZalandoAMIConfigPartHandler(handlers.Handler):
