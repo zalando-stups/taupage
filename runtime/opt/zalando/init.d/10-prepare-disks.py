@@ -189,8 +189,8 @@ def handle_volumes(args, config):
 
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/zalando.yaml')
-    parser.add_argument('-f', '--file', dest='filename', default='/etc/zalando.yaml', help='configuration file in YAML')
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
     parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
     parser.add_argument('-r', '--region', dest='region',
                         help='uses a specific AWS region instead of querying the instance metadata')
