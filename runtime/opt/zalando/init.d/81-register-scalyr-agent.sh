@@ -1,5 +1,5 @@
 #!/bin/sh
-# read /etc/zalando.yaml
+# read /etc/taupage.yaml
 # get scalyr Key and register the agent
 
 #parse yaml function
@@ -20,8 +20,8 @@ parse_yaml() {
 }
 
 
-#read zalando.yaml file
-eval $(parse_yaml /etc/zalando.yaml "config_")
+#read taupage.yaml file
+eval $(parse_yaml /etc/taupage.yaml "config_")
 
 #set more readable variables
 ACCOUNTKEY=$config_scalyr_account_key
@@ -87,7 +87,7 @@ else
 fi
 
 
-#follow auth.log 
+#follow auth.log
 echo "";
 echo -n "insert authlog to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
@@ -100,7 +100,7 @@ else
         exit
 fi
 
-#follow audit.log 
+#follow audit.log
 echo "";
 echo -n "insert audit to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
@@ -113,7 +113,7 @@ else
         exit
 fi
 
-#follow application.log 
+#follow application.log
 echo "";
 echo -n "insert authlog to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config

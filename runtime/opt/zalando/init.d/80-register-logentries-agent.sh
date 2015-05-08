@@ -1,5 +1,5 @@
 #!/bin/sh
-# read /etc/zalando.yaml
+# read /etc/taupage.yaml
 # get logentries Key and register logentries daemon
 
 #parse yaml function
@@ -20,10 +20,10 @@ parse_yaml() {
 }
 
 
-#read zalando.yaml file
-eval $(parse_yaml /etc/zalando.yaml "config_")
+#read taupage.yaml file
+eval $(parse_yaml /etc/taupage.yaml "config_")
 
-#set more readable variables 
+#set more readable variables
 ACCOUNTKEY=$config_logentries_account_key
 TOKENID=$config_logentries_token_id
 APPID=$config_application_id
@@ -34,7 +34,7 @@ APPVERSION="${APPVERSION%\'}"
 APPVERSION="${APPVERSION#\'}"
 
 #check if appname and appversion is provided from the yaml
-if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
+if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
 then
 	echo "ERROR: no application_id and application_version are in the yaml files";
 	exit
@@ -53,9 +53,9 @@ then
 	else
 		echo -n "ERROR: Register to Logentries account failed";
 		exit
-	fi	
-        
-	#add default EC2 followed logfiles and TokenID to le config 
+	fi
+
+	#add default EC2 followed logfiles and TokenID to le config
         le follow /var/log/syslog
         le follow /var/log/auth.log
         le follow /var/log/audit.log
@@ -91,10 +91,10 @@ token = $TOKENID
 		echo "ERROR: no TokenID in .yaml file";
 		exit
 	fi
-		
+
         #restart daemon
         service logentries restart
-else 
+else
 	echo "ERROR: no logentries AccountKey was specify in the .yaml file";
 	exit
 fi

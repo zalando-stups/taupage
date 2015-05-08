@@ -15,9 +15,11 @@ from yaml.parser import ParserError
 from time import sleep
 
 
-def instance_id():
-    """Helper to return theid for the current instance"""
-    return boto.utils.get_instance_metadata()['instance-id']
+def process_arguments():
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/zalando.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/etc/zalando.yaml', help='configuration file in YAML')
+    parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
+    parser.add_argument('--dry-run', action='store_true', help='only do a dry run and output what would be executed')
 
 
 def region():
@@ -101,7 +103,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_mounted=
 
 
 def mount_partition(partition, mountpoint, dir_exists=None, is_mounted=None):
-    """Mounts formatted disks provided by /etc/zalando.yaml"""
+    """Mounts formatted disks provided by /etc/taupage.yaml"""
     if is_mounted is False and dir_exists is False:
         subprocess.check_call(["mkdir", "-p", mountpoint])
         subprocess.check_call(["mount", partition, mountpoint])
@@ -111,6 +113,9 @@ def mount_partition(partition, mountpoint, dir_exists=None, is_mounted=None):
         logging.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
         logging.error("Unexpected error while mounting the disks")
+
+
+# Todo: Add software RAID (mdadm) configuration of RAID 1, RAID 0
 
 
 def iterate_mounts(config):

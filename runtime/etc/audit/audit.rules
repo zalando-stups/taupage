@@ -79,7 +79,7 @@
 -w /var/log/tallylog -p wa -k login
 
 ## Zalando configuration
--w /etc/zalando.yaml -p wa -k zalandocfg
+-w /etc/taupage.yaml -p wa -k zalandocfg
 
 ## Network configuration
 -w /etc/hosts -p wa -k hosts
