@@ -2,7 +2,7 @@
 
 ## Build a new AMI
 
-You need to be logged in (Mai login).
+You need to be logged in (mai login).
 
     $ ./create-ami.sh ./config-stups.sh
 
