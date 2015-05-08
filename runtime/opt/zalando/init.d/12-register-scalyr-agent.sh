@@ -23,7 +23,7 @@ parse_yaml() {
 #read zalando.yaml file
 eval $(parse_yaml /etc/zalando.yaml "config_")
 
-#set more readable variables 
+#set more readable variables
 ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
@@ -34,7 +34,7 @@ APPVERSION="${APPVERSION#\'}"
 
 
 #check if appname and appversion is provided from the yaml
-if [ -z "$APPID" ] && [ -z "$APPVERSION" ]; 
+if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
 then
 	echo "ERROR: no application_id and application_version are in the yaml files";
 	exit;
@@ -52,11 +52,11 @@ then
 		echo -n "DONE"
 	else
 		echo -n "ERROR: Register to Scalyr account failed";
-		exit; 
-	fi	
-else 
+		exit;
+	fi
+else
 	echo "ERROR: no scalyr AccountKey was specify in the .yaml file";
-	exit; 
+	exit;
 fi
 
 #default path to scalyr config
