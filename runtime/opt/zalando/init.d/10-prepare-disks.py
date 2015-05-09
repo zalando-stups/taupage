@@ -14,6 +14,9 @@ import boto.utils
 from yaml.parser import ParserError
 from time import sleep
 
+LOG = logging.getLogger(__name__)
+LOG.setLevel(logging.INFO)
+
 
 def instance_id():
     """Helper to return theid for the current instance"""
@@ -39,7 +42,7 @@ def find_volume(ec2, name):
     try:
         return list(filter(lambda volume: volume_available, ec2.get_all_volumes(filters={"tag:Name": name})))[0].id
     except Exception as e:
-        logging.exception(e)
+        LOG.exception(e)
         sys.exit(2)
 
 
@@ -48,7 +51,7 @@ def attach_volume(ec2, volume_id, attach_as):
     try:
         ec2.attach_volume(volume_id, instance_id(), attach_as)
     except Exception as e:
-        logging.exception(e)
+        LOG.exception(e)
         sys.exit(3)
 
 
@@ -58,13 +61,13 @@ def load_configuration(filename):
         with open(filename) as f:
             configuration = yaml.safe_load(f)
     except FileNotFoundError:
-        logging.error('Configuration file not found!')
+        LOG.error('Configuration file not found!')
         sys.exit(1)
     except ParserError:
-        logging.error('Unable to parse configuration file!')
+        LOG.error('Unable to parse configuration file!')
         sys.exit(1)
 
-    logging.debug('Configuration successfully loaded')
+    LOG.debug('Configuration successfully loaded')
 
     return configuration
 
@@ -88,29 +91,29 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_mounted=
     if (initialize or not has_filesystem(partition)) and not is_mounted:
         call = ["mkfs." + filesystem]
         if not is_root and filesystem.startswith("ext"):
-            logging.debug("%s being formatted with unprivileged user as owner")
+            LOG.debug("%s being formatted with unprivileged user as owner")
             entry = pwd.getpwnam('application')
             call.append("-E")
             call.append("root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
         call.append(partition)
         subprocess.check_call(call)
     elif is_mounted:
-        logging.warning("%s is already mounted.", partition)
+        LOG.warning("%s is already mounted.", partition)
     else:
-        logging.info("Nothing to do for disk %s", partition)
+        LOG.info("Nothing to do for disk %s", partition)
 
 
 def mount_partition(partition, mountpoint, dir_exists=None, is_mounted=None):
     """Mounts formatted disks provided by /etc/taupage.yaml"""
     if is_mounted is False and dir_exists is False:
-        subprocess.check_call(["mkdir", "-p", mountpoint])
+        os.makedirs(mountpoint)
         subprocess.check_call(["mount", partition, mountpoint])
     elif is_mounted is False and dir_exists is True:
         subprocess.check_call(["mount", partition, mountpoint])
     elif is_mounted is True and dir_exists is True:
-        logging.warning("Directory %s already exists and device is already mounted.", mountpoint)
+        LOG.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
-        logging.error("Unexpected error while mounting the disks")
+        LOG.error("Unexpected error while mounting the disks")
 
 
 def iterate_mounts(config):
@@ -134,6 +137,7 @@ def handle_ebs_volumes(args, ebs_volumes):
     ec2 = boto.ec2.connect_to_region(current_region)
     for device, name in ebs_volumes.items():
         attach_volume(ec2, find_volume(ec2, name), device)
+        LOG.debug("Attached RBS volume '%s' as '%s'", name, device)
 
 
 def raid_device_exists(raid_device):
@@ -148,29 +152,31 @@ def create_raid_device(raid_device, raid_config):
     devices = raid_config.get("devices", [])
     num_devices = len(devices)
     if num_devices < 2:
-        logging.error("You need at least 2 devices to create a RAID")
+        LOG.error("You need at least 2 devices to create a RAID")
         sys.exit(4)
     else:
+        raid_level = raid_config.get("level")
         call = ["mdadm",
                 "--build", raid_device,
-                "--level=" + str(raid_config.get("level")),
+                "--level=" + str(raid_level),
                 "--raid-devices=" + str(num_devices)]
         for device in devices:
             tries = 0
             # Give devices some time to be available in case they were recently attached
             while tries < 3 and not os.path.exists(device):
-                logging.error("Waiting for %s to stabilize", device)
+                LOG.error("Waiting for %s to stabilize", device)
                 tries += 1
                 sleep(2.5)
             call.append(device)
 
         subprocess.check_call(call)
+        LOG.info("Created RAID%d device '%s'", raid_level, raid_device)
 
 
 def handle_raid_volumes(raid_volumes):
     for raid_device, raid_config in raid_volumes.items():
         if raid_device_exists(raid_device):
-            logging.info("%s already exists", raid_device)
+            LOG.info("%s already exists", raid_device)
         else:
             create_raid_device(raid_device, raid_config)
 
@@ -202,6 +208,9 @@ def process_arguments():
 def main():
     # Process arguments
     args = process_arguments()
+    if args.debug:
+        LOG.setLevel(logging.DEBUG)
+
     # Load configuration from YAML file
     config = load_configuration(args.filename)
 
