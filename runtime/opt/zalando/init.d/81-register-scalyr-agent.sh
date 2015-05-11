@@ -103,7 +103,7 @@ fi
 #follow audit.log
 echo "";
 echo -n "insert audit to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
@@ -116,7 +116,7 @@ fi
 #follow application.log
 echo "";
 echo -n "insert authlog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
