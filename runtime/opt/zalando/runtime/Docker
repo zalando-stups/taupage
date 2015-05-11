@@ -27,6 +27,8 @@ def get_volume_options(config: dict):
     # meta directory, e.g. containing application credentials retrieved by berry
     yield '-v'
     yield '/meta:/meta'
+    yield '-e'
+    yield 'CREDENTIALS_DIR=/meta/credentials'
 
 
 def get_port_options(config: dict):
