@@ -6,32 +6,68 @@ import logging
 import sys
 import subprocess
 import os
+import pwd
+
+import boto.ec2
+import boto.utils
 
 from yaml.parser import ParserError
+from time import sleep
+
+LOG = logging.getLogger(__name__)
+LOG.setLevel(logging.INFO)
 
 
-def process_arguments():
-    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
-    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
-    parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
-    parser.add_argument('--dry-run', action='store_true', help='only do a dry run and output what would be executed')
+def instance_id():
+    """Helper to return theid for the current instance"""
+    return boto.utils.get_instance_metadata()['instance-id']
 
-    return parser.parse_args()
+
+def region():
+    """Helper to return the region for the current instance"""
+    return boto.utils.get_instance_metadata()['placement']['availability-zone'][:-1]
+
+
+def zone():
+    """Helper to return the AZ for the current instance"""
+    return boto.utils.get_instance_metadata()['placement']['availability-zone']
+
+
+def volume_available(volume):
+    return volume.zone == zone() and volume.status == 'available'
+
+
+def find_volume(ec2, name):
+    """Looks up the EBS volume with a given Name tag"""
+    try:
+        return list(filter(lambda volume: volume_available, ec2.get_all_volumes(filters={"tag:Name": name})))[0].id
+    except Exception as e:
+        LOG.exception(e)
+        sys.exit(2)
+
+
+def attach_volume(ec2, volume_id, attach_as):
+    """Attaches a volume to the current instance"""
+    try:
+        ec2.attach_volume(volume_id, instance_id(), attach_as)
+    except Exception as e:
+        LOG.exception(e)
+        sys.exit(3)
 
 
 def load_configuration(filename):
-    '''Loads configuration file of Zalando AMI.'''
+    """Loads configuration file of Zalando AMI."""
     try:
         with open(filename) as f:
             configuration = yaml.safe_load(f)
     except FileNotFoundError:
-        logging.error('Configuration file not found!')
-        sys.exit()
+        LOG.error('Configuration file not found!')
+        sys.exit(1)
     except ParserError:
-        logging.error('Unable to parse configuration file!')
-        sys.exit()
+        LOG.error('Unable to parse configuration file!')
+        sys.exit(1)
 
-    logging.debug('Configuration successfully loaded')
+    LOG.debug('Configuration successfully loaded')
 
     return configuration
 
@@ -39,10 +75,7 @@ def load_configuration(filename):
 def has_filesystem(device):
     proc = subprocess.Popen(["dumpe2fs", device], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, errs = proc.communicate()
-    # print(out)
-    has_filesystem = b"Couldn't find valid filesystem superblock." not in out
-    # print(has_filesystem)
-    return has_filesystem
+    return b"Couldn't find valid filesystem superblock." not in out
 
 
 def dir_exists(mountpoint):
@@ -53,56 +86,140 @@ def is_mounted(mountpoint):
     return os.path.ismount(mountpoint)
 
 
-def format_disks(config, disks=None, erase_on_boot=False, filesystem="ext4", is_mounted=None):
-    '''Formats disks to ext4 if erase_on_boot is True or is_new_disk'''
-    for disk in disks:
-        if (erase_on_boot is True or not has_filesystem(disk)) and is_mounted is False:
-            print(is_mounted)
-            subprocess.check_call(["mkfs." + filesystem, disk])
-        elif is_mounted is True:
-            print("{} is already mounted.".format(disk))
-        else:
-            print("Nothing to do here", disk)
+def format_partition(partition, filesystem="ext4", initialize=False, is_mounted=False, is_root=False):
+    """Formats disks if initialize is True or not initialized yet"""
+    if (initialize or not has_filesystem(partition)) and not is_mounted:
+        call = ["mkfs." + filesystem]
+        if not is_root and filesystem.startswith("ext"):
+            LOG.debug("%s being formatted with unprivileged user as owner")
+            entry = pwd.getpwnam('application')
+            call.append("-E")
+            call.append("root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
+        call.append(partition)
+        subprocess.check_call(call)
+    elif is_mounted:
+        LOG.warning("%s is already mounted.", partition)
+    else:
+        LOG.info("Nothing to do for disk %s", partition)
 
 
-def mount_disks(mountpoint=None, disks=None, dir_exists=None, is_mounted=None):
-    '''Mounts formatted disks provided by /etc/taupage.yaml'''
-    for disk in disks:
-        print("mounting:", disk, "to mountpoint:", mountpoint)
-        print("is_mounted:", is_mounted, "dir_exists", dir_exists)
-        if is_mounted is False and dir_exists is False:
-            subprocess.check_call(["mkdir", "-p", mountpoint])
-            subprocess.check_call(["mount", disk, mountpoint])
-        elif is_mounted is False and dir_exists is True:
-            subprocess.check_call(["mount", disk, mountpoint])
-        elif is_mounted is True and dir_exists is True:
-            print("Directory {} already exists and device is already mounted.".format(mountpoint))
-        else:
-            print("Unexpected error while mounting the disks")
-
-
-# Todo: Add software RAID (mdadm) configuration of RAID 1, RAID 0
+def mount_partition(partition, mountpoint, dir_exists=None, is_mounted=None):
+    """Mounts formatted disks provided by /etc/taupage.yaml"""
+    if is_mounted is False and dir_exists is False:
+        os.makedirs(mountpoint)
+        subprocess.check_call(["mount", partition, mountpoint])
+    elif is_mounted is False and dir_exists is True:
+        subprocess.check_call(["mount", partition, mountpoint])
+    elif is_mounted is True and dir_exists is True:
+        LOG.warning("Directory %s already exists and device is already mounted.", mountpoint)
+    else:
+        LOG.error("Unexpected error while mounting the disks")
 
 
 def iterate_mounts(config):
-    '''Iterates over mount points file to provide disk device paths'''
-    for mpoint, data in config.get("mounts", {}).items():
+    """Iterates over mount points file to provide disk device paths"""
+    for mountpoint, data in config.get("mounts", {}).items():
         # mount path below /mounts on the host system
         # (the path specifies the mount point inside the Docker container)
-        mpoint = '/mounts/{}'.format(mpoint)
-        format_disks(mpoint, data['devices'], data.get("erase_on_boot", False), data.get("filesystem", "ext4"), is_mounted(mpoint))
-        mount_disks(mpoint, data['devices'], dir_exists(mpoint), is_mounted(mpoint))
-        subprocess.check_call(["chown", "-R", "application:", mpoint])
+        mountpoint = '/mounts/{}'.format(mountpoint)
+
+        partition = data.get("partition")
+        filesystem = data.get("filesystem", "ext4")
+        initialize = data.get("erase_on_boot", False)
+        already_mounted = is_mounted(mountpoint)
+
+        format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
+        mount_partition(partition, mountpoint, dir_exists(mountpoint), already_mounted)
+
+
+def handle_ebs_volumes(args, ebs_volumes):
+    current_region = args.region if args.region else region()
+    ec2 = boto.ec2.connect_to_region(current_region)
+    for device, name in ebs_volumes.items():
+        attach_volume(ec2, find_volume(ec2, name), device)
+        LOG.debug("Attached RBS volume '%s' as '%s'", name, device)
+
+
+def raid_device_exists(raid_device):
+    try:
+        subprocess.check_call(["mdadm", raid_device])
+        return True
+    except:
+        return False
+
+
+def create_raid_device(raid_device, raid_config):
+    devices = raid_config.get("devices", [])
+    num_devices = len(devices)
+    if num_devices < 2:
+        LOG.error("You need at least 2 devices to create a RAID")
+        sys.exit(4)
+    else:
+        raid_level = raid_config.get("level")
+        call = ["mdadm",
+                "--build", raid_device,
+                "--level=" + str(raid_level),
+                "--raid-devices=" + str(num_devices)]
+        for device in devices:
+            tries = 0
+            # Give devices some time to be available in case they were recently attached
+            while tries < 3 and not os.path.exists(device):
+                LOG.error("Waiting for %s to stabilize", device)
+                tries += 1
+                sleep(2.5)
+            call.append(device)
+
+        subprocess.check_call(call)
+        LOG.info("Created RAID%d device '%s'", raid_level, raid_device)
+
+
+def handle_raid_volumes(raid_volumes):
+    for raid_device, raid_config in raid_volumes.items():
+        if raid_device_exists(raid_device):
+            LOG.info("%s already exists", raid_device)
+        else:
+            create_raid_device(raid_device, raid_config)
+
+
+def handle_volumes(args, config):
+    """Try to attach volumes"""
+    volumes = config.get("volumes", {})
+
+    # attach ESB volumes first
+    if "ebs" in volumes:
+        handle_ebs_volumes(args, volumes.get("ebs"))
+
+    # then take care of any RAID definitions
+    if "raid" in volumes:
+        handle_raid_volumes(volumes.get("raid"))
+
+
+def process_arguments():
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
+    parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
+    parser.add_argument('-r', '--region', dest='region',
+                        help='uses a specific AWS region instead of querying the instance metadata')
+    parser.add_argument('--dry-run', action='store_true', help='only do a dry run and output what would be executed')
+
+    return parser.parse_args()
 
 
 def main():
-
     # Process arguments
     args = process_arguments()
+    if args.debug:
+        LOG.setLevel(logging.DEBUG)
+
     # Load configuration from YAML file
     config = load_configuration(args.filename)
+
+    if config.get("volumes"):
+        handle_volumes(args, config)
+
     # Iterate over mount points
     iterate_mounts(config)
+
 
 if __name__ == '__main__':
     main()

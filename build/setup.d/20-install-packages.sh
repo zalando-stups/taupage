@@ -9,6 +9,7 @@ python3-pip
 ntp
 logentries
 logentries-daemon
+mdadm
 "
 
 echo "Installing packages..."

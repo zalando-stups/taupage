@@ -17,3 +17,31 @@ ports:
 ssh_ports:
   - 22
   - 2222
+
+volumes:
+  ebs:
+    /dev/sdf: taupage-ami-test-vol1
+    /dev/sdg: taupage-ami-test-vol2
+    /dev/sdh: taupage-ami-test-vol3
+    /dev/sdi: taupage-ami-test-vol4
+
+  raid:
+    /dev/md/sampleraid0:
+      level: 0
+      devices:
+        - /dev/xvdf
+        - /dev/xvdg
+    /dev/md/sampleraid1:
+      level: 1
+      devices:
+        - /dev/xvdh
+        - /dev/xvdi
+
+
+mounts:
+    /some_volume:
+        partition: /dev/md/sampleraid0
+        erase_on_boot: false
+        filesystem: ext4
+    /other_volume:
+        partition: /dev/md/sampleraid1

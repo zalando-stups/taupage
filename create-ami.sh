@@ -60,7 +60,8 @@ done
 
 echo "IP: $ip"
 
-ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=$(mktemp)"
+# The created hosts are ephemeral and their keys useless
+ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # wait for server
 while [ true ]; do
@@ -77,6 +78,11 @@ while [ true ]; do
 
     sleep 2
 done
+
+if [[ $OSTYPE == darwin* ]]; then
+    # Disable tar'ing resource forks on Macs
+    export COPYFILE_DISABLE=true
+fi
 
 # upload files
 echo "Uploading runtime/* files to server..."
