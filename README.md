@@ -1,5 +1,7 @@
 # Zalando AMI generation tooling
 
+[![Build Status](https://travis-ci.org/zalando-stups/taupage.svg)](https://travis-ci.org/zalando-stups/taupage)
+
 ## Build a new AMI
 
 You need to be logged in (mai login).
