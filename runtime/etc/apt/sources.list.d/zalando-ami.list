@@ -1,2 +1,3 @@
 deb https://get.docker.com/ubuntu docker main
+# deb http://mirror.yandex.ru/mirrors/docker/ docker main
 deb https://apt.newrelic.com/debian/ newrelic non-free
