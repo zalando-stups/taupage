@@ -113,7 +113,7 @@ ssh $ssh_args ubuntu@$ip sudo rm -rf /tmp/build
 # sleep 15
 
 # create ami
-ami_name="Taupage-AMI-$(date +%Y%m%d-%H%M%S)"
+ami_name="Taupage${ami_suffix}-AMI-$(date +%Y%m%d-%H%M%S)"
 echo "Creating $ami_name ..."
 result=$(aws ec2 create-image \
     --region $region \
