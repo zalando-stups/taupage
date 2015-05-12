@@ -2,7 +2,7 @@
 
 IMPROVEMENTS:
 
-  * imrpovement 1
+  * improvement 1
 
 BUG FIXES:
 
