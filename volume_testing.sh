@@ -85,7 +85,7 @@ delete_test_volumes()
     for volumeid in $(cat "${TEST_VOLUMES}") ;
     do
         while [ true ]; do
-            result=$(aws ec2 describe-volumes --region eu-central-1 --volume-id $volumeid --output json)
+            result=$(aws ec2 describe-volumes --region ${region} --volume-id $volumeid --output json)
             state=$(echo $result | jq .Volumes\[0\].State | sed 's/"//g')
 
             [ ! -z "$state" ] && [ "$state" == "available" ] && break
