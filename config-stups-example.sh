@@ -3,7 +3,7 @@
 keypair="jdoe"
 
 # region
-region="eu-central-1"
+region="eu-west-1"
 
 # base AMI (Ubuntu 14.04 LTS)
 base_ami="ami-accff2b1"
@@ -13,14 +13,15 @@ instance_type="t2.small"
 config_dir=$(dirname $1)
 secret_dir="$config_dir/secret"
 
-# accounts to share with
+# AWS accounts to share the AMI with
 accounts="
 123456789
 123456788
 "
 
+# AWS regions to copy the AMI to
 copy_regions="
-eu-west-1
+eu-central-1
 "
 
 # security group with SSH and HTTP open
