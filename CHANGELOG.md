@@ -8,6 +8,6 @@ BUG FIXES:
 
   * bug fix 1
 
-## 0.1.0 (July 28, 2014)
+## 0.1.0 (May 11, 2015)
 
   * Initial release
