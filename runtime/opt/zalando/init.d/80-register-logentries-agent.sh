@@ -25,7 +25,6 @@ eval $(parse_yaml /etc/taupage.yaml "config_")
 
 #set more readable variables
 ACCOUNTKEY=$config_logentries_account_key
-TOKENID=$config_logentries_token_id
 APPID=$config_application_id
 APPVERSION=$config_application_version
 
@@ -61,36 +60,29 @@ then
         le follow /var/log/audit.log
         le follow /var/log/application.log
 
-	if [ -n "$TOKENID" ];
-	then
 echo "
-[$APPID-$APPVERSION-syslog]
+[$APPID]
 path = /var/log/syslog
-token = $TOKENID
+destination = $APPID/$APPVERSION
 " >> /etc/le/config
 
 echo "
-[$APPID-$APPVERSION-auth]
+[$APPID]
 path = /var/log/auth.log
-token = $TOKENID
+destination = $APPID/$APPVERSION
 " >> /etc/le/config
 
 echo "
-[$APPID-$APPVERSION-audit]
+[audit-logs]
 path = /var/log/audit.log
-token = $TOKENID
+destination = $APPID/$APPVERSION
 " >> /etc/le/config
 
 echo "
-[$APPID-$APPVERSION-application]
+[$APPID]
 path = /var/log/application.log
-token = $TOKENID
+destination = $APPID/$APPVERSION
 " >> /etc/le/config
-
-	else
-		echo "ERROR: no TokenID in .yaml file";
-		exit
-	fi
 
         #restart daemon
         service logentries restart

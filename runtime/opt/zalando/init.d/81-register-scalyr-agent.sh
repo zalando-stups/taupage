@@ -27,6 +27,9 @@ eval $(parse_yaml /etc/taupage.yaml "config_")
 ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
+SOURCE=$config_application_source
+STACK=$config_application_stack
+IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 
 #remove "'" from Version number
 APPVERSION="${APPVERSION%\'}"
@@ -46,7 +49,7 @@ then
 
         echo -n "register scalyr Daemon ... ";
         #register scalyr account
-	wget -q https://www.scalyr.com/scalyr-repo/stable/latest/install-scalyr-agent-2.sh && bash ./install-scalyr-agent-2.sh --set-api-key "$ACCOUNTKEY" --start-agent
+	bash /tmp/install-scalyr-agent-2.sh --set-api-key "$ACCOUNTKEY" --start-agent
 	if [ $? -eq 0 ];
 	then
 		echo -n "DONE"
@@ -64,7 +67,7 @@ scalyr_config=/etc/scalyr-agent-2/agent.json
 
 #set serverhost to appname and version
 echo -n "set app name and version ...";
-sed -i "1,$ s/\/\/\ serverHost:\ \"REPLACE THIS\"/serverHost:\ \"$APPID\-$APPVERSION\"/g" $scalyr_config
+sed -i "1,$ s/\/\/\ serverHost:\ \"REPLACE THIS\"/serverHost:\ \"$APPID\"/g" $scalyr_config
 
 if [ $? -eq 0 ];
 then
@@ -77,7 +80,7 @@ fi
 #follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
@@ -103,7 +106,7 @@ fi
 #follow audit.log
 echo "";
 echo -n "insert audit to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
@@ -115,8 +118,8 @@ fi
 
 #follow application.log
 echo "";
-echo -n "insert authlog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\"} } " $scalyr_config
+echo -n "insert application to follow ... ";
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"slf4j\", appname: \"$APPID\", appversion: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
