@@ -8,7 +8,9 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Starting Zalando AMI init process..."
-date | tee /run/zalando-init-ran/date
+# save current timestamp,
+# this timestamp is used has Taupage's boot time reference
+date --utc --iso-8601=seconds | tee /run/zalando-init-ran/date
 
 # reset dir
 cd $(dirname $0)
