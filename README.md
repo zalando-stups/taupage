@@ -5,6 +5,7 @@
 ## Build a new AMI
 
 You need to be logged in (mai login).
+(As a configuration example, you can find the file config-stups-example.sh in the code base. You should modify it to suit it to your needs.)
 
     $ ./create-ami.sh ./config-stups.sh
 
