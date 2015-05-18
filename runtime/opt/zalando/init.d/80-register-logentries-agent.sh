@@ -2,35 +2,13 @@
 # read /etc/taupage.yaml
 # get logentries Key and register logentries daemon
 
-#parse yaml function
-parse_yaml() {
-   local prefix=$2
-   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-   sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
-   awk -F$fs '{
-      indent = length($1)/2;
-      vname[indent] = $2;
-      for (i in vname) {if (i > indent) {delete vname[i]}}
-      if (length($3) > 0) {
-         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
-      }
-   }'
-}
-
-
 #read taupage.yaml file
-eval $(parse_yaml /etc/taupage.yaml "config_")
+eval $(/opt/zalando/bin/parse-yaml.py /etc/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_logentries_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
-
-#remove "'" from Version number
-APPVERSION="${APPVERSION%\'}"
-APPVERSION="${APPVERSION#\'}"
 
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
