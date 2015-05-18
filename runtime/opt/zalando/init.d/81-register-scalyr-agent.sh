@@ -1,3 +1,4 @@
+w
 #!/bin/sh
 # read /etc/taupage.yaml
 # get scalyr Key and register the agent
@@ -80,7 +81,7 @@ fi
 #follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", appname: \"$APPID\", appversion: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
@@ -119,7 +120,7 @@ fi
 #follow application.log
 echo "";
 echo -n "insert application to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"slf4j\", appname: \"$APPID\", appversion: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"slf4j\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
 	echo -n "DONE";
