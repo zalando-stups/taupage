@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 TEST_ROLE="test-role-$AMI_ID"
 TEST_PERMISSIONS="test-permissions-$AMI_ID"
@@ -88,11 +88,16 @@ delete_test_volumes()
             result=$(aws ec2 describe-volumes --region ${region} --volume-id $volumeid --output json)
             state=$(echo $result | jq .Volumes\[0\].State | sed 's/"//g')
 
-            [ ! -z "$state" ] && [ "$state" == "available" ] && break
-
-            echo "Waiting for volume $volumeid to detach..."
-            sleep 2
+            if [ ! -z "$state" ] && [ "$state" = "available" ];
+	    then 
+		    break
+	    else 
+	            echo "Waiting for volume $volumeid to detach...";
+	            sleep 2;
+	    fi 
         done
+	#debug 
+	echo "delete ${volumeid}"; 
         aws ec2 delete-volume --region ${region} --volume-id ${volumeid}
     done
     rm -f "$TEST_VOLUMES"
