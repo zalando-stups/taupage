@@ -9,6 +9,7 @@ import logging
 import os
 import pierone.api
 import pwd
+import sys
 import subprocess
 import time
 import yaml
@@ -102,6 +103,24 @@ def registry_login(config: dict, registry: str):
     pierone.api.docker_login(pierone_url, 'services', 'pierone', user, passwd, token_url=token_url, use_keyring=False)
 
 
+def run_docker(cmd, dry_run):
+    logging.info('Starting Docker container: {}'.format(' '.join(cmd)))
+    if not args.dry_run:
+        max_tries = 3
+        for i in range(max_tries):
+            try:
+                out = subprocess.check_output(cmd)
+                break
+            except Exception as e:
+                if i+1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                    time.sleep(5)
+                else:
+                    raise e
+        container_id = out.decode('utf-8').strip()
+        logging.info('Container {} is running'.format(container_id))
+
+
 def main(args):
 
     with open(args.config) as fd:
@@ -119,21 +138,11 @@ def main(args):
         cmd += list(f(config))
     cmd += [source]
 
-    logging.info('Starting Docker container: {}'.format(' '.join(cmd)))
-    if not args.dry_run:
-        max_tries = 3
-        for i in range(max_tries):
-            try:
-                out = subprocess.check_output(cmd)
-                break
-            except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
-                    time.sleep(5)
-                else:
-                    raise e
-        container_id = out.decode('utf-8').strip()
-        logging.info('Container {} is running'.format(container_id))
+    try:
+        run_docker(cmd, args.dry_run)
+    except Exception as e:
+        logging.error('Docker run failed: %s', e)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
