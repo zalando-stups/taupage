@@ -48,6 +48,8 @@ EOF
     aws iam add-role-to-instance-profile --instance-profile-name "$INSTANCE_PROFILE" \
         --role-name "$TEST_ROLE"
 
+    aws iam get-instance-profile --instance-profile-name "$INSTANCE_PROFILE" --output json
+
     rm -f "$TRUST_POLICY" "$PERMISSIONS_POLICY"
 }
 
