@@ -86,9 +86,18 @@ def is_mounted(mountpoint):
     return os.path.ismount(mountpoint)
 
 
-def format_partition(partition, filesystem="ext4", initialize=False, is_mounted=False, is_root=False):
+def wait_for_device(device, max_tries=3, wait_time=2.5):
+    """Gives device some time to be available in case it was recently attached"""
+    tries = 0
+    while tries < max_tries and not os.path.exists(device):
+        LOG.error("Waiting for %s to stabilize", device)
+        tries += 1
+        sleep(wait_time)
+
+
+def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
     """Formats disks if initialize is True or not initialized yet"""
-    if (initialize or not has_filesystem(partition)) and not is_mounted:
+    if (initialize or not has_filesystem(partition)) and not is_already_mounted:
         call = ["mkfs." + filesystem]
         if not is_root and filesystem.startswith("ext"):
             LOG.debug("%s being formatted with unprivileged user as owner")
@@ -96,8 +105,9 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_mounted=
             call.append("-E")
             call.append("root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
         call.append(partition)
+        wait_for_device(partition)
         subprocess.check_call(call)
-    elif is_mounted:
+    elif is_already_mounted:
         LOG.warning("%s is already mounted.", partition)
     else:
         LOG.info("Nothing to do for disk %s", partition)
@@ -160,13 +170,9 @@ def create_raid_device(raid_device, raid_config):
                 "--build", raid_device,
                 "--level=" + str(raid_level),
                 "--raid-devices=" + str(num_devices)]
+        # Give devices some time to be available in case they were recently attached
         for device in devices:
-            tries = 0
-            # Give devices some time to be available in case they were recently attached
-            while tries < 3 and not os.path.exists(device):
-                LOG.error("Waiting for %s to stabilize", device)
-                tries += 1
-                sleep(2.5)
+            wait_for_device(device)
             call.append(device)
 
         subprocess.check_call(call)
