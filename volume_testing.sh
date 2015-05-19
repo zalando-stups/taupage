@@ -63,13 +63,14 @@ delete_profile_for_volume_attachment()
 create_test_volumes()
 {
     echo "Creating test EBS volumes ..."
-    SUBNET_DESCRIPTION=$(aws ec2 describe-subnets --region ${region} --subnet-id ${subnet})
+    SUBNET_DESCRIPTION=$(aws ec2 describe-subnets --output json --region ${region} --subnet-id ${subnet})
     AVAILABILITY_ZONE=$(echo ${SUBNET_DESCRIPTION} | jq .Subnets\[0\].AvailabilityZone | sed 's/"//g')
 
     for i in `seq 1 4`;
     do
         result=$(aws ec2 create-volume \
             --size 2 \
+            --output json \
             --region ${region} \
             --availability-zone ${AVAILABILITY_ZONE} \
             --volume-type gp2)
@@ -85,7 +86,7 @@ delete_test_volumes()
     for volumeid in $(cat "${TEST_VOLUMES}") ;
     do
         while [ true ]; do
-            result=$(aws ec2 describe-volumes --region ${region} --volume-id $volumeid --output json)
+            result=$(aws ec2 describe-volumes --output json --region ${region} --volume-id $volumeid --output json)
             state=$(echo $result | jq .Volumes\[0\].State | sed 's/"//g')
 
             if [ ! -z "$state" ] && [ "$state" = "available" ];
