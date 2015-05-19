@@ -4,10 +4,16 @@ Docker runtime script: load /etc/taupage.yaml and run the Docker container
 '''
 
 import argparse
+import json
+import logging
+import os
+import pierone.api
 import pwd
 import subprocess
 import time
 import yaml
+
+CREDENTIALS_DIR = '/meta/credentials'
 
 
 def get_env_options(config: dict):
@@ -28,7 +34,7 @@ def get_volume_options(config: dict):
     yield '-v'
     yield '/meta:/meta'
     yield '-e'
-    yield 'CREDENTIALS_DIR=/meta/credentials'
+    yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
 
 def get_port_options(config: dict):
@@ -52,17 +58,68 @@ def get_other_options(config: dict):
         yield '--hostname={}'.format(config.get('hostname'))
 
 
+def extract_registry(docker_image: str) -> str:
+    """
+    >>> extract_registry('nginx')
+
+    >>> extract_registry('foo.bar.example.com:2195/namespace/my_repo:1.0')
+    'foo.bar.example.com:2195'
+    """
+
+    parts = docker_image.split('/')
+    if len(parts) == 3:
+        return parts[0]
+    return None
+
+
+def registry_login(config: dict, registry: str):
+    if 'pierone' not in registry:
+        logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
+        return
+    pierone_url = 'https://{}'.format(registry)
+    token_url = config.get('token_service_url')
+
+    if not token_url:
+        logging.warning('No token service URL configured in Taupage YAML ("token_service_url" property)')
+        return
+
+    path = os.path.join(CREDENTIALS_DIR, 'user.json')
+
+    while not os.path.exists(path):
+        logging.info('Waiting for berry to download OAuth credentials to {}..'.format(path))
+        time.sleep(5)
+
+    with open(path) as fd:
+        credentials = json.load(fd)
+
+    user = credentials.get('application_username')
+    passwd = credentials.get('application_password')
+
+    if not user or not passwd:
+        logging.warning('Invalid OAuth credentials: application user and/or password missing in %s', path)
+        return
+
+    pierone.api.docker_login(pierone_url, 'services', 'pierone', user, passwd, token_url=token_url, use_keyring=False)
+
+
 def main(args):
 
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
+    source = config['source']
+
+    registry = extract_registry(source)
+
+    if registry:
+        registry_login(config, registry)
+
     cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--restart=on-failure:10']
     for f in get_env_options, get_volume_options, get_port_options, get_other_options:
         cmd += list(f(config))
-    cmd += [config['source']]
+    cmd += [source]
 
-    print('Starting Docker container: {}'.format(' '.join(cmd)))
+    logging.info('Starting Docker container: {}'.format(' '.join(cmd)))
     if not args.dry_run:
         max_tries = 3
         for i in range(max_tries):
@@ -71,16 +128,18 @@ def main(args):
                 break
             except Exception as e:
                 if i+1 < max_tries:
-                    print('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
         container_id = out.decode('utf-8').strip()
-        print('Container {} is running'.format(container_id))
+        logging.info('Container {} is running'.format(container_id))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', '-c', help='Config file', default='/etc/taupage.yaml')
     parser.add_argument('--dry-run', help='Print what would be done', action='store_true')
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     main(args)
