@@ -16,9 +16,9 @@ echo "Installing packages..."
 
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
 
-#get install files manually 
+#get install files manually
 
-#for scalyr agent install 
+#for scalyr agent install
 wget -P /opt/zalando/installfiles -q https://www.scalyr.com/scalyr-repo/stable/latest/install-scalyr-agent-2.sh
 
 

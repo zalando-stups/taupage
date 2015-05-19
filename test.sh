@@ -53,13 +53,13 @@ echo "Instance: $instanceid"
 aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Test"
 
 while [ true ]; do
-	result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
-	ip=$(echo $result | jq .Reservations\[0\].Instances\[0\].PublicIpAddress | sed 's/"//g')
+    result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
+    ip=$(echo $result | jq .Reservations\[0\].Instances\[0\].PublicIpAddress | sed 's/"//g')
 
-	[ ! -z "$ip" ] && [ "$ip" != "null" ] && break
+    [ ! -z "$ip" ] && [ "$ip" != "null" ] && break
 
-	echo "Waiting for public IP..."
-	sleep 5
+    echo "Waiting for public IP..."
+    sleep 5
 done
 
 echo "IP: $ip"

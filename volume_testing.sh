@@ -89,15 +89,15 @@ delete_test_volumes()
             state=$(echo $result | jq .Volumes\[0\].State | sed 's/"//g')
 
             if [ ! -z "$state" ] && [ "$state" = "available" ];
-	    then 
-		    break
-	    else 
-	            echo "Waiting for volume $volumeid to detach...";
-	            sleep 2;
-	    fi 
+        then
+            break
+        else
+                echo "Waiting for volume $volumeid to detach...";
+                sleep 2;
+        fi
         done
-	#debug 
-	echo "delete ${volumeid}"; 
+    #debug
+    echo "delete ${volumeid}";
         aws ec2 delete-volume --region ${region} --volume-id ${volumeid}
     done
     rm -f "$TEST_VOLUMES"

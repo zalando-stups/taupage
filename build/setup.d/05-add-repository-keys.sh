@@ -11,11 +11,11 @@ newrelic.key
 echo "Adding repository keys..."
 
 for key in $apt_keys; do
-	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $key >>keys.log
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $key >>keys.log
 done
 
 for key in $local_keys; do
-	apt-key add keys/$key >>keys.log
+    apt-key add keys/$key >>keys.log
 done
 
 #add logentries repo and add pub key

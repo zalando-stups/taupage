@@ -11,6 +11,6 @@ set -x
 cd $(dirname $0)
 export BUILD_DIR=$(pwd)
 for script in $(ls setup.d | sort); do
-	cd $BUILD_DIR
-	. setup.d/$script
+    cd $BUILD_DIR
+    . setup.d/$script
 done
