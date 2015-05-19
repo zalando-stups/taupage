@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
