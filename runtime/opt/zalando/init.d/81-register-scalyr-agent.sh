@@ -26,7 +26,7 @@ then
 
         echo -n "register scalyr Daemon ... ";
         #register scalyr account
-	bash /tmp/install-scalyr-agent-2.sh --set-api-key "$ACCOUNTKEY" --start-agent
+	bash /opt/zalando/installfiles/install-scalyr-agent-2.sh --set-api-key "$ACCOUNTKEY" --start-agent
 	if [ $? -eq 0 ];
 	then
 		echo -n "DONE"

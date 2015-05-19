@@ -19,6 +19,6 @@ apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confol
 #get install files manually 
 
 #for scalyr agent install 
-wget -P /tmp -q https://www.scalyr.com/scalyr-repo/stable/latest/install-scalyr-agent-2.sh
+wget -P /opt/zalando/installfiles -q https://www.scalyr.com/scalyr-repo/stable/latest/install-scalyr-agent-2.sh
 
 

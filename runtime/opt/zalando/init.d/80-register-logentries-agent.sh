@@ -39,27 +39,27 @@ then
         le follow /var/log/application.log
 
 echo "
-[$APPID]
+[syslog]
 path = /var/log/syslog
-destination = $APPID/$APPVERSION
+destination = $APPID-$APPVERSION/syslog
 " >> /etc/le/config
 
 echo "
-[$APPID]
+[auth.log]
 path = /var/log/auth.log
-destination = $APPID/$APPVERSION
+destination = $APPID-$APPVERSION/auth.log
 " >> /etc/le/config
 
 echo "
 [audit-logs]
 path = /var/log/audit.log
-destination = $APPID/$APPVERSION
+destination = $APPID-$APPVERSION/audit.log
 " >> /etc/le/config
 
 echo "
-[$APPID]
+[$APPID-$APPVERSION]
 path = /var/log/application.log
-destination = $APPID/$APPVERSION
+destination = $APPID-$APPVERSION/application.log
 " >> /etc/le/config
 
         #restart daemon
