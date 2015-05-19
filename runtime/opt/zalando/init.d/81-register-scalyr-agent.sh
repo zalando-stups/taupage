@@ -9,8 +9,8 @@ eval $(/opt/zalando/bin/parse-yaml.py /etc/taupage.yaml "config")
 ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
-SOURCE=$config_application_source
-STACK=$config_application_stack
+SOURCE=$config_source
+STACK=$config_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 
 #check if appname and appversion is provided from the yaml
