@@ -3,12 +3,11 @@
 import argparse
 import json
 import logging
-import os
 import yaml
 import time
 import requests
 import socket
-import urllib.parse
+
 
 def run_heartbeat(args):
     with open(args.config) as fd:
@@ -20,7 +19,8 @@ def run_heartbeat(args):
     metadata = json.dumps(config)
     hostname = socket.gethostbyaddr(socket.gethostname())[0]
 
-    logging.info("Sending heartbeat for me ({}) to etcd cluster {} every {} seconds with {} seconds tolerance...".format(hostname, args.etcd, args.interval, args.ttl))
+    logging.info("Sending heartbeat for me ({}) to etcd cluster {} every {} seconds with {} seconds tolerance..".format(
+                 hostname, args.etcd, args.interval, args.ttl))
 
     while True:
         # TODO support heartbeat checks to own application and only send to etcd if alive
@@ -29,13 +29,15 @@ def run_heartbeat(args):
         key = "taupage/{}".format(hostname)
         value = metadata
 
-        response = requests.put("{}/v2/keys/{}".format(args.etcd, key), data={'value': value, 'ttl': args.ttl}, stream=False)
+        data = {'value': value, 'ttl': args.ttl}
+        response = requests.put("{}/v2/keys/{}".format(args.etcd, key), data=data, stream=False)
         if response.status_code < 200 or response.status_code >= 300:
             logging.warn("Could not send heartbeat to etcd cluster {}: {}".format(args.etcd, response.status_code))
         elif args.logging:
             logging.info("Heartbeat: {} ttl={}".format(key, args.ttl))
 
         time.sleep(args.interval)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -52,4 +54,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
