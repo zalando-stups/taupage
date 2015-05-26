@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
 import boto.utils
-import boto.s3
+import codecs
+import json
+import logging
+import requests
 import yaml
 
 with open('/etc/taupage.yaml') as fd:
     config = yaml.safe_load(fd)
 
-bucket_name = config.get('logs_bucket')
+instance_logs_url = config.get('instance_logs_url')
 
-if bucket_name:
+if instance_logs_url:
+    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     region = identity['region']
@@ -19,17 +23,18 @@ if bucket_name:
     with open('/run/zalando-init-ran/date') as fd:
         boot_time = fd.read().strip()
 
-    year, month, day = boot_time.split('T')[0].split('-')
-    hour, minute, _ = boot_time.split('T')[1].split(':')
+    if boot_time.endswith('+0000'):
+        boot_time = boot_time[:-5] + 'Z'
 
-    s3 = boto.s3.connect_to_region(region)
-
-    bucket = s3.get_bucket(bucket_name, validate=False)
-
-    # timestamp is using the CloudTrail format ("20150308T1430Z")
-    timestamp = '{year}{month}{day}T{hour}{minute}Z'.format(**vars())
-
-    key_name = '{account_id}/{region}/{year}/{month}/{day}/{instance_id}-{timestamp}/taupage.yaml'.format(**vars())
-
-    key = bucket.get_key(key_name, validate=False)
-    key.set_contents_from_filename('/etc/taupage.yaml')
+    data = {'account-id': str(account_id),
+            'region': region,
+            'instance-boot-time': boot_time,
+            'instance-id': instance_id,
+            'log-data': codecs.encode(yaml.safe_dump(config).encode('utf-8'), 'base64').decode('utf-8'),
+            'log-type': 'USER_DATA'}
+    print(data)
+    try:
+        response = requests.post(instance_logs_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+        print(response.json())
+    except:
+        logging.exception('Failed to upload Taupage YAML')
