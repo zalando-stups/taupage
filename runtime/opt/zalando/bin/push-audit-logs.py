@@ -4,6 +4,7 @@ import boto.utils
 import codecs
 import datetime
 import glob
+import gzip
 import json
 import logging
 import os
@@ -13,9 +14,11 @@ import time
 import yaml
 
 
-def push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn):
+def push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=False):
     with open(fn, 'rb') as fd:
         contents = fd.read()
+    if compress:
+        contents = gzip.compress(contents)
     logging.info('Pushing {} ({} Bytes) to {}..'.format(fn, len(contents), instance_logs_url))
     data = {'account_id': str(account_id),
             'region': region,
@@ -71,7 +74,7 @@ def main():
             push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn)
         if is_shutdown:
             for fn in glob.glob('/var/log/audit.log'):
-                push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn)
+                push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=True)
             return
         time.sleep(60)
 
