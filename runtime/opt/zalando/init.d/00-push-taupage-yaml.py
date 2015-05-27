@@ -26,12 +26,12 @@ if instance_logs_url:
     if boot_time.endswith('+0000'):
         boot_time = boot_time[:-5] + 'Z'
 
-    data = {'account-id': str(account_id),
+    data = {'account_id': str(account_id),
             'region': region,
-            'instance-boot-time': boot_time,
-            'instance-id': instance_id,
-            'log-data': codecs.encode(yaml.safe_dump(config).encode('utf-8'), 'base64').decode('utf-8'),
-            'log-type': 'USER_DATA'}
+            'instance_boot_time': boot_time,
+            'instance_id': instance_id,
+            'log_data': codecs.encode(yaml.safe_dump(config).encode('utf-8'), 'base64').decode('utf-8'),
+            'log_type': 'USER_DATA'}
     print(data)
     try:
         response = requests.post(instance_logs_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
