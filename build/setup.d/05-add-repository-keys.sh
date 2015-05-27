@@ -5,6 +5,7 @@ apt_keys="
 
 local_keys="
 newrelic.key
+scalyr.asc
 "
 
 
