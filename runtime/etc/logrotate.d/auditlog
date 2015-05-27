@@ -3,6 +3,7 @@ su root syslog
 /var/log/audit.log
 {
         rotate 48
+        hourly
         missingok
         notifempty
         compress
