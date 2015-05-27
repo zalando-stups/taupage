@@ -23,7 +23,7 @@ def get_env_options(config: dict):
         yield '-e'
         yield '{}={}'.format(key, val)
 
-    if config.get('etcd_discovery_url'):
+    if config.get('etcd_discovery_domain'):
         # TODO: use dynamic IP of docker0
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
