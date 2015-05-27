@@ -13,7 +13,7 @@ with open('/etc/taupage.yaml') as fd:
 instance_logs_url = config.get('instance_logs_url')
 
 if instance_logs_url:
-    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     region = identity['region']
