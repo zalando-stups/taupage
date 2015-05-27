@@ -24,9 +24,8 @@ fi
 if [ -n "$ACCOUNTKEY" ];
 then
 
-    echo -n "register scalyr Daemon ... ";
-    #register scalyr account
-    bash /opt/zalando/installfiles/install-scalyr-agent-2.sh --set-api-key "$ACCOUNTKEY" --start-agent
+    echo -n "Configuring scalyr daemon ... ";
+    /usr/sbin/scalyr-agent-2-config --set-key "$ACCOUNTKEY"
     if [ $? -eq 0 ];
     then
         echo -n "DONE"
@@ -35,7 +34,7 @@ then
         exit;
     fi
 else
-    echo "ERROR: no scalyr AccountKey was specify in the .yaml file";
+    echo "INFO: scalyr not configured; skipping daemon setup.";
     exit;
 fi
 
@@ -106,6 +105,13 @@ else
     exit
 fi
 
-#if there was no Errors restart the agent
-scalyr-agent-2 restart
+echo -n "Starting scalyr daemon ... ";
+/usr/sbin/scalyr-agent-2 start
+if [ $? -eq 0 ];
+then
+    echo -n "DONE"
+else
+    echo -n "ERROR: Failed to start scalyr daemon!";
+    exit;
+fi
 
