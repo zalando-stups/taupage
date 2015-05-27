@@ -106,6 +106,7 @@ else
 fi
 
 echo -n "Starting scalyr daemon ... ";
+/usr/sbin/scalyr-agent-2 stop # just in case
 /usr/sbin/scalyr-agent-2 start
 if [ $? -eq 0 ];
 then
