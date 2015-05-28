@@ -113,13 +113,15 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
         LOG.info("Nothing to do for disk %s", partition)
 
 
-def mount_partition(partition, mountpoint, dir_exists=None, is_mounted=None):
+def mount_partition(partition, mountpoint, options, dir_exists=None, is_mounted=None):
     """Mounts formatted disks provided by /etc/taupage.yaml"""
-    if is_mounted is False and dir_exists is False:
-        os.makedirs(mountpoint)
-        subprocess.check_call(["mount", partition, mountpoint])
-    elif is_mounted is False and dir_exists is True:
-        subprocess.check_call(["mount", partition, mountpoint])
+    if is_mounted is False:
+        if dir_exists is False:
+            os.makedirs(mountpoint)
+        if options and len(options) > 0:
+            subprocess.check_call(["mount", "-o", options.replace(' ',''), partition, mountpoint])
+        else:
+            subprocess.check_call(["mount", partition, mountpoint])
     elif is_mounted is True and dir_exists is True:
         LOG.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
@@ -136,10 +138,11 @@ def iterate_mounts(config):
         partition = data.get("partition")
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
+        options = data.get('options')
         already_mounted = is_mounted(mountpoint)
 
         format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-        mount_partition(partition, mountpoint, dir_exists(mountpoint), already_mounted)
+        mount_partition(partition, mountpoint, options, dir_exists(mountpoint), already_mounted)
 
 
 def handle_ebs_volumes(args, ebs_volumes):
