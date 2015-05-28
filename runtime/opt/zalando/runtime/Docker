@@ -9,6 +9,7 @@ import logging
 import os
 import pierone.api
 import pwd
+import requests
 import sys
 import subprocess
 import time
@@ -126,6 +127,45 @@ def run_docker(cmd, dry_run):
         logging.info('Container {} is running'.format(container_id))
 
 
+def get_first(iterable, default=None):
+    if iterable:
+        for item in iterable:
+            return item
+    return default
+
+
+def wait_for_health_check(config: dict):
+    health_check_port = config.get('health_check_port', get_first(config.get('ports', {}).keys()))
+    health_check_path = config.get('health_check_path')
+    health_check_timeout_seconds = config.get('health_check_timeout_seconds', 60)
+
+    if not health_check_path:
+        logging.info('Health check path is not configured, not waiting for health check')
+        return
+    if not health_check_port:
+        logging.warning('Health check port is not configured, skipping health check')
+        return
+
+    url = 'http://localhost:{}{}'.format(health_check_port, health_check_path)
+
+    start = time.time()
+    while time.time() < start + health_check_timeout_seconds:
+        logging.info('Waiting for health check {}:{}..'.format(health_check_port, health_check_path))
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                logging.info('Health check returned OK')
+                return
+        except:
+            pass
+
+        time.sleep(2)
+
+    logging.error('Timeout of {}s expired for health check {}:{}'.format(
+                  health_check_timeout_seconds, health_check_port, health_check_path))
+    sys.exit(1)
+
+
 def main(args):
 
     with open(args.config) as fd:
@@ -148,6 +188,8 @@ def main(args):
     except Exception as e:
         logging.error('Docker run failed: %s', e)
         sys.exit(1)
+
+    wait_for_health_check(config)
 
 
 if __name__ == '__main__':
