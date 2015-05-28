@@ -194,6 +194,12 @@ then
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."
 
+    # HipChat notification
+    if [ "$hipchat_notification_enabled" = true ]; then
+        echo "Sending HipChat notification..."
+        curl -s -S -X POST -H "Content-Type: application/json" -d "{\"message\":\"$hipchat_message\"}" "https://${hipchat_server_address}/v2/room/${hipchat_room_id}/notification?auth_token=${hipchat_auth_token}"
+    fi
+
 else
 
     echo "AMI $ami_name ($imageid) create failed "
