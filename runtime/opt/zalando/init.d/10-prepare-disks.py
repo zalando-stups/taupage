@@ -118,10 +118,11 @@ def mount_partition(partition, mountpoint, options, dir_exists=None, is_mounted=
     if is_mounted is False:
         if dir_exists is False:
             os.makedirs(mountpoint)
-        if options and len(options) > 0:
-            subprocess.check_call(["mount", "-o", options.replace(' ',''), partition, mountpoint])
-        else:
-            subprocess.check_call(["mount", partition, mountpoint])
+        mount_command = ['mount']
+        if options:
+            mount_command.extend(['-o', options.replace(' ','')])
+        mount_command.extend([partition, mountpoint])
+        subprocess.check_call(mount_command)
     elif is_mounted is True and dir_exists is True:
         LOG.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
