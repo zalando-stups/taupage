@@ -127,6 +127,8 @@ def mount_partition(partition, mountpoint, options, dir_exists=None, is_mounted=
         LOG.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
         LOG.error("Unexpected error while mounting the disks")
+        return
+    os.chmod(mountpoint, 0o777)
 
 
 def iterate_mounts(config):
