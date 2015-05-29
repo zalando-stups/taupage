@@ -120,7 +120,7 @@ def mount_partition(partition, mountpoint, options, dir_exists=None, is_mounted=
             os.makedirs(mountpoint)
         mount_command = ['mount']
         if options:
-            mount_command.extend(['-o', options.replace(' ','')])
+            mount_command.extend(['-o', options.replace(' ', '')])
         mount_command.extend([partition, mountpoint])
         subprocess.check_call(mount_command)
     elif is_mounted is True and dir_exists is True:
