@@ -83,7 +83,7 @@ def main():
     parser.add_argument('-l', '--logging', help="log heartbeats?", default=False)
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.getLogger("urllib3.connectionpool").setLevel(logging.WARN)
     run_heartbeat(args)
 
