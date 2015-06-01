@@ -32,7 +32,7 @@ subnet="subnet-123456"
 
 # HipChat notification when AMI is built
 hipchat_notification_enabled=false
-hipchat_server_address="chat.example.org"
+hipchat_server_address="hipchat.com" # Put your server address here
 hipchat_room_id="notifications" # Room ID (the room name)
 hipchat_auth_token="" # Auth token for the HipChat room
 hipchat_message="[Taupage] AMI $ami_name ($imageid) successfully created and shared."
