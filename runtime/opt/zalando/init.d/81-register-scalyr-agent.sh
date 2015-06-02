@@ -10,7 +10,7 @@ ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 SOURCE=$config_source
-STACK=$config_stack
+STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
 
