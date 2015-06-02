@@ -12,6 +12,7 @@ APPVERSION=$config_application_version
 SOURCE=$config_source
 STACK=$config_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
+LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
 
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
@@ -95,7 +96,7 @@ fi
 #follow application.log
 echo "";
 echo -n "insert application to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"slf4j\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
