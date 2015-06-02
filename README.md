@@ -1,8 +1,6 @@
 # Zalando AMI generation tooling
 
-[![Join the chat at https://gitter.im/zalando-stups/taupage](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zalando-stups/taupage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[![Build Status](https://travis-ci.org/zalando-stups/taupage.svg)](https://travis-ci.org/zalando-stups/taupage)
+[![Build Status](https://travis-ci.org/zalando-stups/taupage.svg)](https://travis-ci.org/zalando-stups/taupage)[![Join the chat at https://gitter.im/zalando-stups/taupage](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zalando-stups/taupage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Build a new AMI
 
