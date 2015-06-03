@@ -14,6 +14,7 @@ import sys
 import subprocess
 import time
 import yaml
+import boto.utils
 
 CREDENTIALS_DIR = '/meta/credentials'
 
@@ -28,6 +29,15 @@ def get_env_options(config: dict):
         # TODO: use dynamic IP of docker0
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
+
+    yield '-e'
+    yield 'APPLICATION_ID={}'.format(config.get('application_id'))
+
+    yield '-e'
+    yield 'APPLICATION_VERSION={}'.format(config.get('application_version'))
+
+    yield '-e'
+    yield 'INSTANCE_ID={}'.format(boto.utils.get_instance_metadata()['instance-id'])
 
 
 def get_volume_options(config: dict):
