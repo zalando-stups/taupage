@@ -36,7 +36,7 @@ fi
 RUNTIME=$(basename $RUNTIME)
 
 # figure out executable
-RUNTIME_INIT=/opt/zalando/runtime/$RUNTIME
+RUNTIME_INIT=/opt/taupage/runtime/$RUNTIME
 
 if [ ! -f $RUNTIME_INIT ]; then
     echo "Runtime '$RUNTIME' not found!" >&2

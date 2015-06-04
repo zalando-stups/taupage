@@ -3,7 +3,7 @@
 # get logentries Key and register logentries daemon
 
 #read taupage.yaml file
-eval $(/opt/zalando/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_logentries_account_key
