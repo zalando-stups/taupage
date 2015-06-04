@@ -14,7 +14,6 @@ import sys
 import subprocess
 import time
 import yaml
-import boto.utils
 
 CREDENTIALS_DIR = '/meta/credentials'
 
@@ -30,14 +29,12 @@ def get_env_options(config: dict):
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
 
-    yield '-e'
-    yield 'APPLICATION_ID={}'.format(config.get('application_id'))
-
-    yield '-e'
-    yield 'APPLICATION_VERSION={}'.format(config.get('application_version'))
-
-    yield '-e'
-    yield 'INSTANCE_ID={}'.format(boto.utils.get_instance_metadata()['instance-id'])
+    # set APPLICATION_ID and APPLICATION_VERSION for convenience
+    # NOTE: we should not add other environment variables here (even if it sounds tempting),
+    # esp. EC2 metadata should not be passed as env. variables!
+    for key in ('application_id', 'application_version'):
+        yield '-e'
+        yield '{}={}'.format(key.upper(), config.get(key))
 
 
 def get_volume_options(config: dict):
