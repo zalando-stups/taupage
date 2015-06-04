@@ -37,7 +37,9 @@ if instance_logs_url:
             'log_type': 'USER_DATA'}
     logging.info('Pushing Taupage YAML to {}..'.format(instance_logs_url))
     try:
-        response = requests.post(instance_logs_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+        # TODO: use OAuth credentials
+        response = requests.post(instance_logs_url, data=json.dumps(data),
+                                 headers={'Content-Type': 'application/json'}, timeout=5)
         if response.status_code != 201:
             logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
                          response.status_code, response.text))
