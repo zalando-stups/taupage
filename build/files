@@ -24,9 +24,9 @@
 
 /etc/taupage.yaml root:root 0444
 
-/opt/zalando/init.d/10-prepare-disks.py root:root 0700
-/opt/zalando/init.sh root:root 0700
-/opt/zalando/runtime/Docker root:root 0700
+/opt/taupage/init.d/10-prepare-disks.py root:root 0700
+/opt/taupage/init.sh root:root 0700
+/opt/taupage/runtime/Docker root:root 0700
 
 /usr/lib/python2.7/dist-packages/cloudinit/handlers/zalando_ami_config.py root:root 0444
 

@@ -3,7 +3,7 @@
 # get scalyr Key and register the agent
 
 #read taupage.yaml file
-eval $(/opt/zalando/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_scalyr_account_key
