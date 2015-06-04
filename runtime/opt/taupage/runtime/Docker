@@ -71,6 +71,9 @@ def get_other_options(config: dict):
     if config.get('hostname'):
         yield '--hostname={}'.format(config.get('hostname'))
 
+    if config.get('networking'):
+        yield '--net={}'.format(config.get('networking'))
+
 
 def extract_registry(docker_image: str) -> str:
     """
