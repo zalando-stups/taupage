@@ -60,9 +60,6 @@ done
 
 echo "IP: $ip"
 
-# The created hosts are ephemeral and their keys useless
-ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
 # wait for server
 while [ true ]; do
     echo "Waiting for server..."

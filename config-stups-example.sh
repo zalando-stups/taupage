@@ -2,6 +2,9 @@
 #TODO generate on the fly and clean up later
 keypair="jdoe"
 
+# The created hosts are ephemeral and their keys useless
+ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
 # region
 region="eu-west-1"
 
