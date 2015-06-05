@@ -14,11 +14,8 @@
 /etc/newrelic newrelic:newrelic 0750
 /etc/newrelic/nrsysmond.cfg newrelic:newrelic 0640
 
-/etc/rsyslog.d/22-loggly.conf root:root 0444
 /etc/rsyslog.d/keys root:root 0755
 /etc/rsyslog.d/keys/ca.d root:root 0755
-
-/etc/rsyslog.d/keys/ca.d/loggly.crt root:root 0644
 
 /etc/ssh-access-granting-service.yaml root:root 0444
 
