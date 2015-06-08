@@ -36,7 +36,14 @@ def is_sensitive_key(k):
 
 
 def decrypt(val):
-    if val.startswith(AWS_KMS_PREFIX):
+    '''
+    >>> decrypt(True)
+    True
+
+    >>> decrypt('test')
+    'test'
+    '''
+    if str(val).startswith(AWS_KMS_PREFIX):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
         ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())
