@@ -8,7 +8,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
 #set more readable variables
 ACCOUNTKEY=$config_newrelic_license_key
 
-#if logentries account exists in the yaml file. Register the logentries Daemon to this Account
+#if NewRelic account exists in the yaml file. Register the logentries Daemon to this Account
 if [ -n "$ACCOUNTKEY" ];
 then
 
