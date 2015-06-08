@@ -68,7 +68,7 @@ echo "IP: $ip"
 set +e
 TEST_OK=false
 
-max_tries=18  # ~3 minutes
+max_tries=30  # ~3 minutes
 while [ true ]; do
     echo "Waiting for HTTP server..."
 
