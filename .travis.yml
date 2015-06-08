@@ -8,3 +8,4 @@ install:
 script:
   - flake8 -v .
   - python3 -m doctest -v runtime/opt/taupage/runtime/Docker.py
+  - python3 -m doctest -v runtime/opt/taupage/init.d/00-push-taupage-yaml.py

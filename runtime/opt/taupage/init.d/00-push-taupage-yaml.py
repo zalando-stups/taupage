@@ -7,41 +7,82 @@ import logging
 import requests
 import yaml
 
-with open('/etc/taupage.yaml') as fd:
-    config = yaml.safe_load(fd)
 
-instance_logs_url = config.get('instance_logs_url')
+def is_sensitive_key(k):
+    '''
+    >>> is_sensitive_key('foo')
+    False
 
-if instance_logs_url:
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-    logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
+    >>> is_sensitive_key('DB_PASSWORD')
+    True
+    '''
+    lower = k.lower()
+    return 'pass' in lower or \
+           'private' in lower or \
+           'secret' in lower
 
-    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
-    identity = boto.utils.get_instance_identity()['document']
 
-    region = identity['region']
-    account_id = identity['accountId']
-    instance_id = identity['instanceId']
+def mask_dictionary(d: dict):
+    '''
+    >>> mask_dictionary({'a': 'b'})
+    {'a': 'b'}
 
-    with open('/run/taupage-init-ran/date') as fd:
-        boot_time = fd.read().strip()
+    >>> mask_dictionary({'priVaTe': 'b'})
+    {'priVaTe': 'MASKED'}
+    '''
+    masked_dict = {}
+    for key, val in d.items():
+        if is_sensitive_key(key):
+            val = 'MASKED'
+        if isinstance(val, dict):
+            val = mask_dictionary(val)
+        masked_dict[key] = val
+    return masked_dict
 
-    if boot_time.endswith('+0000'):
-        boot_time = boot_time[:-5] + 'Z'
 
-    data = {'account_id': str(account_id),
-            'region': region,
-            'instance_boot_time': boot_time,
-            'instance_id': instance_id,
-            'log_data': codecs.encode(yaml.safe_dump(config).encode('utf-8'), 'base64').decode('utf-8'),
-            'log_type': 'USER_DATA'}
-    logging.info('Pushing Taupage YAML to {}..'.format(instance_logs_url))
-    try:
-        # TODO: use OAuth credentials
-        response = requests.post(instance_logs_url, data=json.dumps(data),
-                                 headers={'Content-Type': 'application/json'}, timeout=5)
-        if response.status_code != 201:
-            logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
-                         response.status_code, response.text))
-    except:
-        logging.exception('Failed to push Taupage YAML')
+def main():
+    with open('/etc/taupage.yaml') as fd:
+        config = yaml.safe_load(fd)
+
+    instance_logs_url = config.get('instance_logs_url')
+
+    if instance_logs_url:
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+        logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
+
+        # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+        identity = boto.utils.get_instance_identity()['document']
+
+        region = identity['region']
+        account_id = identity['accountId']
+        instance_id = identity['instanceId']
+
+        with open('/run/taupage-init-ran/date') as fd:
+            boot_time = fd.read().strip()
+
+        if boot_time.endswith('+0000'):
+            boot_time = boot_time[:-5] + 'Z'
+
+        # remove "sensitive" information from Taupage Config
+        # (should be encrypted anyway, but better be sure..)
+        masked_config = mask_dictionary(config)
+
+        data = {'account_id': str(account_id),
+                'region': region,
+                'instance_boot_time': boot_time,
+                'instance_id': instance_id,
+                'log_data': codecs.encode(yaml.safe_dump(masked_config).encode('utf-8'), 'base64').decode('utf-8'),
+                'log_type': 'USER_DATA'}
+        logging.info('Pushing Taupage YAML to {}..'.format(instance_logs_url))
+        try:
+            # TODO: use OAuth credentials
+            response = requests.post(instance_logs_url, data=json.dumps(data),
+                                     headers={'Content-Type': 'application/json'}, timeout=5)
+            if response.status_code != 201:
+                logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
+                             response.status_code, response.text))
+        except:
+            logging.exception('Failed to push Taupage YAML')
+
+if __name__ == '__main__':
+    main()
