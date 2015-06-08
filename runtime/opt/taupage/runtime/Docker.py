@@ -149,6 +149,9 @@ def get_other_options(config: dict):
     if config.get('networking'):
         yield '--net={}'.format(config.get('networking'))
 
+    if config.get('privileged'):
+        yield '--privileged'
+
 
 def extract_registry(docker_image: str) -> str:
     """
