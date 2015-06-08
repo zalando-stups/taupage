@@ -4,4 +4,5 @@ python:
 install:
   - pip install flake8
 script:
-  - flake8 --filename=Docker,*.py -v .
+  - flake8 -v .
+  - python3 -m doctest runtime/opt/taupage/runtime/Docker.py

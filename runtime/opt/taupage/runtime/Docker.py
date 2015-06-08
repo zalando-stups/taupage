@@ -17,6 +17,36 @@ import yaml
 
 CREDENTIALS_DIR = '/meta/credentials'
 
+AWS_KMS_PREFIX = 'aws:kms:'
+
+
+def is_sensitive_key(k):
+    lower = k.lower()
+    return 'pass' in lower or \
+           'private' in lower or \
+           'secret' in lower
+
+
+def decrypt(val):
+    return val
+
+
+def mask_command(cmd: list):
+    '''
+    >>> mask_command([])
+    ''
+
+    >>> mask_command(['-e', 'SECRET=abc'])
+    '-e SECRET=MASKED'
+    '''
+    masked_cmd = []
+    for arg in cmd:
+        key, sep, val = arg.partition('=')
+        if is_sensitive_key(key):
+            val = 'MASKED'
+        masked_cmd.append(key + sep + val)
+    return ' '.join(masked_cmd)
+
 
 def get_or(d: dict, key, default):
     '''
@@ -41,7 +71,7 @@ def get_env_options(config: dict):
     '''build Docker environment options'''
     for key, val in get_or(config, 'environment', {}).items():
         yield '-e'
-        yield '{}={}'.format(key, val)
+        yield '{}={}'.format(key, decrypt(val))
 
     if config.get('etcd_discovery_domain'):
         # TODO: use dynamic IP of docker0
@@ -139,7 +169,7 @@ def registry_login(config: dict, registry: str):
 
 
 def run_docker(cmd, dry_run):
-    logging.info('Starting Docker container: {}'.format(' '.join(cmd)))
+    logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
     if not args.dry_run:
         max_tries = 3
         for i in range(max_tries):
@@ -215,7 +245,7 @@ def main(args):
     try:
         run_docker(cmd, args.dry_run)
     except Exception as e:
-        logging.error('Docker run failed: %s', e)
+        logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
 
     wait_for_health_check(config)
