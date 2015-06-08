@@ -59,7 +59,7 @@ def main():
     account_id = identity['accountId']
     instance_id = identity['instanceId']
 
-    with open('/run/zalando-init-ran/date') as fd:
+    with open('/run/taupage-init-ran/date') as fd:
         boot_time = fd.read().strip()
 
     if boot_time.endswith('+0000'):
