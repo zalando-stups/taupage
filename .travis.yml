@@ -3,6 +3,8 @@ python:
   - "3.4"
 install:
   - pip install flake8
+  - pip install boto
+  - pip install stups-pierone
 script:
   - flake8 -v .
   - python3 -m doctest runtime/opt/taupage/runtime/Docker.py

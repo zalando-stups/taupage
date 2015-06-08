@@ -4,6 +4,8 @@ Docker runtime script: load /etc/taupage.yaml and run the Docker container
 '''
 
 import argparse
+import boto.kms
+import boto.utils
 import json
 import logging
 import os
@@ -20,6 +22,11 @@ CREDENTIALS_DIR = '/meta/credentials'
 AWS_KMS_PREFIX = 'aws:kms:'
 
 
+def get_region():
+    identity = boto.utils.get_instance_identity()['document']
+    return identity['region']
+
+
 def is_sensitive_key(k):
     lower = k.lower()
     return 'pass' in lower or \
@@ -28,7 +35,13 @@ def is_sensitive_key(k):
 
 
 def decrypt(val):
-    return val
+    if val.startswith(AWS_KMS_PREFIX):
+        ciphertext_blob = val[len(AWS_KMS_PREFIX):]
+        conn = boto.kms.connect_to_region(get_region())
+        plaintext = conn.decrypt(ciphertext_blob)
+        return plaintext
+    else:
+        return val
 
 
 def mask_command(cmd: list):
