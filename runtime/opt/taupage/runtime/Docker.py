@@ -4,6 +4,7 @@ Docker runtime script: load /etc/taupage.yaml and run the Docker container
 '''
 
 import argparse
+import base64
 import boto.kms
 import boto.utils
 import json
@@ -37,9 +38,21 @@ def is_sensitive_key(k):
 def decrypt(val):
     if val.startswith(AWS_KMS_PREFIX):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
+        ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())
-        plaintext = conn.decrypt(ciphertext_blob)
-        return plaintext
+        try:
+            # HACK: ugly hack to fix boto Python 3 compat
+            # "decrypt" expects bytes, but "json.dumps" uses bytes, too
+            # which throws "TypeError: .. is not JSON serializable"
+            # workaround: return Base64 as unicode string
+            orig = base64.b64encode
+            base64.b64encode = lambda x: orig(x).decode('ascii')
+            data = conn.decrypt(ciphertext_blob)
+            if 'Plaintext' not in data:
+                raise Exception('KMS decrypt failed')
+        finally:
+            base64.b64encode = orig
+        return data['Plaintext'].decode('utf-8')
     else:
         return val
 
