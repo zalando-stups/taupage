@@ -11,9 +11,9 @@ logentries
 logentries-daemon
 mdadm
 scalyr-agent-2
+newrelic-sysmond
 "
 
 echo "Installing packages..."
 
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
-
