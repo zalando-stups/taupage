@@ -15,13 +15,16 @@ CREDENTIALS_DIR = '/meta/credentials'
 
 def is_sensitive_key(k):
     '''
+    >>> is_sensitive_key(1)
+    False
+
     >>> is_sensitive_key('foo')
     False
 
     >>> is_sensitive_key('DB_PASSWORD')
     True
     '''
-    lower = k.lower()
+    lower = str(k).lower()
     return 'pass' in lower or \
            'private' in lower or \
            'secret' in lower
@@ -68,7 +71,7 @@ def get_token(config: dict):
         logging.warning('Invalid OAuth credentials: application user and/or password missing in %s', path)
         return
 
-    token = zign.api.get_named_token('uid', 'services', 'taupage', user, passwd, url=token_url, use_keyring=False)
+    token = zign.api.get_named_token(['uid'], 'services', 'taupage', user, passwd, url=token_url, use_keyring=False)
     return token
 
 
@@ -82,7 +85,7 @@ def main():
         logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
         logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
 
-        token = get_token() or {}
+        token = get_token(config) or {}
 
         # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
         identity = boto.utils.get_instance_identity()['document']
