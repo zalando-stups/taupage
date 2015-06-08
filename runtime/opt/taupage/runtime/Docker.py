@@ -18,7 +18,7 @@ import subprocess
 import time
 import yaml
 
-CREDENTIALS_DIR = '/meta/credentials'
+from taupage import is_sensitive_key, CREDENTIALS_DIR
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -26,13 +26,6 @@ AWS_KMS_PREFIX = 'aws:kms:'
 def get_region():
     identity = boto.utils.get_instance_identity()['document']
     return identity['region']
-
-
-def is_sensitive_key(k):
-    lower = k.lower()
-    return 'pass' in lower or \
-           'private' in lower or \
-           'secret' in lower
 
 
 def decrypt(val):
