@@ -1,9 +1,10 @@
 #!/bin/sh
 
-TEST_ROLE="test-role-$AMI_ID"
-TEST_PERMISSIONS="test-permissions-$AMI_ID"
-INSTANCE_PROFILE="test-profile-$AMI_ID"
-TEST_VOLUMES="test-volumes-$AMI_ID"
+RANDOM_SUFFIX=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
+TEST_ROLE="test-role-$AMI_ID-$RANDOM_SUFFIX"
+TEST_PERMISSIONS="test-permissions-$AMI_ID-$RANDOM_SUFFIX"
+INSTANCE_PROFILE="test-profile-$AMI_ID-$RANDOM_SUFFIX"
+TEST_VOLUMES="test-volumes-$AMI_ID-$RANDOM_SUFFIX"
 
 create_profile_for_volume_attachment()
 {
