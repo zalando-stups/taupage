@@ -83,7 +83,7 @@ fi
 
 # upload files
 echo "Uploading runtime/* files to server..."
-tar c -C runtime . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
+tar c -C runtime --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
 echo "Uploading secret/* files to server..."
