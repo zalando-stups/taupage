@@ -4,6 +4,8 @@ Docker runtime script: load /etc/taupage.yaml and run the Docker container
 '''
 
 import argparse
+import boto.kms
+import boto.utils
 import json
 import logging
 import os
@@ -17,12 +19,72 @@ import yaml
 
 CREDENTIALS_DIR = '/meta/credentials'
 
+AWS_KMS_PREFIX = 'aws:kms:'
+
+
+def get_region():
+    identity = boto.utils.get_instance_identity()['document']
+    return identity['region']
+
+
+def is_sensitive_key(k):
+    lower = k.lower()
+    return 'pass' in lower or \
+           'private' in lower or \
+           'secret' in lower
+
+
+def decrypt(val):
+    if val.startswith(AWS_KMS_PREFIX):
+        ciphertext_blob = val[len(AWS_KMS_PREFIX):]
+        conn = boto.kms.connect_to_region(get_region())
+        plaintext = conn.decrypt(ciphertext_blob)
+        return plaintext
+    else:
+        return val
+
+
+def mask_command(cmd: list):
+    '''
+    >>> mask_command([])
+    ''
+
+    >>> mask_command(['-e', 'SECRET=abc'])
+    '-e SECRET=MASKED'
+    '''
+    masked_cmd = []
+    for arg in cmd:
+        key, sep, val = arg.partition('=')
+        if is_sensitive_key(key):
+            val = 'MASKED'
+        masked_cmd.append(key + sep + val)
+    return ' '.join(masked_cmd)
+
+
+def get_or(d: dict, key, default):
+    '''
+    Return value from dict if it evaluates to true or default otherwise
+
+    This is a convenience function to treat "null" values in YAML config
+    the same as an empty dictionary or list.
+
+    >>> get_or({}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': None}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': 1}, 'a', 'b')
+    1
+    '''
+    return d.get(key) or default
+
 
 def get_env_options(config: dict):
     '''build Docker environment options'''
-    for key, val in config.get('environment', {}).items():
+    for key, val in get_or(config, 'environment', {}).items():
         yield '-e'
-        yield '{}={}'.format(key, val)
+        yield '{}={}'.format(key, decrypt(val))
 
     if config.get('etcd_discovery_domain'):
         # TODO: use dynamic IP of docker0
@@ -39,7 +101,7 @@ def get_env_options(config: dict):
 
 def get_volume_options(config: dict):
     '''build Docker volume mount options'''
-    for path, mount in config.get('mounts', {}).items():
+    for path, mount in get_or(config, 'mounts', {}).items():
         yield '-v'
         # /opt/taupage/init.d/10-prepare-disks.py will mount the path below "/mounts" on the host system
         yield '{}:{}'.format('/mounts{}'.format(path), path)
@@ -52,7 +114,7 @@ def get_volume_options(config: dict):
 
 
 def get_port_options(config: dict):
-    for host_port, container_port in config.get('ports', {}).items():
+    for host_port, container_port in get_or(config, 'ports', {}).items():
         yield '-p'
         yield '{}:{}'.format(host_port, container_port)
 
@@ -65,7 +127,7 @@ def get_other_options(config: dict):
         yield str(entry.pw_uid)
 
     for t in 'add', 'drop':
-        for cap in config.get('capabilities_{}'.format(t), []):
+        for cap in get_or(config, 'capabilities_{}'.format(t), []):
             yield '--cap-{}={}'.format(t, cap)
 
     if config.get('hostname'):
@@ -123,7 +185,7 @@ def registry_login(config: dict, registry: str):
 
 
 def run_docker(cmd, dry_run):
-    logging.info('Starting Docker container: {}'.format(' '.join(cmd)))
+    logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
     if not args.dry_run:
         max_tries = 3
         for i in range(max_tries):
@@ -148,9 +210,9 @@ def get_first(iterable, default=None):
 
 
 def wait_for_health_check(config: dict):
-    health_check_port = config.get('health_check_port', get_first(sorted(config.get('ports', {}).keys())))
+    health_check_port = config.get('health_check_port', get_first(sorted(get_or(config, 'ports', {}).keys())))
     health_check_path = config.get('health_check_path')
-    health_check_timeout_seconds = config.get('health_check_timeout_seconds', 60)
+    health_check_timeout_seconds = get_or(config, 'health_check_timeout_seconds', 60)
 
     if not health_check_path:
         logging.info('Health check path is not configured, not waiting for health check')
@@ -199,7 +261,7 @@ def main(args):
     try:
         run_docker(cmd, args.dry_run)
     except Exception as e:
-        logging.error('Docker run failed: %s', e)
+        logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
 
     wait_for_health_check(config)
