@@ -62,6 +62,12 @@ def get_token(config: dict, token_name: str, scopes: list):
         logging.warning('No token service URL configured in Taupage YAML ("token_service_url" property)')
         return
 
+    if not config.get('mint_bucket'):
+        # berry will only be started if a mint bucket is configured,
+        # skip OAuth token retrieval if this is not the case
+        logging.warning('No mint bucket configured in Taupage YAML ("mint_bucket" property)')
+        return
+
     path = os.path.join(CREDENTIALS_DIR, 'user.json')
 
     while not os.path.exists(path):
