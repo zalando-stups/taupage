@@ -78,7 +78,7 @@
 -w /var/log/lastlog -p wa -k login
 -w /var/log/tallylog -p wa -k login
 
-## Zalando configuration
+## Taupage configuration
 -w /etc/taupage.yaml -p wa -k zalandocfg
 
 ## Network configuration

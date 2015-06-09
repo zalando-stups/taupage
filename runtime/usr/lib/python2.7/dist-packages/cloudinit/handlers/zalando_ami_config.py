@@ -23,7 +23,7 @@ class ZalandoAMIConfigPartHandler(handlers.Handler):
 
     def handle_part(self, _data, ctype, filename, payload, frequency):
         if ctype == TAUPAGE_AMI_CONFIG_MIME_TYPE:
-            LOG.info("Got Zalando AMI configuration; merging with {config}".format(config=TAUPAGE_CONFIG))
+            LOG.info("Got Taupage AMI configuration; merging with {config}".format(config=TAUPAGE_CONFIG))
 
             LOG.debug("Parsing given input...")
             config_new = util.load_yaml(payload)

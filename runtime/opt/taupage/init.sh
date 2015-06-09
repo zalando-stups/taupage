@@ -7,7 +7,7 @@ if [ $? -ne 0 ]; then
     exit 0
 fi
 
-echo "Starting Zalando AMI init process..."
+echo "Starting Taupage AMI init process.."
 # save current timestamp,
 # this timestamp is used has Taupage's boot time reference
 date --utc --iso-8601=seconds | tee /run/taupage-init-ran/date
