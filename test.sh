@@ -64,6 +64,35 @@ done
 
 echo "IP: $ip"
 
+# wait for server
+while [ true ]; do
+    echo "Waiting for server..."
+
+    set +e
+    ssh $ssh_args ubuntu@$ip echo >/dev/null
+    alive=$?
+    set -e
+
+    if [ $alive -eq 0 ]; then
+        break
+    fi
+
+    sleep 2
+done
+
+if [[ $OSTYPE == darwin* ]]; then
+    # Disable tar'ing resource forks on Macs
+    export COPYFILE_DISABLE=true
+fi
+
+echo "Uploading tests and scripts files to server..."
+ssh $ssh_args ubuntu@$ip sudo mkdir -p /tmp/{tests,scripts}
+tar c -C tests . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tmp/tests/
+tar c -C scripts . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tmp/scripts/
+ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
+ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
+# scripts/serverspec.sh
+
 # now wait until HTTP works
 set +e
 TEST_OK=false
