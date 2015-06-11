@@ -11,10 +11,13 @@ import os
 import requests
 import sys
 import time
-import yaml
+
+from taupage import configure_logging, get_config, get_token, get_boot_time
 
 
-def push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=False):
+def push_audit_log(config: dict, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=False):
+    token = get_token(config, 'taupage', ['uid']) or {}
+
     with open(fn, 'rb') as fd:
         contents = fd.read()
     if compress:
@@ -29,7 +32,8 @@ def push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time
     try:
         now = datetime.datetime.now()
         response = requests.post(instance_logs_url, data=json.dumps(data),
-                                 headers={'Content-Type': 'application/json'})
+                                 headers={'Content-Type': 'application/json',
+                                          'Authorization': 'Bearer {}'.format(token.get('access_token'))})
         if response.status_code == 201:
             os.rename(fn, fn + '-pushed-{}'.format(now.isoformat('T')))
         else:
@@ -40,11 +44,9 @@ def push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-    logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
+    configure_logging()
 
-    with open('/etc/taupage.yaml') as fd:
-        config = yaml.safe_load(fd)
+    config = get_config()
 
     instance_logs_url = config.get('instance_logs_url')
 
@@ -59,11 +61,7 @@ def main():
     account_id = identity['accountId']
     instance_id = identity['instanceId']
 
-    with open('/run/zalando-init-ran/date') as fd:
-        boot_time = fd.read().strip()
-
-    if boot_time.endswith('+0000'):
-        boot_time = boot_time[:-5] + 'Z'
+    boot_time = get_boot_time()
 
     is_shutdown = False
     if len(sys.argv) > 1:
@@ -71,10 +69,10 @@ def main():
 
     while True:
         for fn in glob.glob('/var/log/audit.log.*.gz'):
-            push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn)
+            push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn)
         if is_shutdown:
             for fn in glob.glob('/var/log/audit.log'):
-                push_audit_log(instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=True)
+                push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=True)
             return
         time.sleep(60)
 

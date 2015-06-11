@@ -21,7 +21,7 @@ then
     exit;
 fi
 
-#if logentries account exists in the yaml file. Register the logentries Daemon to this Account
+#If Scalyr account exists in the yaml file. Register the Scalyr Daemon to this Account
 if [ -n "$ACCOUNTKEY" ];
 then
 
@@ -116,4 +116,3 @@ else
     echo -n "ERROR: Failed to start scalyr daemon!";
     exit;
 fi
-

@@ -18,7 +18,7 @@ import subprocess
 import time
 import yaml
 
-CREDENTIALS_DIR = '/meta/credentials'
+from taupage import is_sensitive_key, CREDENTIALS_DIR
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -28,15 +28,15 @@ def get_region():
     return identity['region']
 
 
-def is_sensitive_key(k):
-    lower = k.lower()
-    return 'pass' in lower or \
-           'private' in lower or \
-           'secret' in lower
-
-
 def decrypt(val):
-    if val.startswith(AWS_KMS_PREFIX):
+    '''
+    >>> decrypt(True)
+    True
+
+    >>> decrypt('test')
+    'test'
+    '''
+    if str(val).startswith(AWS_KMS_PREFIX):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
         ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())

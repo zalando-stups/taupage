@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-RANDOM_SUFFIX=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
+RANDOM_SUFFIX=$RANDOM$RANDOM$RANDOM
 TEST_ROLE="test-role-$AMI_ID-$RANDOM_SUFFIX"
 TEST_PERMISSIONS="test-permissions-$AMI_ID-$RANDOM_SUFFIX"
 INSTANCE_PROFILE="test-profile-$AMI_ID-$RANDOM_SUFFIX"

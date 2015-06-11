@@ -1,16 +1,16 @@
 #!/bin/sh
 
 # lock task execution, only run once
-mkdir /run/zalando-init-ran
+mkdir /run/taupage-init-ran
 if [ $? -ne 0 ]; then
     echo "Aborting init process; init already ran."
     exit 0
 fi
 
-echo "Starting Zalando AMI init process..."
+echo "Starting Taupage AMI init process.."
 # save current timestamp,
 # this timestamp is used has Taupage's boot time reference
-date --utc --iso-8601=seconds | tee /run/zalando-init-ran/date
+date --utc --iso-8601=seconds | tee /run/taupage-init-ran/date
 
 # reset dir
 cd $(dirname $0)

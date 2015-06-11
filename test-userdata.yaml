@@ -8,6 +8,7 @@ source: nginx
 
 environment:
   STAGE: ami-test
+  SOME_BOOLEAN_ENV_VAR: false
 
 root: true
 
