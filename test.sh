@@ -91,7 +91,6 @@ tar c -C tests . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tm
 tar c -C scripts . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tmp/scripts/
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
-# scripts/serverspec.sh
 
 # now wait until HTTP works
 set +e
