@@ -119,6 +119,14 @@ def get_volume_options(config: dict):
         # /opt/taupage/init.d/10-prepare-disks.py will mount the path below "/mounts" on the host system
         yield '{}:{}'.format('/mounts{}'.format(path), path)
 
+    # this is equivalent to giving the container sudo access to the host
+    # and is used to be able to run docker alongside within the container
+    if get_or(config, 'allow_docker_alongside_docker', False):
+        yield '-v'
+        yield '/usr/bin/docker:/usr/bin/docker'
+        yield '-v'
+        yield '/var/run/docker.sock:/var/run/docker.sock'
+
     # meta directory, e.g. containing application credentials retrieved by berry
     yield '-v'
     yield '/meta:/meta'
