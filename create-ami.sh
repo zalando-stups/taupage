@@ -117,7 +117,7 @@ result=$(aws ec2 create-image \
     --instance-id $instanceid \
     --output json \
     --name $ami_name \
-    --description "user_data_version: 1")
+    --description "STUPS' Taupage AMI with Docker runtime")
 
 imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 echo "Image: $imageid"
