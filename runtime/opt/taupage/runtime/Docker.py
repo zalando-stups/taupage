@@ -127,11 +127,19 @@ def get_volume_options(config: dict):
 
 
 def get_port_options(config: dict):
+    '''
+    >>> list(get_port_options({}))
+    []
+    >>> list(get_port_options({'ports': {80: 8080}}))
+    ['-p', '80:8080']
+    >>> list(get_port_options({'ports': {'80/udp': 8080}}))
+    ['-p', '80:8080/udp']
+    '''
     for host_port, container_port in get_or(config, 'ports', {}).items():
         protocol = None
-        if '/' in host_port:
-            host_port, protocol = host_port.split('/')
-        if protocol and '/' not in container_port:
+        if '/' in str(host_port):
+            host_port, protocol = str(host_port).split('/')
+        if protocol and '/' not in str(container_port):
             container_port = '{}/{}'.format(container_port, protocol)
 
         yield '-p'
