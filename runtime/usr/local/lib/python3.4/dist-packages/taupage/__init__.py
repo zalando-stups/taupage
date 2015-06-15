@@ -14,6 +14,46 @@ TAUPAGE_CONFIG_PATH = '/etc/taupage.yaml'
 CREDENTIALS_DIR = '/meta/credentials'
 
 
+def get_first(iterable, default=None):
+    if iterable:
+        for item in iterable:
+            return item
+    return default
+
+
+def get_or(d: dict, key, default):
+    '''
+    Return value from dict if it evaluates to true or default otherwise
+
+    This is a convenience function to treat "null" values in YAML config
+    the same as an empty dictionary or list.
+
+    >>> get_or({}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': None}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': 1}, 'a', 'b')
+    1
+    '''
+    return d.get(key) or default
+
+
+def get_default_port(config: dict):
+    '''
+    >>> get_default_port({})
+    >>> get_default_port({'ports': {8080:8080}})
+    8080
+    >>> get_default_port({'ports': {'8080/udp':8080}})
+    8080
+    '''
+    default_port = get_first(sorted(get_or(config, 'ports', {}).keys()))
+    if default_port:
+        default_port = int(str(default_port).split('/')[0])  # strip /protocol
+    return default_port
+
+
 def configure_logging(level=logging.INFO):
     logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)

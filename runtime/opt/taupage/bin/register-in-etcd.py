@@ -8,6 +8,8 @@ import time
 import requests
 import socket
 
+from taupage import get_default_port
+
 
 def get_first(iterable, default=None):
     if iterable:
@@ -17,7 +19,7 @@ def get_first(iterable, default=None):
 
 
 def get_health_check_url(config: dict):
-    default_port = get_first(sorted(config.get('ports', {}).keys())).split('/')[0]  # strip /protocol
+    default_port = get_default_port(config)
     health_check_port = config.get('health_check_port', default_port)
     health_check_path = config.get('health_check_path')
 
