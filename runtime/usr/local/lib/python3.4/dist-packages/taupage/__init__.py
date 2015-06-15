@@ -1,3 +1,7 @@
+'''
+Taupage base module with helper functions
+'''
+
 import json
 import logging
 import os
@@ -6,11 +10,12 @@ import yaml
 import zign.api
 
 
+TAUPAGE_CONFIG_PATH = '/etc/taupage.yaml'
 CREDENTIALS_DIR = '/meta/credentials'
 
 
-def configure_logging():
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+def configure_logging(level=logging.INFO):
+    logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
 
 
@@ -49,8 +54,8 @@ def mask_dictionary(d: dict):
     return masked_dict
 
 
-def get_config():
-    with open('/etc/taupage.yaml') as fd:
+def get_config(filename=TAUPAGE_CONFIG_PATH):
+    with open(filename) as fd:
         config = yaml.safe_load(fd)
     return config
 
