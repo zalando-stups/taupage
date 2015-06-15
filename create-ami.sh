@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# default description (may be overriden by config file)
+ami_description="STUPS' Taupage AMI with Docker runtime"
+
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
     echo "Dry run requested."
@@ -117,7 +120,7 @@ result=$(aws ec2 create-image \
     --instance-id $instanceid \
     --output json \
     --name $ami_name \
-    --description "STUPS' Taupage AMI with Docker runtime")
+    --description "$ami_description")
 
 imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 echo "Image: $imageid"
@@ -161,7 +164,7 @@ then
 
     for target_region in $copy_regions; do
         echo "Copying AMI to region $target_region ..."
-        result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "user_data_version: 1" --output json)
+        result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
         target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 
         state="no state yet"
