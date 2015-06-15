@@ -40,17 +40,42 @@ def get_or(d: dict, key, default):
     return d.get(key) or default
 
 
+def integer_port(port):
+    return int(str(port).split('/')[0])  # strip /protocol
+
+
+def is_tcp_port(port):
+    '''
+    >>> is_tcp_port(1)
+    True
+    >>> is_tcp_port('1/tcp')
+    True
+    >>> is_tcp_port('53/udp')
+    False
+    '''
+    try:
+        int(port)
+        return True
+    except:
+        return str(port).endswith('/tcp')
+
+
 def get_default_port(config: dict):
     '''
+    Get the default TCP port
+
     >>> get_default_port({})
     >>> get_default_port({'ports': {8080:8080}})
     8080
     >>> get_default_port({'ports': {'8080/udp':8080}})
+    >>> get_default_port({'ports': {'8080/tcp':8080}})
     8080
+    >>> get_default_port({'ports': {80: 80, '8080/udp': 8080}})
+    80
     '''
-    default_port = get_first(sorted(get_or(config, 'ports', {}).keys()))
-    if default_port:
-        default_port = int(str(default_port).split('/')[0])  # strip /protocol
+    tcp_ports = filter(is_tcp_port, get_or(config, 'ports', {}).keys())
+    tcp_ports = map(integer_port, tcp_ports)
+    default_port = get_first(sorted(tcp_ports))
     return default_port
 
 
