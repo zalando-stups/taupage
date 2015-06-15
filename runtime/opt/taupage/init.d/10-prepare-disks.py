@@ -33,17 +33,23 @@ def zone():
     return boto.utils.get_instance_metadata()['placement']['availability-zone']
 
 
-def volume_available(volume):
-    return volume.zone == zone() and volume.status == 'available'
-
-
 def find_volume(ec2, name):
     """Looks up the EBS volume with a given Name tag"""
     try:
-        return list(filter(lambda volume: volume_available, ec2.get_all_volumes(filters={"tag:Name": name})))[0].id
+        volumes = list(ec2.get_all_volumes(filters={
+            'tag:Name': name,
+            'status': 'available',
+            'availability-zone': zone()}))
     except Exception as e:
         LOG.exception(e)
         sys.exit(2)
+    if not volumes:
+        LOG.error('No matching EBS volume with name %s found.', name)
+        sys.exit(2)
+    elif len(volumes) > 1:
+        LOG.warning('More than one EBS volume with name %s found.', name)
+        volumes.sort(key=lambda v: v.id)
+    return volumes[0].id
 
 
 def attach_volume(ec2, volume_id, attach_as):
