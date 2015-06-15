@@ -17,7 +17,8 @@ def get_first(iterable, default=None):
 
 
 def get_health_check_url(config: dict):
-    health_check_port = config.get('health_check_port', get_first(sorted(config.get('ports', {}).keys())))
+    default_port = get_first(sorted(config.get('ports', {}).keys())).split('/')[0]  # strip /protocol
+    health_check_port = config.get('health_check_port', default_port)
     health_check_path = config.get('health_check_path')
 
     if not health_check_path:
