@@ -44,7 +44,8 @@ volumes:
 mounts:
     /some_volume:
         partition: /dev/md/sampleraid0
-        erase_on_boot: false
+        erase_on_boot: true
         filesystem: ext4
     /other_volume:
         partition: /dev/md/sampleraid1
+        erase_on_boot: true

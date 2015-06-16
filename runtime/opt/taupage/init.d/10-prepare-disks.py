@@ -57,12 +57,6 @@ def attach_volume(ec2, volume_id, attach_as):
         sys.exit(3)
 
 
-def has_filesystem(device):
-    proc = subprocess.Popen(["dumpe2fs", device], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out, errs = proc.communicate()
-    return b"Couldn't find valid filesystem superblock." not in out
-
-
 def dir_exists(mountpoint):
     return os.path.isdir(mountpoint)
 
@@ -75,14 +69,14 @@ def wait_for_device(device, max_tries=3, wait_time=2.5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
     while tries < max_tries and not os.path.exists(device):
-        logging.error("Waiting for %s to stabilize", device)
+        logging.info("Waiting for %s to stabilize", device)
         tries += 1
         sleep(wait_time)
 
 
 def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
-    """Formats disks if initialize is True or not initialized yet"""
-    if (initialize or not has_filesystem(partition)) and not is_already_mounted:
+    """Formats disks if initialize is True"""
+    if initialize and not is_already_mounted:
         call = ["mkfs." + filesystem]
         if not is_root and filesystem.startswith("ext"):
             logging.debug("%s being formatted with unprivileged user as owner")
@@ -121,7 +115,7 @@ def iterate_mounts(config):
     for mountpoint, data in config.get("mounts", {}).items():
         # mount path below /mounts on the host system
         # (the path specifies the mount point inside the Docker container)
-        mountpoint = '/mounts/{}'.format(mountpoint)
+        mountpoint = '/mounts{}'.format(mountpoint)
 
         partition = data.get("partition")
         filesystem = data.get("filesystem", "ext4")
@@ -129,8 +123,9 @@ def iterate_mounts(config):
         options = data.get('options')
         already_mounted = is_mounted(mountpoint)
 
-        format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-        mount_partition(partition, mountpoint, options, dir_exists(mountpoint), already_mounted)
+        if partition:
+            format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
+            mount_partition(partition, mountpoint, options, dir_exists(mountpoint), already_mounted)
 
 
 def handle_ebs_volumes(args, ebs_volumes):
@@ -138,7 +133,7 @@ def handle_ebs_volumes(args, ebs_volumes):
     ec2 = boto.ec2.connect_to_region(current_region)
     for device, name in ebs_volumes.items():
         attach_volume(ec2, find_volume(ec2, name), device)
-        logging.debug("Attached RBS volume '%s' as '%s'", name, device)
+        logging.info("Attached EBS volume '%s' as '%s'", name, device)
 
 
 def raid_device_exists(raid_device):
@@ -163,7 +158,7 @@ def create_raid_device(raid_device, raid_config):
                 "--raid-devices=" + str(num_devices)]
         # Give devices some time to be available in case they were recently attached
         for device in devices:
-            wait_for_device(device)
+            wait_for_device(device, wait_time=5)
             call.append(device)
 
         subprocess.check_call(call)
