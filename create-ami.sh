@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -u -e -E -C -o pipefail
+
 # default description (may be overriden by config file)
 ami_description="STUPS' Taupage AMI with Docker runtime"
 
@@ -205,6 +207,3 @@ else
     echo "AMI $ami_name ($imageid) create failed "
 
 fi
-
-
-
