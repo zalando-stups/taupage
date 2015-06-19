@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -u -e -E -C -o pipefail
 
 cd $(dirname $0)
 
