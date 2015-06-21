@@ -102,7 +102,8 @@ def get_volume_options(config: dict):
 
     # meta directory, e.g. containing application credentials retrieved by berry
     yield '-v'
-    yield '/meta:/meta'
+    # mount the meta directory as read-only filesystem
+    yield '/meta:/meta:ro'
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
