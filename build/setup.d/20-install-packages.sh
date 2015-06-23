@@ -9,7 +9,7 @@ libyaml-0-2
 linux-image-extra-$(uname -r)
 logentries
 logentries-daemon
-lxc-docker
+lxc-docker-1.6.1
 mdadm
 newrelic-sysmond
 ntp
