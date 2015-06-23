@@ -11,6 +11,7 @@ logentries
 logentries-daemon
 mdadm
 scalyr-agent-2
+newrelic-sysmond
 rkhunter
 unhide.rb
 ruby
@@ -22,4 +23,3 @@ iproute
 echo "Installing packages..."
 
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
-
