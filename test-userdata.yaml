@@ -11,6 +11,7 @@ environment:
   SOME_BOOLEAN_ENV_VAR: false
 
 root: false
+read_only: true
 
 ports:
   80: 8080
