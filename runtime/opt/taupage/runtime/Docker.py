@@ -149,7 +149,7 @@ def get_other_options(config: dict):
         yield '--privileged'
 
     # Mount the container's root filesystem as read only
-    if config.get('readonly'):
+    if config.get('read_only'):
         yield '--read-only'
 
 
