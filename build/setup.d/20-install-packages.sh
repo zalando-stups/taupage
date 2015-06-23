@@ -1,23 +1,24 @@
+# please keep this list sorted!
 pkgs="
-lxc-docker
-rsyslog-gnutls
 auditd
-python-setuptools
-python3-requests
-python3-yaml
-python3-pip
-ntp
-logentries
-logentries-daemon
-mdadm
-scalyr-agent-2
-newrelic-sysmond
-rkhunter
-unhide.rb
-ruby
+iproute
 libruby1.9.1
 libyaml-0-2
-iproute
+logentries
+logentries-daemon
+lxc-docker
+mdadm
+newrelic-sysmond
+ntp
+python3-pip
+python3-requests
+python3-yaml
+python-setuptools
+rkhunter
+rsyslog-gnutls
+ruby
+scalyr-agent-2
+unhide.rb
 "
 
 echo "Installing packages..."
