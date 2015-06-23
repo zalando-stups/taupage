@@ -1,21 +1,19 @@
 require 'spec_helper'
 
-describe package('rsyslog-gnutls') do
-  it { should be_installed }
-end
+basepackage = [ 'rsyslog-gnutls',
+                'python-setuptools',
+                'python3-requests',
+                'python3-yaml',
+                'python3-pip',
+                'logentries',
+                'logentries-daemon',
+                'mdadm',
+                'scalyr-agent-2',
+		'newrelic-sysmond'
+              ]
 
-describe package('newrelic-sysmond') do
-  it { should be_installed }
-end
-
-describe package('python-setuptools') do
-  it { should be_installed }
-end
-
-describe package('python3-requests') do
-  it { should be_installed }
-end
-
-describe package('python3-yaml') do
-  it { should be_installed }
+basepackage.each do |i|
+  describe package("#{i}") do
+    it { should be_installed }
+  end
 end

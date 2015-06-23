@@ -1,3 +1,7 @@
+'''
+Taupage base module with helper functions
+'''
+
 import json
 import logging
 import os
@@ -6,11 +10,77 @@ import yaml
 import zign.api
 
 
+TAUPAGE_CONFIG_PATH = '/etc/taupage.yaml'
 CREDENTIALS_DIR = '/meta/credentials'
 
 
-def configure_logging():
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+def get_first(iterable, default=None):
+    if iterable:
+        for item in iterable:
+            return item
+    return default
+
+
+def get_or(d: dict, key, default):
+    '''
+    Return value from dict if it evaluates to true or default otherwise
+
+    This is a convenience function to treat "null" values in YAML config
+    the same as an empty dictionary or list.
+
+    >>> get_or({}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': None}, 'a', 'b')
+    'b'
+
+    >>> get_or({'a': 1}, 'a', 'b')
+    1
+    '''
+    return d.get(key) or default
+
+
+def integer_port(port):
+    return int(str(port).split('/')[0])  # strip /protocol
+
+
+def is_tcp_port(port):
+    '''
+    >>> is_tcp_port(1)
+    True
+    >>> is_tcp_port('1/tcp')
+    True
+    >>> is_tcp_port('53/udp')
+    False
+    '''
+    try:
+        int(port)
+        return True
+    except:
+        return str(port).endswith('/tcp')
+
+
+def get_default_port(config: dict):
+    '''
+    Get the default TCP port
+
+    >>> get_default_port({})
+    >>> get_default_port({'ports': {8080:8080}})
+    8080
+    >>> get_default_port({'ports': {'8080/udp':8080}})
+    >>> get_default_port({'ports': {'8080/tcp':8080}})
+    8080
+    >>> get_default_port({'ports': {80: 80, '8080/udp': 8080}})
+    80
+    '''
+    tcp_ports = filter(is_tcp_port, get_or(config, 'ports', {}).keys())
+    tcp_ports = map(integer_port, tcp_ports)
+    default_port = get_first(sorted(tcp_ports))
+    return default_port
+
+
+def configure_logging(level=logging.INFO):
+    logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
 
 
@@ -49,8 +119,8 @@ def mask_dictionary(d: dict):
     return masked_dict
 
 
-def get_config():
-    with open('/etc/taupage.yaml') as fd:
+def get_config(filename=TAUPAGE_CONFIG_PATH):
+    with open(filename) as fd:
         config = yaml.safe_load(fd)
     return config
 

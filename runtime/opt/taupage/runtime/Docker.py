@@ -18,7 +18,7 @@ import subprocess
 import time
 import yaml
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -74,25 +74,6 @@ def mask_command(cmd: list):
     return ' '.join(masked_cmd)
 
 
-def get_or(d: dict, key, default):
-    '''
-    Return value from dict if it evaluates to true or default otherwise
-
-    This is a convenience function to treat "null" values in YAML config
-    the same as an empty dictionary or list.
-
-    >>> get_or({}, 'a', 'b')
-    'b'
-
-    >>> get_or({'a': None}, 'a', 'b')
-    'b'
-
-    >>> get_or({'a': 1}, 'a', 'b')
-    1
-    '''
-    return d.get(key) or default
-
-
 def get_env_options(config: dict):
     '''build Docker environment options'''
     for key, val in get_or(config, 'environment', {}).items():
@@ -121,13 +102,28 @@ def get_volume_options(config: dict):
 
     # meta directory, e.g. containing application credentials retrieved by berry
     yield '-v'
-    yield '/meta:/meta'
+    # mount the meta directory as read-only filesystem
+    yield '/meta:/meta:ro'
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
 
 def get_port_options(config: dict):
+    '''
+    >>> list(get_port_options({}))
+    []
+    >>> list(get_port_options({'ports': {80: 8080}}))
+    ['-p', '80:8080']
+    >>> list(get_port_options({'ports': {'80/udp': 8080}}))
+    ['-p', '80:8080/udp']
+    '''
     for host_port, container_port in get_or(config, 'ports', {}).items():
+        protocol = None
+        if '/' in str(host_port):
+            host_port, protocol = str(host_port).split('/')
+        if protocol and '/' not in str(container_port):
+            container_port = '{}/{}'.format(container_port, protocol)
+
         yield '-p'
         yield '{}:{}'.format(host_port, container_port)
 
@@ -215,15 +211,9 @@ def run_docker(cmd, dry_run):
         logging.info('Container {} is running'.format(container_id))
 
 
-def get_first(iterable, default=None):
-    if iterable:
-        for item in iterable:
-            return item
-    return default
-
-
 def wait_for_health_check(config: dict):
-    health_check_port = config.get('health_check_port', get_first(sorted(get_or(config, 'ports', {}).keys())))
+    default_port = get_default_port(config)
+    health_check_port = config.get('health_check_port', default_port)
     health_check_path = config.get('health_check_path')
     health_check_timeout_seconds = get_or(config, 'health_check_timeout_seconds', 60)
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RANDOM_SUFFIX=$RANDOM$RANDOM$RANDOM
+RANDOM_SUFFIX="$RANDOM$RANDOM"
 TEST_ROLE="test-role-$AMI_ID-$RANDOM_SUFFIX"
 TEST_PERMISSIONS="test-permissions-$AMI_ID-$RANDOM_SUFFIX"
 INSTANCE_PROFILE="test-profile-$AMI_ID-$RANDOM_SUFFIX"
@@ -49,7 +49,7 @@ EOF
     aws iam add-role-to-instance-profile --instance-profile-name "$INSTANCE_PROFILE" \
         --role-name "$TEST_ROLE"
 
-    aws iam get-instance-profile --instance-profile-name "$INSTANCE_PROFILE" --output json
+    aws iam get-instance-profile --instance-profile-name "$INSTANCE_PROFILE" > /dev/null
 
     rm -f "$TRUST_POLICY" "$PERMISSIONS_POLICY"
 }
