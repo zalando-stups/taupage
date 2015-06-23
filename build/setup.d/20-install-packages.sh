@@ -1,9 +1,12 @@
 # please keep this list sorted!
+# we need to install linux-image-extra-.. to get aufs!
+# see https://github.com/zalando-stups/taupage/issues/84
 pkgs="
 auditd
 iproute
 libruby1.9.1
 libyaml-0-2
+linux-image-extra-$(uname -r)
 logentries
 logentries-daemon
 lxc-docker
@@ -23,4 +26,4 @@ unhide.rb
 
 echo "Installing packages..."
 
-apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
+#apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
