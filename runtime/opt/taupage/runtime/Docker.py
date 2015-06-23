@@ -148,6 +148,10 @@ def get_other_options(config: dict):
     if config.get('privileged'):
         yield '--privileged'
 
+    # Mount the container's root filesystem as read only
+    if config.get('readonly'):
+        yield '--read-only'
+
 
 def extract_registry(docker_image: str) -> str:
     """
