@@ -76,7 +76,7 @@ def wait_for_device(device, max_tries=3, wait_time=2.5):
 
 def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
     """Formats disks if initialize is True"""
-    if initialize and not is_already_mounted:
+    if initialize and not is_already_mounted and filesystem != 'tmpfs':
         call = ["mkfs." + filesystem]
         if not is_root and filesystem.startswith("ext"):
             logging.debug("%s being formatted with unprivileged user as owner")
@@ -92,12 +92,14 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
         logging.info("Nothing to do for disk %s", partition)
 
 
-def mount_partition(partition, mountpoint, options, dir_exists=None, is_mounted=None):
+def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
     """Mounts formatted disks provided by /etc/taupage.yaml"""
     if is_mounted is False:
         if dir_exists is False:
             os.makedirs(mountpoint)
         mount_command = ['mount']
+        if filesystem == 'tmpfs':
+            mount_command.extend(['-t', 'tmpfs'])
         if options:
             mount_command.extend(['-o', options.replace(' ', '')])
         mount_command.extend([partition, mountpoint])
@@ -125,7 +127,7 @@ def iterate_mounts(config):
 
         if partition:
             format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-            mount_partition(partition, mountpoint, options, dir_exists(mountpoint), already_mounted)
+            mount_partition(partition, mountpoint, options, filesystem, dir_exists(mountpoint), already_mounted)
 
 
 def handle_ebs_volumes(args, ebs_volumes):
