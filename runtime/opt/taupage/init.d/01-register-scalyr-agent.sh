@@ -80,19 +80,6 @@ else
     exit
 fi
 
-#follow audit.log
-echo "";
-echo -n "insert audit to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/audit.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
-if [ $? -eq 0 ];
-then
-    echo -n "DONE";
-    echo "";
-else
-    echo -n "ERROR";
-    exit
-fi
-
 #follow application.log
 echo "";
 echo -n "insert application to follow ... ";

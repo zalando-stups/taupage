@@ -35,7 +35,6 @@ then
     #add default EC2 followed logfiles and TokenID to le config
     le follow /var/log/syslog
     le follow /var/log/auth.log
-    le follow /var/log/audit.log
     le follow /var/log/application.log
 
 echo "
@@ -48,12 +47,6 @@ echo "
 [auth.log]
 path = /var/log/auth.log
 destination = $APPID-$APPVERSION/auth.log
-" >> /etc/le/config
-
-echo "
-[audit-logs]
-path = /var/log/audit.log
-destination = $APPID-$APPVERSION/audit.log
 " >> /etc/le/config
 
 echo "
