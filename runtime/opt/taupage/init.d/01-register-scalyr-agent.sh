@@ -42,7 +42,7 @@ fi
 #default path to scalyr config
 scalyr_config=/etc/scalyr-agent-2/agent.json
 
-#set serverhost to appname and version
+#set serverhost to application_id
 echo -n "set app name and version ...";
 sed -i "1,$ s/\/\/\ serverHost:\ \"REPLACE THIS\"/serverHost:\ \"$APPID\"/g" $scalyr_config
 
@@ -53,6 +53,19 @@ else
     echo -n "ERROR";
     exit
 fi
+
+#disable system metric
+echo "";
+echo -n "disable system metrics ... ";
+sed -i "/api_key\:/a\ \ implicit_metric_monitor: false, implicit_agent_process_metrics_monitor: false, " $scalyr_config
+if [ $? -eq 0 ];
+then
+    echo -n "DONE";
+else
+    echo -n "ERROR";
+    exit
+fi
+
 
 #follow syslog
 echo "";
@@ -93,7 +106,7 @@ else
     exit
 fi
 
-echo -n "Starting scalyr daemon ... ";
+echo -n "restarting scalyr daemon ... ";
 /usr/sbin/scalyr-agent-2 stop # just in case
 /usr/sbin/scalyr-agent-2 start
 if [ $? -eq 0 ];
