@@ -69,7 +69,7 @@ def wait_for_device(device, max_tries=3, wait_time=2.5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
     while tries < max_tries and not os.path.exists(device):
-        logging.info("Waiting for %s to stabilize", device)
+        logging.info("Waiting for %s to stabilize..", device)
         tries += 1
         sleep(wait_time)
 
@@ -89,6 +89,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
     elif is_already_mounted:
         logging.warning("%s is already mounted.", partition)
     else:
+        wait_for_device(partition)
         logging.info("Nothing to do for disk %s", partition)
 
 
