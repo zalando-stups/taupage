@@ -19,7 +19,7 @@ then
         echo -n "DONE";
         echo "";
 	echo -n "Starting newrelic-sysmond ... ";
-	 service newrelic-sysmond stop # just in case
+	 service newrelic-sysmond stop # just in case, TODO: check if this is necessary 
 	 service newrelic-sysmond start
 	if [ $? -eq 0 ];
 	then
