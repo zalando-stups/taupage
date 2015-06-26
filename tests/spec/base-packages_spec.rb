@@ -8,8 +8,11 @@ basepackage = [ 'rsyslog-gnutls',
                 'logentries',
                 'logentries-daemon',
                 'mdadm',
+                'rkhunter',
+                'unhide.rb',
+                'ruby',
                 'scalyr-agent-2',
-		'newrelic-sysmond'
+                'newrelic-sysmond'
               ]
 
 basepackage.each do |i|
