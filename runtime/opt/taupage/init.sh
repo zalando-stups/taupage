@@ -11,6 +11,7 @@ echo "INFO: Starting Taupage AMI init process.."
 # save current timestamp,
 # this timestamp is used has Taupage's boot time reference
 date --utc --iso-8601=seconds | tee /run/taupage-init-ran/date
+START_TIME=$(date +"%s")
 
 # reset dir
 cd $(dirname $0)
@@ -62,6 +63,15 @@ else
     echo "INFO: Notifying CloudFormation (region $EC2_REGION stack $CFN_STACK resource $CFN_RESOURCE status $result)..."
 
     cfn-signal -e $result --stack $CFN_STACK --resource $CFN_RESOURCE --region $EC2_REGION
+fi
+
+END_TIME=$(date +"%s")
+ELAPSED_SECONDS=$(($END_TIME-$START_TIME))
+
+if [ $result -eq 0 ]; then
+    echo "SUCCESS: Initialization completed successfully in $ELAPSED_SECONDS seconds"
+else
+    echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
 fi
 
 # finished!
