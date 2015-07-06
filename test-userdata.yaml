@@ -1,5 +1,6 @@
 #taupage-ami-config
 
+cloudwatch_logs_logging: true
 application_id: my-http-test-app-ami
 application_version: "0.1"
 
