@@ -23,10 +23,10 @@ AWSLOGS_CONFIG_TEMPLATE = textwrap.dedent("""
     [general]
     state_file = /var/awslogs/state/agent-state
 
-    {% for log_file in log_files %}
+    {% for log_file, log_group in observed_log_files.items() %}
     [{{log_file}}]
     file = {{log_file}}
-    log_group_name = {{application_id}}:{{log_file}}
+    log_group_name = {{log_group}}
     log_stream_name = {{instance_id}}
     datetime_format = %b %d %H:%M:%S
 
@@ -51,21 +51,32 @@ def start_awslogs_service():
         raise Exception("'service awslogs start' failed with exit code: {0}".format(exit_code))
 
 
+def contains_cloudwatch_logs_config(config):
+    cwlogs_config = config.get('cloudwatch_logs')
+    if not cwlogs_config:
+        return False
+    if not isinstance(cwlogs_config, dict):
+        logging.warning("Check value of cloudwatch_logs to be a key-value mapping of file:loggroup")
+        return False
+    else:
+        return True
+
+
 def main():
     configure_logging()
     config = get_config()
 
-    if not config.get('cloudwatch_logs_logging'):
+    if not contains_cloudwatch_logs_config(config):
         logging.info('Cloudwatch Logs Agent disabled by configuration')
         sys.exit(0)
 
     logging.info('Configuring Cloudwatch Logs Agent')
 
-    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     environment = {
-        'log_files': LOG_FILES,
+        'observed_log_files': config.get('cloudwatch_logs'),
         'application_id': config.get('application_id'),
         'application_version': config.get('application_version'),
         'region': identity['region'],
