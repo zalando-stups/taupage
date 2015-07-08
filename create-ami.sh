@@ -191,6 +191,8 @@ then
         done
     done
     # TODO tag current git head with AMI name
+     
+    # TODO tag the AMI-Image with the current git commitID 
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."

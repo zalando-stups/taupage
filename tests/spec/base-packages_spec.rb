@@ -12,7 +12,8 @@ basepackage = [ 'rsyslog-gnutls',
                 'unhide.rb',
                 'ruby',
                 'scalyr-agent-2',
-                'newrelic-sysmond'
+                'newrelic-sysmond',
+                'unzip'
               ]
 
 basepackage.each do |i|

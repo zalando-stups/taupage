@@ -104,6 +104,11 @@ def get_volume_options(config: dict):
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
+    # if NewRelic Agent exisits than mount the agent to the docker container
+    NewRelic_yaml = /data/newrelic/newrelic.yml
+    if os.path.isfile(NewRelic_yaml):
+       yield '/data/newrelic:/data/newrelic:ro'
+
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
