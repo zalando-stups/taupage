@@ -11,7 +11,7 @@ RUXIT_TOKEN=$config_ruxit_account_key
 #check if agent is there 
 if [ -f $AGENT ];
 then
-   if if [ -n "$RUXIT_TOKEN" ];
+   if [ -n "$RUXIT_TOKEN" ];
    then
       echo -n "Register Ruxit Agent ... "
       #insert ruxit_token_id
