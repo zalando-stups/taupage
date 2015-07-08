@@ -10,8 +10,6 @@ from jinja2 import Template
 from taupage import configure_logging, get_config
 
 
-LOG_FILES = ['/var/log/syslog', '/var/log/application.log']
-
 AWS_CONFIG_TEMPLATE = textwrap.dedent("""
     [plugins]
     cwlogs = cwlogs
@@ -72,7 +70,7 @@ def main():
 
     logging.info('Configuring Cloudwatch Logs Agent')
 
-    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     environment = {
