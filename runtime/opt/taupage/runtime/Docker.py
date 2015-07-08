@@ -107,7 +107,8 @@ def get_volume_options(config: dict):
     # if NewRelic Agent exisits than mount the agent to the docker container
     newrelic_yaml = '/data/newrelic/newrelic.yml'
     if os.path.isfile(newrelic_yaml):
-       yield '/data/newrelic:/data/newrelic:ro'
+        yield '-v'
+        yield '/data/newrelic:/data/newrelic:ro'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
