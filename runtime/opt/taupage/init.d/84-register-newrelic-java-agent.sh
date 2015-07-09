@@ -24,6 +24,8 @@ then
   		sed -i "1,$ s/LICENSEKEY/\ $ACCOUNTKEY/" $newrelic_yaml
                 #set ApplicationName
                 sed -i "1,$ s/APPNAME/\ $APPID/" $newrelic_yaml
+                #add labels
+                sed -i "/labels=label_type:/a labels=application_id:$APPID;application_version:$APPVERSION" $newrelic_yaml
     else
        echo -n "ERROR: Newrelic JavaAgent is not installed";
        exit;
