@@ -35,7 +35,7 @@ def get_health_check_url(config: dict):
 
 
 def is_healthy(url):
-    '''Return true iff GET on the URL returns status 200'''
+    '''Return true if GET on the URL returns status 200'''
     try:
         response = requests.get(url, timeout=5)
         if response.status_code == 200:

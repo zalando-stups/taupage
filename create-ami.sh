@@ -190,7 +190,15 @@ then
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
         done
     done
-    # TODO tag current git head with AMI name
+    #git add new release tag
+    git tag $ami_name 
+    git push --tags 
+    # get commitID
+    commit_id=$(git log | head -n 1 | awk {'print $2'})
+    #tag image in Frankfurt with commitID
+    aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id    
+    #tag image in Ireland with commitID
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id    
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."

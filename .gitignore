@@ -8,3 +8,6 @@ test-volumes-ami-*
 
 # Python
 __pycache__
+
+#NewRelic Agent
+/runtime/data/newrelic.zip

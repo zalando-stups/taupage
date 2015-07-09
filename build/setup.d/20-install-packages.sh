@@ -23,6 +23,7 @@ rsyslog-gnutls
 ruby
 scalyr-agent-2
 unhide.rb
+unzip
 "
 
 echo "Installing packages..."
