@@ -195,9 +195,9 @@ then
     # get commitID
     commit_id=$(git log | head -n 1 | awk {'print $2'})
     #tag image in Frankfurt with commitID
-    aws ec2 create-tags --resources $imageid --tags Key=CommitID,Value=$commit_id    
+    aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id    
     #tag image in Ireland with commitID
-    aws ec2 create-tags --resources $target_imageid --tags Key=CommitID,Value=$commit_id    
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id    
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."
