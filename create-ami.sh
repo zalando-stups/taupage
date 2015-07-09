@@ -190,8 +190,9 @@ then
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
         done
     done
-    #git 
+    #git add new release tag
     git tag $ami_name 
+    git push --tags 
     # get commitID
     commit_id=$(git log | head -n 1 | awk {'print $2'})
     #tag image in Frankfurt with commitID
