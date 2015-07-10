@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe package('lxc-docker') do
+describe package('lxc-docker-1.7') do
   it { should be_installed }
 end
 
