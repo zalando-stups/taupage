@@ -4,10 +4,7 @@ import boto.utils
 import logging
 import sys
 import textwrap
-<<<<<<< HEAD
 import subprocess
-=======
->>>>>>> configure awslogs daemon based on environment and /etc/taupage.yaml configuration
 
 from jinja2 import Template
 from taupage import configure_logging, get_config
@@ -23,17 +20,10 @@ AWSLOGS_CONFIG_TEMPLATE = textwrap.dedent("""
     [general]
     state_file = /var/awslogs/state/agent-state
 
-<<<<<<< HEAD
     {% for log_file, log_group in observed_log_files.items() %}
     [{{log_file}}]
     file = {{log_file}}
     log_group_name = {{log_group}}
-=======
-    {% for log_file in log_files %}
-    [{{log_file}}]
-    file = {{log_file}}
-    log_group_name = {{application_id}}:{{log_file}}
->>>>>>> configure awslogs daemon based on environment and /etc/taupage.yaml configuration
     log_stream_name = {{instance_id}}
     datetime_format = %b %d %H:%M:%S
 
@@ -92,7 +82,7 @@ def main():
 
     logging.info('Configuring Cloudwatch Logs Agent')
 
-    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     environment = {
