@@ -33,6 +33,13 @@ AWSLOGS_CONFIG_TEMPLATE = textwrap.dedent("""
 
 
 def render_template(template, environment: dict):
+    """
+    Render a template with given params
+
+    :param template: Jinja2 template string
+    :param environment: dict of vars to render in template
+    :return: rendered template string
+    """
     template = Template(template, trim_blocks=True)
     return str(template.render(environment)).strip()
 
@@ -50,6 +57,12 @@ def start_awslogs_service():
 
 
 def contains_cloudwatch_logs_config(config):
+    """
+    Check if a given config dict contains valid configuration for cloudwatch_logs
+
+    :param config: dict
+    :return: True / False
+    """
     cwlogs_config = config.get('cloudwatch_logs')
     if not cwlogs_config:
         return False
