@@ -82,7 +82,7 @@ def main():
 
     logging.info('Configuring Cloudwatch Logs Agent')
 
-    # identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
+    #identity = {'region': 'eu-west-1', 'accountId': 123456, 'instanceId': 'i-123'}
     identity = boto.utils.get_instance_identity()['document']
 
     environment = {
