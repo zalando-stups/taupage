@@ -11,3 +11,4 @@ __pycache__
 
 #NewRelic Agent
 /runtime/data/newrelic.zip
+/runtime/data/AppdynamicAgent.zip
