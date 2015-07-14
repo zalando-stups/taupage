@@ -116,17 +116,6 @@ while [ true ]; do
     sleep 10
 done
 
-# clean up aka terminate test server
-if [ $DRY_RUN = false ]; then
-    echo "Terminating server..."
-    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-    delete_test_volumes
-    delete_profile_for_volume_attachment
-else
-    echo "Skipping termination of server due to dry run. Instance profile and test volumes were also kept intact!"
-fi
-
-
 if [ $TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
     exit 0
@@ -134,3 +123,17 @@ else
     echo "TEST FAILED: http did not come up properly"
     exit 1
 fi
+
+function finally {
+	# clean up aka terminate test server
+	if [ $DRY_RUN = false ]; then
+		echo "Terminating server..."
+		aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+		delete_test_volumes
+		delete_profile_for_volume_attachment
+	else
+		echo "Skipping termination of server due to dry run. Instance profile and test volumes were also kept intact!"
+	fi
+    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+}
+trap finally EXIT

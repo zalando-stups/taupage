@@ -143,11 +143,6 @@ while [ true ]; do
     sleep 10
 done
 
-
-# delete instance
-echo "Terminating server..."
-aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-
 # run tests
 ./test.sh $CONFIG_FILE $imageid
 
@@ -214,3 +209,11 @@ else
     echo "AMI $ami_name ($imageid) create failed "
 
 fi
+
+function finally {
+
+    # delete instance
+    echo "Terminating server..."
+    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+}
+trap finally EXIT
