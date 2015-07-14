@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# check if directory exists
+
+if [ ! -d /opt/proprietary/appdynamics-machine ]; then
+	echo "INFO: no AppDynamics agent found, skip configuration"
+	exit	
+fi
+
 # standard config files
 appdynamics_agents="
 /opt/proprietary/appdynamics-jvm
