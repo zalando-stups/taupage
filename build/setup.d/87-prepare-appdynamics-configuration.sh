@@ -50,5 +50,5 @@ done
 # make sure they are writeable by docker users
 for agent in $appdynamics_agents; do
 	chown -R root:root $agent
-	chmod 0777 $agent
+	find $agent -type d -exec chmod 0777 '{}' ';'
 done
