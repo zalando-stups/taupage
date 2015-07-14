@@ -104,12 +104,16 @@ def get_volume_options(config: dict):
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
+
     # if NewRelic Agent exisits than mount the agent to the docker container
-    # TODO check if newrelic key is in taupage yaml not if the newrelic exists ...
-    newrelic_yaml = '/data/newrelic/newrelic.yml'
-    if os.path.isfile(newrelic_yaml):
+    # TODO move newrelic to /opt/proprietary and mount to /agents/newrelic-jvm
+    if 'newrelic_account_key' in config:
         yield '-v'
         yield '/data/newrelic:/data/newrelic:ro'
+
+    if 'appdynamics_application' in config:
+        yield '-v'
+        yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
