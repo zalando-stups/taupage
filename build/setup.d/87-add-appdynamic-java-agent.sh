@@ -24,7 +24,7 @@ else
 fi
 
 ############################
-# CHANGE DEFAULT YAML FILE #
+# CHANGE DEFAULT XML  FILE #
 ############################
 
 echo "INFO: change default controller-info.xml"
