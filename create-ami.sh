@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+set -e
+
+# finally terminate ec2 instance
+function finally() {
+
+    # delete instance
+    echo "Terminating server..."
+    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+}
+trap finally EXIT
 
 
 # default description (may be overriden by config file)
@@ -210,10 +220,3 @@ else
 
 fi
 
-function finally {
-
-    # delete instance
-    echo "Terminating server..."
-    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-}
-trap finally EXIT
