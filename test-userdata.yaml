@@ -22,6 +22,10 @@ ssh_ports:
   - 22
   - 2222
 
+cloudwatch_logs:
+  /var/log/syslog: my-syslog-loggroup
+  /var/log/application.log: my-application-loggroup
+
 volumes:
   ebs:
     /dev/sdf: taupage-ami-test-vol1

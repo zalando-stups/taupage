@@ -105,7 +105,7 @@ def get_volume_options(config: dict):
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
     # if NewRelic Agent exisits than mount the agent to the docker container
-    # TODO check if newrelic key is in taupage yaml not if the newrelic exists ... 
+    # TODO check if newrelic key is in taupage yaml not if the newrelic exists ...
     newrelic_yaml = '/data/newrelic/newrelic.yml'
     if os.path.isfile(newrelic_yaml):
         yield '-v'
