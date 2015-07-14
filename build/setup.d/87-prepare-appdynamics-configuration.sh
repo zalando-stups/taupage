@@ -21,7 +21,7 @@ for agent in $appdynamics_agents; do
 done
 
 # setup all configs
-for conf in $appdynamics_config; do
+for conf in $appdynamics_configs; do
 	if [ -z "$APPDYNAMICS_CONTROLLER_HOST" ]; then
 		echo "ERROR: AppDynamics agent found but configuration missing; check your secrets configuration."
 		exit 1
