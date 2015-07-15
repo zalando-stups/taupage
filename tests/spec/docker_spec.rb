@@ -15,5 +15,6 @@ describe command('docker info') do
 end
 
 describe file('/root/.dockercfg') do
-  it { should contain '{"https://hub.docker.com": {"email": "mail@example.org", "auth": "foo"}}' }
+  it { should contain 'https://hub.docker.com' }
+  it { should contain '"auth": "foo"' }
 end
