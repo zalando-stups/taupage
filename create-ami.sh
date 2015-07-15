@@ -97,6 +97,7 @@ tar c -C $secret_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
 
 if [ ! -z "$proprietary_dir" ]; then
     echo "Uploading proprietary/* files to server..."
+    ssh $ssh_args ubuntu@$ip sudo mkdir /opt/proprietary
     tar c -C $proprietary_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /opt/proprietary
 fi
 
@@ -206,7 +207,7 @@ then
     #tag image in Frankfurt with commitID
     aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
     #tag image in Ireland with commitID
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id    
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."
