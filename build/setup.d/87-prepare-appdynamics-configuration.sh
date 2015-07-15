@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # check if directory exists
 
 if [ ! -d /opt/proprietary/appdynamics-machine ]; then
