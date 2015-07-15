@@ -2,8 +2,6 @@
 
 set -x
 
-newrelic_archive=/data/newrelic.zip
-no_newrelic=/data/no_newrelic
 newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
 
 #check if there is a no_newrelic file and exit
