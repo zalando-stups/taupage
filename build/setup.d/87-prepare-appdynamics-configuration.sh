@@ -4,7 +4,7 @@
 
 if [ ! -d /opt/proprietary/appdynamics-machine ]; then
 	echo "INFO: no AppDynamics agent found, skip configuration"
-	exit	
+	exit
 fi
 
 # standard config files
@@ -22,7 +22,7 @@ done
 
 # setup all configs
 for conf in $appdynamics_configs; do
-	if [ -z "$APPDYNAMICS_CONTROLLER_HOST" ]; then
+	if [ -z "$APPDYNAMICS_CONTROLLER_HOST" ] || [ -z "$APPDYNAMICS_ACCOUNT_KEY" ]; then
 		echo "ERROR: AppDynamics agent found but configuration missing; check your secrets configuration."
 		exit 1
 	fi
@@ -36,7 +36,7 @@ for conf in $appdynamics_configs; do
 
 	# access config
 	sed -i "1,$ s/<account-name.*$/<account-name>$APPDYNAMICS_ACCOUNT_NAME<\/account-name>/" $conf
-	sed -i "1,$ s/<account-access-key.*$/<account-access-key>$APPDYNAMICS_ACCOUNT_ACCESS_KEY<\/account-access-key>/" $conf
+	sed -i "1,$ s/<account-access-key.*$/<account-access-key>$APPDYNAMICS_ACCOUNT_KEY<\/account-access-key>/" $conf
 
 	# runtime config
 	sed -i "1,$ s/<application-name.*$/<application-name>APPDYNAMICS_APPLICATION<\/application-name>/" $conf
