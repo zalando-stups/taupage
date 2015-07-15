@@ -17,6 +17,10 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$config_appdynamics_application/" $conf
 	sed -i "1,$ s/APPDYNAMICS_TIER/$config_application_id/" $conf
 	sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $conf
+
+	# provide unique ID information
+	agent_dir=$(dirname $(dirname $conf))
+	echo $node > $agent_dir/uniqueHostId
 done
 
 # start machine agent
