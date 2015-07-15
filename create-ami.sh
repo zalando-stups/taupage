@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+set -e
+
+# finally terminate ec2 instance
+function finally() {
+
+    # delete instance
+    echo "Terminating server..."
+    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+}
+trap finally EXIT
 
 
 # default description (may be overriden by config file)
@@ -152,11 +162,6 @@ while [ true ]; do
     sleep 10
 done
 
-
-# delete instance
-echo "Terminating server..."
-aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-
 # run tests
 ./test.sh $CONFIG_FILE $imageid
 
@@ -223,3 +228,4 @@ else
     echo "AMI $ami_name ($imageid) create failed "
 
 fi
+
