@@ -16,5 +16,6 @@ end
 
 describe file('/root/.dockercfg') do
   it { should contain 'https://hub.docker.com' }
-  it { should contain '"auth": "foo"' }
+  it { should contain 'foo' }
+  it { should contain 'auth' }
 end
