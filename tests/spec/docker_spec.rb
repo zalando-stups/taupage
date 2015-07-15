@@ -13,3 +13,7 @@ describe command('docker info') do
   # make sure the aufs module can be loaded and is used by Docker
   its(:stdout) { should match /Storage Driver: aufs/ }
 end
+
+describe file('/root/.dockercfg') do
+  it { should contain '{"https://hub.docker.com": {"email": "mail@example.org", "auth": "foo"}}' }
+end

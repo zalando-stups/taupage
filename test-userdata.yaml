@@ -13,6 +13,11 @@ environment:
 root: false
 read_only: true
 
+dockercfg:
+  "https://hub.docker.com":
+    auth: foo1234
+    email: mail@example.org
+
 ports:
   80: 8080
 
