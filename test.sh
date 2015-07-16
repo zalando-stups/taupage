@@ -106,6 +106,8 @@ echo "Uploading tests and scripts files to server..."
 ssh $ssh_args ubuntu@$ip sudo mkdir -p /tmp/{tests,scripts}
 tar c -C tests . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tmp/tests/
 tar c -C scripts . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /tmp/scripts/
+
+# run ServerSpec tests
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
