@@ -57,6 +57,14 @@ destination = $APPID-$APPVERSION/application.log
 
     #restart daemon
     service logentries restart
+    #check exit status 
+    if [ "$?" = "0" ];
+    then
+        echo "INFO: logentries agent start successfull"
+    else 
+       echo "ERROR: logentries agent start failed"
+       exit
+    fi
 else
     echo "ERROR: no logentries AccountKey was specify in the .yaml file";
     exit
