@@ -1,26 +1,18 @@
 #!/bin/bash
 
-newrelic_archive=/data/newrelic.zip
-no_newrelic=/data/no_newrelic
-newrelic_yaml=/data/newrelic/newrelic.yml
+set -x
 
-#check if there is a no_newrelic file and exit 
-if [ -f $no_newrelic ];
-then
-	echo "INFO: Newrelic Java Agent disabled.";
-	exit; 	
+newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
+
+#check if there is a no_newrelic file and exit
+if [ ! -d /opt/proprietary/newrelic ]; then
+	echo "INFO: no NewRelic agent found, skip configuration"
+	exit
 fi
 
-#unzip newrelic agent
-if [ -f $newrelic_archive ]
-then
-	#unzip the archive
-	cd /data/
-	unzip $newrelic_archive	
-else
-	echo "ERROR: No NewRelic Java Agent was found!"
-	exit; 
-fi
+# standard config files
+newrelic_agents="
+/opt/proprietary/newrelic"
 
 ############################
 # CHANGE DEFAULT YAML FILE #
@@ -37,6 +29,4 @@ sed -i "1,$ s/high_security:.*$/high_security:\ true/" $newrelic_yaml
 #change my application
 sed -i "1,$ s/app_name:.*$/app_name:\ APPNAME/" $newrelic_yaml
 
-#TODO maybe change more default settings 
-
-
+#TODO maybe change more default settings
