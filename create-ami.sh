@@ -4,9 +4,13 @@ set -e
 # finally terminate ec2 instance
 function finally() {
 
-    # delete instance
-    echo "Terminating server..."
-    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+    if [ $DRY_RUN = true ]; then
+       echo "Dry run requested; skipping server termination"
+    else
+       # delete instance
+       echo "Terminating server..."
+       aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+    fi
 }
 trap finally EXIT
 
@@ -118,7 +122,7 @@ echo "Executing setup script..."
 ssh $ssh_args ubuntu@$ip sudo /tmp/build/setup.sh
 
 if [ $DRY_RUN = true ]; then
-    echo "Dry run requested; skipping image creation, server termination and sharing!"
+    echo "Dry run requested; skipping image creation and sharing!"
     exit 0
 fi
 
