@@ -1,24 +1,16 @@
 #!/bin/bash
 
-newrelic_archive=/data/newrelic.zip
-no_newrelic=/data/no_newrelic
-newrelic_yaml=/data/newrelic/newrelic.yml
+set -x
 
-#check if there is a no_newrelic file and exit 
-if [ -f $no_newrelic ];
-then
-	echo "INFO: Newrelic Java Agent disabled.";
+newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
+
+#check if there is a no_newrelic file and exit
+if [ ! -d /opt/proprietary/newrelic ]; then
+	echo "INFO: no NewRelic agent found, skip configuration"
 else
-	#unzip newrelic agent
-	if [ -f $newrelic_archive ]
-	then
-		#unzip the archive
-		cd /data/
-		unzip $newrelic_archive
-	else
-		echo "ERROR: No NewRelic Java Agent was found!"
-		exit;
-	fi
+	# standard config files
+	newrelic_agents="
+	/opt/proprietary/newrelic"
 
 	############################
 	# CHANGE DEFAULT YAML FILE #
@@ -37,7 +29,3 @@ else
 
 	#TODO maybe change more default settings
 fi
-
-
-
-

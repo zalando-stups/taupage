@@ -13,6 +13,7 @@ lxc-docker-1.7.0
 mdadm
 newrelic-sysmond
 ntp
+openjdk-7-jre-headless
 python3-pip
 python3-requests
 python3-yaml

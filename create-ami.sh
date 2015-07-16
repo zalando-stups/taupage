@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+set -e
+
+# finally terminate ec2 instance
+function finally() {
+
+    # delete instance
+    echo "Terminating server..."
+    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+}
+trap finally EXIT
 
 
 # default description (may be overriden by config file)
@@ -88,10 +98,19 @@ fi
 # upload files
 echo "Uploading runtime/* files to server..."
 tar c -C runtime --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
+
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
+
 echo "Uploading secret/* files to server..."
 tar c -C $secret_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
+
+if [ ! -z "$proprietary_dir" ]; then
+    echo "Uploading proprietary/* files to server..."
+    ssh $ssh_args ubuntu@$ip sudo mkdir /opt/proprietary
+    tar c -C $proprietary_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /opt/proprietary
+fi
+
 ssh $ssh_args ubuntu@$ip find /tmp/build
 
 # execute setup script
@@ -143,11 +162,6 @@ while [ true ]; do
     sleep 10
 done
 
-
-# delete instance
-echo "Terminating server..."
-aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-
 # run tests
 ./test.sh $CONFIG_FILE $imageid
 
@@ -198,7 +212,7 @@ then
     #tag image in Frankfurt with commitID
     aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
     #tag image in Ireland with commitID
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id    
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."
@@ -214,3 +228,4 @@ else
     echo "AMI $ami_name ($imageid) create failed "
 
 fi
+
