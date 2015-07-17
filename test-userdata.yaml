@@ -16,7 +16,12 @@ read_only: true
 ports:
   80: 8080
 
+healthcheck:
+  type: elb
+  loadbalancer_name: foo-elb
+
 health_check_path: /
+
 
 ssh_ports:
   - 22
