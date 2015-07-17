@@ -18,7 +18,7 @@ class InstanceMetadata(object):
 
 class HealthChecker(object):
 
-    def elb_healthcheck(self, elb_name, instance_metadata):
+    def _get_elb_instance_state(self, elb_name, instance_metadata):
         self.logger.info("trying describe instance health at ELB API")
         result = self.elb_client.describe_instance_health(LoadBalancerName=elb_name, Instances=[{"InstanceId": self.instance_id}])
         state = result["InstanceStates"][0]["State"]
@@ -27,7 +27,7 @@ class HealthChecker(object):
 
     def is_in_service_from_elb_perspective(self, elb_name, instance_metadata, timeout_in_seconds):
         for i in range(0, timeout_in_seconds / INTERVAL):
-            if self.elb_healthcheck(elb_name, instance_metadata):
+            if self._get_elb_instance_state(elb_name, instance_metadata):
                 return True
             else:
                 sleep(INTERVAL)
