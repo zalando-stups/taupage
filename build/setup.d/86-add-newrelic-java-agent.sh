@@ -7,6 +7,7 @@ newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
 #check if there is a no_newrelic file and exit
 if [ ! -d /opt/proprietary/newrelic ]; then
 	echo "INFO: no NewRelic agent found, skip configuration"
+else
 
 	# standard config files
 	newrelic_agents="
