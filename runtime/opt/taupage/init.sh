@@ -2,7 +2,7 @@
 
 # lock task execution, only run once
 mkdir /run/taupage-init-ran
-if [ $? -ne 0 ]; then
+if [ "$?" -ne 0 ]; then
     echo "ERROR: Aborting init process; init already ran."
     exit 0
 fi
@@ -19,7 +19,7 @@ cd $(dirname $0)
 # general preparation
 for script in $(ls init.d); do
     ./init.d/$script
-    if [ $? -ne 0 ]; then
+    if [ "$?" -ne 0 ]; then
         echo "ERROR: Failed to start $script" >&2
         exit 1
     fi
@@ -39,7 +39,7 @@ RUNTIME=$(basename $RUNTIME)
 # figure out executable
 RUNTIME_INIT=/opt/taupage/runtime/${RUNTIME}.py
 
-if [ ! -f $RUNTIME_INIT ]; then
+if [ ! -f "$RUNTIME_INIT" ]; then
     echo "ERROR: Runtime '$RUNTIME' not found!" >&2
     exit 1
 fi
@@ -68,7 +68,7 @@ fi
 END_TIME=$(date +"%s")
 ELAPSED_SECONDS=$(($END_TIME-$START_TIME))
 
-if [ $result -eq 0 ]; then
+if [ "$result" -eq 0 ]; then
     echo "SUCCESS: Initialization completed successfully in $ELAPSED_SECONDS seconds"
 else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
