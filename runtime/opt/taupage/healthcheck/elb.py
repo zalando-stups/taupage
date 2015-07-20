@@ -1,41 +1,33 @@
 #!/usr/bin/env python
 
+import sys
 import logging
-import botocore.session
 from boto.utils import get_instance_identity
 from taupage import configure_logging, get_config
 from time import sleep
+from boto.ec2 import elb
 
-INTERVAL = 2
-
+INTERVAL = 5
+TIMEOUT = 30
 
 class ElbHealthChecker(object):
-    def __init__(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+    def __init__(self, region):
+        configure_logging()
         self.logger = logging.getLogger(__name__)
-        config = get_config()
+        self.elb_client = elb.connect_to_region(region=region)
 
-        # region = get_instance_identity()['document']['region']
-        # instance_id = get_instance_identity()['document']['instanceId']
-        region = 'eu-central-1'
-        instance_id = 'i-cbb5d20a'
-        loadbalancer_name = config['loadbalancer_name']
-
-        self.elb_client = botocore.session.get_session().create_client("elb", region_name=region)
-        self.instance_id = instance_id
-
-    def _get_elb_instance_state(self, elb_name):
+    def _get_elb_instance_state(self, instance_id, elb_name):
         self.logger.debug("trying describe instance health at ELB API")
         result = self.elb_client.describe_instance_health(LoadBalancerName=elb_name,
-                                                          Instances=[{"InstanceId": self.instance_id}])
+                                                          Instances=[{"InstanceId": instance_id}])
         state = result["InstanceStates"][0]["State"]
-        self.logger.info("ELB state for instance {0}: {1}".format(self.instance_id, state))
-        return state == 'InService'
+        self.logger.info("ELB state for instance {0}: {1}".format(instance_id, state))
+        return state
 
-    def is_in_service_from_elb_perspective(self, elb_name: str, timeout_in_seconds: int):
+    def is_in_service_from_elb_perspective(self, instance_id: str, elb_name: str):
         healthchecker.logger.debug("Checking LB")
-        for i in range(0, int(timeout_in_seconds / INTERVAL)):
-            if self._get_elb_instance_state(elb_name):
+        for i in range(0, int(TIMEOUT / INTERVAL)):
+            if self._get_elb_instance_state(instance_id, elb_name) == 'InService':
                 return True
             else:
                 self.logger.debug('waiting for instance')
@@ -45,5 +37,16 @@ class ElbHealthChecker(object):
 
 
 if __name__ == 'main':
-    healthchecker = ElbHealthChecker()
-    instance_state = healthchecker.is_in_service_from_elb_perspective('registry', 10)
+    region = get_instance_identity()['document']['region']
+    instance_id = get_instance_identity()['document']['instanceId']
+
+    config = get_config()
+    loadbalancer_name = config['loadbalancer_name']
+
+    healthchecker = ElbHealthChecker(region)
+    is_in_service = healthchecker.is_in_service_from_elb_perspective(instance_id, loadbalancer_name)
+
+    if is_in_service:
+        sys.exit(0)
+    else:
+        sys.exit(1)
