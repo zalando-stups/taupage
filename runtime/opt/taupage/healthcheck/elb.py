@@ -9,8 +9,8 @@ from boto.ec2 import elb
 
 
 class ElbHealthChecker(object):
-    INTERVAL = 5
-    TIMEOUT = 30
+    INTERVAL = 10
+    TIMEOUT = 300
 
     def __init__(self, region):
         configure_logging()
