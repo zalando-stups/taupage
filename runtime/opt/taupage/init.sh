@@ -76,9 +76,9 @@ if [ -z "$config_notify_cfn_stack" ] || [ -z "$config_notify_cfn_resource" ]; th
     echo "INFO: Skipping notification of CloudFormation."
 else
     EC2_AVAIL_ZONE=$( curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone )
-    EC2_REGION="$( echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:' )"
+    EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-    echo "INFO: Notifying CloudFormation (region $EC2_REGION stack $config_notify_cfn_stack resource $config_notify_cfn_resource status $result)..."
+    echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result)..."
 
     cfn-signal -e $result --stack $config_notify_cfn_stack --resource $config_notify_cfn_resource --region $EC2_REGION
 fi
