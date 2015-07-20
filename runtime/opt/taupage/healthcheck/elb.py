@@ -15,12 +15,12 @@ class ElbHealthChecker(object):
     def __init__(self, region):
         configure_logging()
         self.logger = logging.getLogger(__name__)
-        self.elb_client = elb.connect_to_region(region=region)
+        self.elb_client = elb.connect_to_region(region)
 
     def _get_elb_instance_state(self, instance_id: str, elb_name: str):
-        result = self.elb_client.describe_instance_health(LoadBalancerName=elb_name,
-                                                          Instances=[{"InstanceId": instance_id}])
-        state = result["InstanceStates"][0]["State"]
+        result = self.elb_client.describe_instance_health(load_balancer_name=elb_name,
+                                                          instances=[instance_id])
+        state = result[0].state
         self.logger.debug("ELB state for instance {0}: {1}".format(instance_id, state))
         return state
 
@@ -39,11 +39,14 @@ class ElbHealthChecker(object):
 
 
 if __name__ == '__main__':
-    region = get_instance_identity()['document']['region']
-    instance_id = get_instance_identity()['document']['instanceId']
+    #region = get_instance_identity()['document']['region']
+    #instance_id = get_instance_identity()['document']['instanceId']
 
-    config = get_config()
-    loadbalancer_name = config['loadbalancer_name']
+    #config = get_config()
+    #loadbalancer_name = config['healthcheck']['loadbalancer_name']
+    region = "eu-west-1"
+    instance_id = "i-34bd2299"
+    loadbalancer_name = "performance-te-elb-KMTRND05CMKD"
 
     healthchecker = ElbHealthChecker(region)
     is_in_service = healthchecker.is_in_service_from_elb_perspective(instance_id, loadbalancer_name)
