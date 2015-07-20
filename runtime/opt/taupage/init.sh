@@ -64,7 +64,6 @@ if [ "$result" -eq 0 ]; then
             exit 1
         fi
 
-        # do magic!
         $HEALTHCHECK_BIN
         result=$?
     else

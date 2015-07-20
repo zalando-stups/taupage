@@ -41,7 +41,7 @@ def decrypt(val):
         ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())
         try:
-            # HACK: ugly hack to fix boto Python 3 compat
+            # TODO: fix ugly hack to fix boto Python 3 compat
             # "decrypt" expects bytes, but "json.dumps" uses bytes, too
             # which throws "TypeError: .. is not JSON serializable"
             # workaround: return Base64 as unicode string
