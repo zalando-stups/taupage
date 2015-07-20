@@ -8,7 +8,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
 #set more readable variables
 ACCOUNTKEY=$config_newrelic_account_key
 APPID=$config_application_id
-newrelic_yaml=/data/newrelic/newrelic.yml
+newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
 APPVERSION=$config_application_version
 
 #if NewRelic account exists in the yaml file. Register the NewRelic Daemon to this Account
@@ -17,10 +17,10 @@ then
 
     #check if java agent is installed
     if [ -f $newrelic_yaml ];
-    then 
-    
+    then
+
        echo -n "Configuring newrelic-java-agent ... ";
-                #insert newrelic Key 
+                #insert newrelic Key
   		sed -i "1,$ s/LICENSEKEY/\ $ACCOUNTKEY/" $newrelic_yaml
                 #set ApplicationName
                 sed -i "1,$ s/APPNAME/\ $APPID/" $newrelic_yaml
@@ -34,4 +34,3 @@ else
     echo "INFO: NewRelic is not configured; skipping daemon setup.";
     exit;
 fi
-
