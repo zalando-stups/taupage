@@ -28,13 +28,13 @@ for script in $(ls init.d); do
     fi
 done
 
-if [ -z "$CONFIG_RUNTIME" ]; then
+if [ -z "$config_runtime" ]; then
     echo "ERROR: No runtime configuration found!" >&2
     exit 1
 fi
 
 # make sure there are no path hacks
-RUNTIME=$(basename $CONFIG_RUNTIME)
+RUNTIME=$(basename $config_runtime)
 
 # figure out executable
 RUNTIME_BIN=/opt/taupage/runtime/${RUNTIME}.py
@@ -51,10 +51,10 @@ result=$?
 # run healthcheck if runtime returns successfully
 if [ "$result" -eq 0 ]; then
     # run healthcheck if configured
-    if [ -n "$CONFIG_HEALTHCHECK_TYPE" ]; then
+    if [ -n "$config_healthcheck_type" ]; then
 
         # make sure there are no path hacks
-        HEALTHCHECK=$(basename $CONFIG_HEALTHCHECK_TYPE)
+        HEALTHCHECK=$(basename $config_healthcheck_type)
 
         # figure out executable
         HEALTHCHECK_BIN=/opt/taupage/healthcheck/${HEALTHCHECK}.py
@@ -72,19 +72,15 @@ if [ "$result" -eq 0 ]; then
 fi
 
 ### notify cloud formation
-# TODO get it more reliably
-CONFIG_NOTIFY_CFN_STACK
-CONFIG_NOTIFY_CFN_RESOURCE
-
-if [ -z "$CONFIG_NOTIFY_CFN_STACK" ] || [ -z "$CONFIG_NOTIFY_CFN_RESOURCE" ]; then
+if [ -z "$config_notify_cfn_stack" ] || [ -z "$config_notify_cfn_resource" ]; then
     echo "INFO: Skipping notification of CloudFormation."
 else
     EC2_AVAIL_ZONE=$( curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone )
     EC2_REGION="$( echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:' )"
 
-    echo "INFO: Notifying CloudFormation (region $EC2_REGION stack $CONFIG_NOTIFY_CFN_STACK resource $CONFIG_NOTIFY_CFN_RESOURCE status $result)..."
+    echo "INFO: Notifying CloudFormation (region $EC2_REGION stack $config_notify_cfn_stack resource $config_notify_cfn_resource status $result)..."
 
-    cfn-signal -e $result --stack $CONFIG_NOTIFY_CFN_STACK --resource $CONFIG_NOTIFY_CFN_RESOURCE --region $EC2_REGION
+    cfn-signal -e $result --stack $config_notify_cfn_stack --resource $config_notify_cfn_resource --region $EC2_REGION
 fi
 
 END_TIME=$(date +"%s")
