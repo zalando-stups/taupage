@@ -109,7 +109,7 @@ def get_volume_options(config: dict):
     # TODO move newrelic to /opt/proprietary and mount to /agents/newrelic-jvm
     if 'newrelic_account_key' in config:
         yield '-v'
-        yield '/data/newrelic:/data/newrelic:ro'
+        yield '/opt/proprietary/newrelic:/data/newrelic:ro'
 
     if 'appdynamics_application' in config:
         yield '-v'
