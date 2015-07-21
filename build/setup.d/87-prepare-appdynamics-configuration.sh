@@ -43,6 +43,11 @@ else
 		sed -i "1,$ s/<tier-name.*$/<tier-name>APPDYNAMICS_TIER<\/tier-name>/" $conf
 		sed -i "1,$ s/<node-name.*$/<node-name>APPDYNAMICS_NODE<\/node-name>/" $conf
 
+		# add overlay configs if available
+		if [ -d /opt/proprietary/appdynamics-conf ]; then
+			cp /opt/proprietary/appdynamics-conf/* $(dirname $conf)
+		fi
+
 		# register config for runtime
 		echo $conf >> /opt/proprietary/appdynamics-configs
 	done
