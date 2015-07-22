@@ -9,6 +9,8 @@ import time
 import yaml
 import zign.api
 
+from boto.utils import get_instance_metadata
+
 
 TAUPAGE_CONFIG_PATH = '/etc/taupage.yaml'
 CREDENTIALS_DIR = '/meta/credentials'
@@ -166,3 +168,11 @@ def get_boot_time():
         boot_time = boot_time[:-5] + 'Z'
 
     return boot_time
+
+
+def get_instance_id():
+    return get_instance_metadata().get('instance-id')
+
+
+def get_region():
+    return get_instance_metadata().get('placement')['availability-zone'][:-1]

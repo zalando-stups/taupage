@@ -6,4 +6,4 @@ install:
   - pip install boto
   - pip install stups-pierone
 script:
-  - run-tests.sh
+  - ./run-tests.sh
