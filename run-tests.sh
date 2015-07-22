@@ -7,7 +7,7 @@ echo "### flake8 checks"
 flake8 -v .
 
 echo "### bash syntax checks"
-tests/shell_syntax_check.sh
+tests/check-bash-script-syntax.sh
 
 echo "### python doctests"
 python3 -m doctest -v runtime/usr/local/lib/python3.4/dist-packages/taupage/__init__.py
