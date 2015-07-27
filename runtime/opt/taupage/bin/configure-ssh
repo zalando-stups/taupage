@@ -2,7 +2,7 @@
 
 import yaml
 
-with open('/etc/taupage.yaml') as fd:
+with open('/meta/taupage.yaml') as fd:
     config = yaml.safe_load(fd)
 
 ssh_ports = config.get('ssh_ports', [22])

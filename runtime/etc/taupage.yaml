@@ -1,7 +1,0 @@
-# default values
-
-# runtime:  could be Docker but let the user make it explicit
-# source:  there is no sane default, this is the only really required one
-
-# the container should not run as root if not required
-root: false

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Docker runtime script: load /etc/taupage.yaml and run the Docker container
+Docker runtime script: load /meta/taupage.yaml and run the Docker container
 '''
 
 import argparse
@@ -287,7 +287,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', '-c', help='Config file', default='/etc/taupage.yaml')
+    parser.add_argument('--config', '-c', help='Config file', default='/meta/taupage.yaml')
     parser.add_argument('--dry-run', help='Print what would be done', action='store_true')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

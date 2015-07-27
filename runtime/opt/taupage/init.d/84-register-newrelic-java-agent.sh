@@ -3,7 +3,7 @@
 # get NewRelic Key and store it in the .yml file for the newrelic java agent
 
 #read taupage.yaml file
-eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_newrelic_account_key

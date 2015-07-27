@@ -3,7 +3,7 @@
 # get NewRelic Key and register the agent
 
 #read taupage.yaml file
-eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_newrelic_account_key
@@ -17,14 +17,14 @@ then
 
     echo -n "Configuring newrelic-sysmond ... ";
 		nrsysmond-config --set license_key="$ACCOUNTKEY"
-    # add labels to newrelic.yaml 
+    # add labels to newrelic.yaml
     sed -i "/labels=label_type:/a labels=application_id:$APPID;application_version:$APPVERSION" $newrelic_sysmoncfg
     if [ $? -eq 0 ];
     then
         echo -n "DONE";
         echo "";
 	echo -n "Starting newrelic-sysmond ... ";
-	 service newrelic-sysmond stop # just in case, TODO: check if this is necessary 
+	 service newrelic-sysmond stop # just in case, TODO: check if this is necessary
 	 service newrelic-sysmond start
 	if [ $? -eq 0 ];
 	then
@@ -41,4 +41,3 @@ else
     echo "INFO: NewRelic is not configured; skipping daemon setup.";
     exit;
 fi
-
