@@ -1,7 +1,12 @@
 require 'spec_helper'
 
 describe package('docker-engine') do
-  it { should be_installed.with_version('1.7.1-0~trusty') }
+  it { should be_installed) }
+end
+
+describe command('docker --version') do
+  # make sure the aufs module can be loaded and is used by Docker
+  its(:stdout) { should match /1.7.1/ }
 end
 
 describe service('docker') do
