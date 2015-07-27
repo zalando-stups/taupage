@@ -1,2 +1,1 @@
-deb https://get.docker.com/ubuntu docker main
-# deb http://mirror.yandex.ru/mirrors/docker/ docker main
+deb https://apt.dockerproject.org/repo ubuntu-trusty main
