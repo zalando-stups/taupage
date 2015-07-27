@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe package('lxc-docker-1.7.0') do
-  it { should be_installed }
+describe package('docker-engine') do
+  it { should be_installed.with_version('1.7.1-0~trusty') }
 end
 
 describe service('docker') do
