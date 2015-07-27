@@ -5,7 +5,7 @@ describe package('docker-engine') do
 end
 
 describe command('docker --version') do
-  # make sure the aufs module can be loaded and is used by Docker
+  # check Docker version
   its(:stdout) { should match /1.7.1/ }
 end
 
