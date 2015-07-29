@@ -156,6 +156,7 @@ def create_raid_device(raid_device, raid_config):
     else:
         raid_level = raid_config.get("level")
         call = ["mdadm",
+                "--run",
                 "--create", raid_device,
                 "--level=" + str(raid_level),
                 "--raid-devices=" + str(num_devices)]
