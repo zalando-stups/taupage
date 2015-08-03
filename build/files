@@ -16,7 +16,7 @@
 
 /etc/ssh-access-granting-service.yaml root:root 0444
 
-/etc/taupage.yaml root:root 0444
+/meta/taupage.yaml root:root 0444
 
 /opt/taupage/init.d/10-prepare-disks.py root:root 0700
 /opt/taupage/init.sh root:root 0700

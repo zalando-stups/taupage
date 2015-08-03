@@ -79,7 +79,7 @@ def run_heartbeat(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', help="configuration file to publish (yaml)", default="/etc/taupage.yaml")
+    parser.add_argument('-c', '--config', help="configuration file to publish (yaml)", default="/meta/taupage.yaml")
     parser.add_argument('-e', '--etcd', help="in which etcd to register", default="http://localhost:2379")
     parser.add_argument('-i', '--interval', help='heartbeat interval', default=5)
     parser.add_argument('-t', '--ttl', help='heartbead ttl', default=15)

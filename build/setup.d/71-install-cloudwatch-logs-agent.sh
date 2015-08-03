@@ -13,7 +13,7 @@ chmod +x ./awslogs-agent-setup.py
 # the region parameter is not relevant here but required
 ./awslogs-agent-setup.py -n -r foo -c cloudwatch_logs_empty.conf
 
-# disable autostart since the service is intended to start only if configured in /etc/taupage.yaml
+# disable autostart since the service is intended to start only if configured in /meta/taupage.yaml
 update-rc.d -f awslogs remove
 
 # cleanup

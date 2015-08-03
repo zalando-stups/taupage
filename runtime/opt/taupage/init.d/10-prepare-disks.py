@@ -94,7 +94,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
-    """Mounts formatted disks provided by /etc/taupage.yaml"""
+    """Mounts formatted disks provided by /meta/taupage.yaml"""
     if is_mounted is False:
         if dir_exists is False:
             os.makedirs(mountpoint)
@@ -191,8 +191,8 @@ def handle_volumes(args, config):
 
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
-    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /meta/taupage.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/meta/taupage.yaml', help='config file in YAML')
     parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
     parser.add_argument('-r', '--region', dest='region',
                         help='uses a specific AWS region instead of querying the instance metadata')

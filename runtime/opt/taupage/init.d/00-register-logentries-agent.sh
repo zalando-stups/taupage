@@ -1,9 +1,9 @@
 #!/bin/sh
-# read /etc/taupage.yaml
+# read /meta/taupage.yaml
 # get logentries Key and register logentries daemon
 
 #read taupage.yaml file
-eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_logentries_account_key
@@ -57,11 +57,11 @@ destination = $APPID-$APPVERSION/application.log
 
     #restart daemon
     service logentries restart
-    #check exit status 
+    #check exit status
     if [ "$?" = "0" ];
     then
         echo "INFO: logentries agent start successfull"
-    else 
+    else
        echo "ERROR: logentries agent start failed"
        exit
     fi

@@ -10,7 +10,7 @@ import yaml
 import zign.api
 
 
-TAUPAGE_CONFIG_PATH = '/etc/taupage.yaml'
+TAUPAGE_CONFIG_PATH = '/meta/taupage.yaml'
 CREDENTIALS_DIR = '/meta/credentials'
 
 
