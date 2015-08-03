@@ -103,6 +103,9 @@ fi
 echo "Uploading runtime/* files to server..."
 tar c -C runtime --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
 
+echo "Set link to old taupage file"
+ssh $ssh_args ubuntu@$ip sudo ln -s /meta/taupage.yaml /etc/taupage.yaml
+
 echo "Uploading build/* files to server..."
 tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
 
