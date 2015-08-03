@@ -23,5 +23,32 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 	echo $node > $agent_dir/uniqueHostId
 done
 
+   # configure application.log & syslog 
+   # first "hack" this should be configurable over the taupage.yaml file.
+   application_log_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/application-log.job"
+   syslog_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/syslog.job"
+   
+   #enable application.log job
+   if [ -f $application_log_job ]; then
+      sed -i "1,$ s/enabled.*$/enabled: true/" $application_log_job
+      sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
+      sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
+      sed -i "1,$ s/NODENAME/$node/" $application_log_job
+   else 
+      echo "INFO: application_job file doesn't exists, skipping setup"
+   fi
+
+   # enable syslogjob
+   if [ -f $syslog_job ]; then
+      sed -i "1,$ s/enabled.*$/enabled: true/" $syslog_job
+      sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
+      sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
+      sed -i "1,$ s/NODENAME/$node/" $syslog_job
+      
+   else 
+      echo "INFO: syslog_job file doesn't exists, skipping setup"
+   fi 
+
+
 # start machine agent
 service appdynamics start
