@@ -10,6 +10,7 @@ TOKEN_SERVICE_URL=
 INSTANCE_LOGS_URL=
 
 # for appdynamics support uncomment the following lines and modify the values. 
+# you also need the agents in proprietary/appdynamics-machine & appdynamics-jvm
 #APPDYNAMICS_CONTROLLER_HOST=CONTROLLERHOSTNAME
 #APPDYNAMICS_CONTROLLER_PORT=443
 #APPDYNAMICS_CONTROLLER_SSL="true"
