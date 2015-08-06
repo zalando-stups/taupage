@@ -104,7 +104,7 @@ def get_volume_options(config: dict):
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
-    # mount logdirectory as read-only 
+    # mount logdirectory as read-only
     yield '-v'
     yield '/var/log:/var/log:ro'
 
