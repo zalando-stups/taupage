@@ -63,7 +63,8 @@ def main():
 
             if status_code != 201:
                 logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
-                            status_code, response.text))
+                    status_code,
+                    response.text))
         except:
             logging.exception('Failed to push Taupage YAML')
 
