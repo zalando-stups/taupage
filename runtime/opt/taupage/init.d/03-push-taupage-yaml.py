@@ -44,9 +44,9 @@ def main():
             response = requests.post(instance_logs_url, data=json.dumps(data), timeout=5,
                                      headers={'Content-Type': 'application/json',
                                               'Authorization': 'Bearer {}'.format(token.get('access_token'))})
-            if status_code != 201:
+            if response.status_code != 201:
                 logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
-                    status_code,
+                    response.status_code,
                     response.text))
         except:
             logging.exception('Failed to push Taupage YAML')
