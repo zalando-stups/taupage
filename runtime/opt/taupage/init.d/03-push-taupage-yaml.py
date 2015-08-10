@@ -41,13 +41,13 @@ def main():
         logging.info('Pushing Taupage YAML to {}..'.format(instance_logs_url))
         try:
             # TODO: use OAuth credentials
-            
+
             # last status code
             status_code = 0
             # how many times we retry sending
             num_retries = 3
-            
-            while status_code != 201: 
+
+            while status_code != 201:
                 response = requests.post(instance_logs_url, data=json.dumps(data), timeout=5,
                                          headers={'Content-Type': 'application/json',
                                                   'Authorization': 'Bearer {}'.format(token.get('access_token'))})
@@ -60,10 +60,10 @@ def main():
                     sleep(90 * 60 * 1000)
                 else:
                     break
-                
+
             if status_code != 201:
                 logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
-                              status_code, response.text))
+                            status_code, response.text))
         except:
             logging.exception('Failed to push Taupage YAML')
 
