@@ -2,6 +2,7 @@
 
 import boto.utils
 import logging
+import os
 import sys
 import textwrap
 import subprocess
@@ -49,6 +50,7 @@ def write_file(path, content):
 
 
 def start_awslogs_service():
+    os.rename('/etc/cron.d/awslogs.deactivated', '/etc/cron.d/awslogs')
     process = subprocess.Popen(['service', 'awslogs', 'start'])
     exit_code = process.wait()
     if exit_code:
