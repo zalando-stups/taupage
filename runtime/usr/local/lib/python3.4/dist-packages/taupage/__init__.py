@@ -154,12 +154,18 @@ def get_token(config: dict, token_name: str, scopes: list):
         logging.warning('Invalid OAuth credentials: application user and/or password missing in %s', path)
         return
 
-
     num_retries = 3
-    token = false
+    token = False
     while num_retries > 0:
         try:
-            token = zign.api.get_named_token(scopes, 'services', token_name, user, passwd, url=token_url, use_keyring=False)
+            token = zign.api.get_named_token(
+                scopes,
+                'services',
+                token_name,
+                user,
+                passwd,
+                url=token_url,
+                use_keyring=False)
             break
         except zign.api.ServerError as e:
             logging.info('Encountered error while obtaining token {}, will retry {} times. The error was {}'.format(
