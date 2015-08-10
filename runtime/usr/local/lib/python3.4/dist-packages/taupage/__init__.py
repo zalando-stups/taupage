@@ -168,10 +168,10 @@ def get_token(config: dict, token_name: str, scopes: list):
                 use_keyring=False)
             break
         except zign.api.ServerError as e:
-            logging.info('Encountered error while obtaining token {}, will retry {} times. The error was {}'.format(
+            logging.info('Encountered error while obtaining token {}, will retry {} times. {}'.format(
                 token_name, num_retries, e))
             num_retries -= 1
-            time.sleep(90 * 60 * 1000)
+            time.sleep(30)
     if not token:
         raise Exception('Could not obtain token {}'.format(token_name))
     return token
