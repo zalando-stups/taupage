@@ -7,9 +7,7 @@ import argparse
 import base64
 import boto.kms
 import boto.utils
-import json
 import logging
-import os
 import pierone.api
 import pwd
 import requests
@@ -18,7 +16,7 @@ import subprocess
 import time
 import yaml
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -186,29 +184,14 @@ def registry_login(config: dict, registry: str):
         logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
         return
     pierone_url = 'https://{}'.format(registry)
-    token_url = config.get('token_service_url')
 
-    if not token_url:
-        logging.warning('No token service URL configured in Taupage YAML ("token_service_url" property)')
+    token = get_token(config, 'pierone', ['uid'])
+
+    if not token or 'access_token' not in token:
+        logging.warning('Missing OAuth token for Pier One login')
         return
 
-    path = os.path.join(CREDENTIALS_DIR, 'user.json')
-
-    while not os.path.exists(path):
-        logging.info('Waiting for berry to download OAuth credentials to {}..'.format(path))
-        time.sleep(5)
-
-    with open(path) as fd:
-        credentials = json.load(fd)
-
-    user = credentials.get('application_username')
-    passwd = credentials.get('application_password')
-
-    if not user or not passwd:
-        logging.warning('Invalid OAuth credentials: application user and/or password missing in %s', path)
-        return
-
-    pierone.api.docker_login(pierone_url, 'services', 'pierone', user, passwd, token_url=token_url, use_keyring=False)
+    pierone.api.docker_login_with_token(pierone_url, token['access_token'])
 
 
 def run_docker(cmd, dry_run):
