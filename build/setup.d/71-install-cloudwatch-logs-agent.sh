@@ -16,5 +16,8 @@ chmod +x ./awslogs-agent-setup.py
 # disable autostart since the service is intended to start only if configured in /meta/taupage.yaml
 update-rc.d -f awslogs remove
 
+# disable awslogs CRON watchdog (should only run if awslogs agent is really started)
+mv /etc/cron.d/awslogs /etc/cron.d/awslogs.deactivated
+
 # cleanup
 rm -rf /tmp/cw-logs-setup
