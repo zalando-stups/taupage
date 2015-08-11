@@ -172,14 +172,18 @@ def get_token(config: dict, token_name: str, scopes: list):
         client_credentials = {}
 
     client_id = client_credentials.get('client_id')
-    client_secret = client_credentials.get('client_secret')
 
-    if client_id and client_secret and oauth_access_token_url:
+    if client_id and oauth_access_token_url:
+        # we have a client_id and the OAuth provider's URL
+        # => we can use the OAuth provider directly
+        # NOTE: the client_secret can be null
         tokens.configure(url=oauth_access_token_url, dir=CREDENTIALS_DIR)
         tokens.manage(token_name, scopes)
         access_token = tokens.get(token_name)
         return {'access_token': access_token}
     else:
+        # fallback to custom Token Service
+        # Token Service only requires user and password
         num_retries = 3
         token = False
         while num_retries > 0:
