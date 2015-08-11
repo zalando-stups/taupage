@@ -4,7 +4,7 @@ python:
 install:
   - pip install flake8
   - pip install boto
-  - pip install stups-pierone
+  - pip install stups-pierone stups-tokens
 script:
   - flake8 -v .
   - python3 -m doctest -v runtime/usr/local/lib/python3.4/dist-packages/taupage/__init__.py
