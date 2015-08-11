@@ -174,7 +174,7 @@ def get_token(config: dict, token_name: str, scopes: list):
     client_id = client_credentials.get('client_id')
     client_secret = client_credentials.get('client_secret')
 
-    if client_id and client_secret:
+    if client_id and client_secret and oauth_access_token_url:
         tokens.configure(url=oauth_access_token_url, dir=CREDENTIALS_DIR)
         tokens.manage(token_name, scopes)
         access_token = tokens.get(token_name)
