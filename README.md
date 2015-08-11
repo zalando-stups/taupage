@@ -18,6 +18,8 @@ want to debug the server after setup, you can add a `--dry-run` flag: AMI genera
 skipped.
 
     $ ./create-ami.sh --dry-run ./config-stups.sh
+    
+See the [STUPS documentation](https://docs.stups.io/en/latest/installation/taupage-ami-creation.html) for more information.
 
 ## Directory structure
 
