@@ -103,8 +103,9 @@ def get_volume_options(config: dict):
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
     # mount logdirectory as read-only
-    yield '-v'
-    yield '/var/log:/var/log:ro'
+    # Todo: this has to be made optional.
+    # yield '-v'
+    # yield '/var/log:/var/log:ro'
 
     # if NewRelic Agent exisits than mount the agent to the docker container
     # TODO move newrelic to /opt/proprietary and mount to /agents/newrelic-jvm
