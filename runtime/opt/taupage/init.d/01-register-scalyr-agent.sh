@@ -106,6 +106,32 @@ else
     exit
 fi
 
+#add max_log_offset_size
+echo "";
+echo -n "adding max_log_offset_size... ";
+sed -i '/api_key/a \  \max_log_offset_size: 30000000,' $scalyr_config
+if [ $? -eq 0 ];
+then
+    echo -n "DONE";
+    echo "";
+else
+    echo -n "ERROR";
+    exit
+fi
+
+#add max_log_offset_size
+echo "";
+echo -n "setting debug_init to true... ";
+sed -i '/api_key/a \  \debug_init: true,' $scalyr_config
+if [ $? -eq 0 ];
+then
+    echo -n "DONE";
+    echo "";
+else
+    echo -n "ERROR";
+    exit
+fi
+
 echo -n "restarting scalyr daemon ... ";
 /usr/sbin/scalyr-agent-2 stop # just in case
 /usr/sbin/scalyr-agent-2 start
