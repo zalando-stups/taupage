@@ -4,6 +4,6 @@ python:
 install:
   - pip install flake8
   - pip install boto
-  - pip install stups-pierone
+  - pip install stups-pierone stups-tokens
 script:
   - ./run-tests.sh

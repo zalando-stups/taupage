@@ -23,7 +23,7 @@ else
 	sed -i "1,$ s/license_key:.*$/license_key:\ LICENSEKEY/" $newrelic_yaml
 
 	#set high security
-	sed -i "1,$ s/high_security:.*$/high_security:\ true/" $newrelic_yaml
+	sed -i "1,$ s/high_security:.*$/high_security:\ false/" $newrelic_yaml
 
 	#change my application
 	sed -i "1,$ s/app_name:.*$/app_name:\ APPNAME/" $newrelic_yaml

@@ -46,7 +46,8 @@ def main():
                                               'Authorization': 'Bearer {}'.format(token.get('access_token'))})
             if response.status_code != 201:
                 logging.warn('Failed to push Taupage YAML: server returned HTTP status {}: {}'.format(
-                             response.status_code, response.text))
+                    response.status_code,
+                    response.text))
         except:
             logging.exception('Failed to push Taupage YAML')
 

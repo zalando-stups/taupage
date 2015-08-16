@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 TAUPAGE_AMI_CONFIG_PREFIX = "#taupage-ami-config"
 TAUPAGE_AMI_CONFIG_MIME_TYPE = handlers.type_from_starts_with(TAUPAGE_AMI_CONFIG_PREFIX)
 
-TAUPAGE_CONFIG = "/etc/taupage.yaml"
+TAUPAGE_CONFIG = "/meta/taupage.yaml"
 
 
 class ZalandoAMIConfigPartHandler(handlers.Handler):

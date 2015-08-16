@@ -9,7 +9,7 @@ libyaml-0-2
 linux-image-extra-$(uname -r)
 logentries
 logentries-daemon
-lxc-docker-1.7.0
+docker-engine=1.8.1-0~trusty
 mdadm
 newrelic-sysmond
 ntp
@@ -22,6 +22,7 @@ python-setuptools
 rkhunter
 rsyslog-gnutls
 ruby
+samhain
 scalyr-agent-2
 unhide.rb
 unzip

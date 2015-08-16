@@ -94,7 +94,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
-    """Mounts formatted disks provided by /etc/taupage.yaml"""
+    """Mounts formatted disks provided by /meta/taupage.yaml"""
     if is_mounted is False:
         if dir_exists is False:
             os.makedirs(mountpoint)
@@ -148,6 +148,7 @@ def raid_device_exists(raid_device):
 
 
 def create_raid_device(raid_device, raid_config):
+    subprocess.check_call(["udevadm", "control", "--stop-exec-queue"])
     devices = raid_config.get("devices", [])
     num_devices = len(devices)
     if num_devices < 2:
@@ -156,7 +157,8 @@ def create_raid_device(raid_device, raid_config):
     else:
         raid_level = raid_config.get("level")
         call = ["mdadm",
-                "--build", raid_device,
+                "--create", raid_device,
+                "--run",
                 "--level=" + str(raid_level),
                 "--raid-devices=" + str(num_devices)]
         # Give devices some time to be available in case they were recently attached
@@ -166,6 +168,7 @@ def create_raid_device(raid_device, raid_config):
 
         subprocess.check_call(call)
         logging.info("Created RAID%d device '%s'", raid_level, raid_device)
+        subprocess.check_call(["udevadm", "control", "--start-exec-queue"])
 
 
 def handle_raid_volumes(raid_volumes):
@@ -190,8 +193,8 @@ def handle_volumes(args, config):
 
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /etc/taupage.yaml')
-    parser.add_argument('-f', '--file', dest='filename', default='/etc/taupage.yaml', help='configuration file in YAML')
+    parser = argparse.ArgumentParser(description='Prepares disks according to the description in /meta/taupage.yaml')
+    parser.add_argument('-f', '--file', dest='filename', default='/meta/taupage.yaml', help='config file in YAML')
     parser.add_argument('-d', '--debug', action='store_true', help='log additional info, for debugging purposes')
     parser.add_argument('-r', '--region', dest='region',
                         help='uses a specific AWS region instead of querying the instance metadata')

@@ -1,9 +1,9 @@
 #!/bin/sh
-# read /etc/taupage.yaml
+# read /meta/taupage.yaml
 # get scalyr Key and register the agent
 
 #read taupage.yaml file
-eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_scalyr_account_key
@@ -97,6 +97,32 @@ fi
 echo "";
 echo -n "insert application to follow ... ";
 sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACKNAME\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+if [ $? -eq 0 ];
+then
+    echo -n "DONE";
+    echo "";
+else
+    echo -n "ERROR";
+    exit
+fi
+
+#add max_log_offset_size
+echo "";
+echo -n "adding max_log_offset_size... ";
+sed -i '/api_key/a \  \max_log_offset_size: 30000000,' $scalyr_config
+if [ $? -eq 0 ];
+then
+    echo -n "DONE";
+    echo "";
+else
+    echo -n "ERROR";
+    exit
+fi
+
+#add max_log_offset_size
+echo "";
+echo -n "setting debug_init to true... ";
+sed -i '/api_key/a \  \debug_init: true,' $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";

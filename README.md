@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/zalando-stups/taupage.svg)](https://travis-ci.org/zalando-stups/taupage) [![Join the chat at https://gitter.im/zalando-stups/taupage](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zalando-stups/taupage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+## Prerequisites
+
+You need to have [jq](http://stedolan.github.io/jq/) and [AWS CLI](http://aws.amazon.com/cli/) preinstalled.
+
 ## Build a new AMI
 
 You need to be logged in (mai login).
@@ -14,6 +18,8 @@ want to debug the server after setup, you can add a `--dry-run` flag: AMI genera
 skipped.
 
     $ ./create-ami.sh --dry-run ./config-stups.sh
+    
+See the [STUPS documentation](https://docs.stups.io/en/latest/installation/taupage-ami-creation.html) for more information.
 
 ## Directory structure
 

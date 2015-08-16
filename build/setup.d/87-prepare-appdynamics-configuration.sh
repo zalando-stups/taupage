@@ -43,9 +43,33 @@ else
 		sed -i "1,$ s/<tier-name.*$/<tier-name>APPDYNAMICS_TIER<\/tier-name>/" $conf
 		sed -i "1,$ s/<node-name.*$/<node-name>APPDYNAMICS_NODE<\/node-name>/" $conf
 
+		# add overlay configs if available
+		if [ -d /opt/proprietary/appdynamics-conf ]; then
+			cp /opt/proprietary/appdynamics-conf/* $(dirname $conf)
+		fi
+
 		# register config for runtime
 		echo $conf >> /opt/proprietary/appdynamics-configs
 	done
+        
+        # setup analytics Agent 
+	# check if GLOBAL ID is set in secret_vars
+	if [ -z "$APPDYNAMICS_ACCOUNT_GLOBALNAME" ]; then
+
+	   echo "INFO: no GLOBAL Appdynamics Accountname is configured; skipping AppDynamics Analyse Agent setup"
+	   exit 0
+	else
+	   # enable analytics Agent
+	   monitor_xml="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/monitor.xml"
+	   sed -i "1,$ s/<enabled.*$/<enabled>true<\/enabled>/" $monitor_xml
+           
+           # setup analytics properties file
+           properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
+           sed -i "1,$ s/http.event.accountName.*$/http.event.accountName=$APPDYNAMICS_ACCOUNT_GLOBALNAME/" $properties_file
+           sed -i "1,$ s/http.event.endpoint.*$/http.event.endpoint=https:\/\/analytics.api.appdynamics.com:443\/v1/" $properties_file
+           sed -i "1,$ s/http.event.accessKey.*$/http.event.accessKey=$APPDYNAMICS_ACCOUNT_KEY/" $properties_file
+ 
+	fi
 
 	# make sure they are writeable by docker users
 	for agent in $appdynamics_agents; do

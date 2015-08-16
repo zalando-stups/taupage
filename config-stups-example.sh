@@ -16,6 +16,9 @@ instance_type="t2.small"
 config_dir=$(dirname $1)
 secret_dir="$config_dir/secret"
 
+# uncomment this if you want to use non open-source binary blobs
+# proprietary_dir="$config_dir/proprietary"
+
 # AWS accounts to share the AMI with
 accounts="
 123456789

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #read taupage.yaml file
-eval $(/opt/taupage/bin/parse-yaml.py /etc/taupage.yaml "config")
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 # lock task execution, only run once
 mkdir /run/taupage-init-ran
@@ -36,7 +36,7 @@ fi
 # make sure there are no path hacks
 RUNTIME=$(basename $config_runtime)
 
-# figure out executable
+# figure executable
 RUNTIME_BIN=/opt/taupage/runtime/${RUNTIME}.py
 
 if [ ! -f "$RUNTIME_BIN" ]; then
@@ -44,7 +44,6 @@ if [ ! -f "$RUNTIME_BIN" ]; then
     exit 1
 fi
 
-# do magic!
 $RUNTIME_BIN
 result=$?
 
@@ -56,7 +55,7 @@ if [ "$result" -eq 0 ]; then
         # make sure there are no path hacks
         HEALTHCHECK=$(basename $config_healthcheck_type)
 
-        # figure out executable
+        # figure executable
         HEALTHCHECK_BIN=/opt/taupage/healthcheck/${HEALTHCHECK}.py
 
         if [ ! -f "$HEALTHCHECK_BIN" ]; then
