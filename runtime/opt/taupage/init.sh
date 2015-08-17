@@ -1,8 +1,11 @@
 #!/bin/sh
 
+#read taupage.yaml file
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
+
 # lock task execution, only run once
 mkdir /run/taupage-init-ran
-if [ $? -ne 0 ]; then
+if [ "$?" -ne 0 ]; then
     echo "ERROR: Aborting init process; init already ran."
     exit 0
 fi
@@ -19,56 +22,70 @@ cd $(dirname $0)
 # general preparation
 for script in $(ls init.d); do
     ./init.d/$script
-    if [ $? -ne 0 ]; then
+    if [ "$?" -ne 0 ]; then
         echo "ERROR: Failed to start $script" >&2
         exit 1
     fi
 done
 
-# runtime execution
-RUNTIME=$(grep -E "^runtime: " /meta/taupage.yaml | cut -d' ' -f 2)
-
-if [ -z "$RUNTIME" ]; then
+if [ -z "$config_runtime" ]; then
     echo "ERROR: No runtime configuration found!" >&2
     exit 1
 fi
 
 # make sure there are no path hacks
-RUNTIME=$(basename $RUNTIME)
+RUNTIME=$(basename $config_runtime)
 
-# figure out executable
-RUNTIME_INIT=/opt/taupage/runtime/${RUNTIME}.py
+# figure executable
+RUNTIME_BIN=/opt/taupage/runtime/${RUNTIME}.py
 
-if [ ! -f $RUNTIME_INIT ]; then
+if [ ! -f "$RUNTIME_BIN" ]; then
     echo "ERROR: Runtime '$RUNTIME' not found!" >&2
     exit 1
 fi
 
-# do magic!
-$RUNTIME_INIT
+$RUNTIME_BIN
 result=$?
 
-# notify cloud formation
+# run healthcheck if runtime returns successfully
+if [ "$result" -eq 0 ]; then
+    # run healthcheck if configured
+    if [ -n "$config_healthcheck_type" ]; then
 
-# TODO get it more reliably
-CFN_STACK=$(grep -E "^    stack:" /meta/taupage.yaml | awk '{print $2}')
-CFN_RESOURCE=$(grep -E "^    resource:" /meta/taupage.yaml | awk '{print $2}')
+        # make sure there are no path hacks
+        HEALTHCHECK=$(basename $config_healthcheck_type)
 
-if [ -z "$CFN_STACK" ] || [ -z "$CFN_RESOURCE" ]; then
+        # figure executable
+        HEALTHCHECK_BIN=/opt/taupage/healthcheck/${HEALTHCHECK}.py
+
+        if [ ! -f "$HEALTHCHECK_BIN" ]; then
+            echo "ERROR: Healthcheck '$HEALTHCHECK' not found!" >&2
+            exit 1
+        fi
+
+        $HEALTHCHECK_BIN
+        result=$?
+    else
+        echo "WARNING: No healthcheck configuration found!" >&2
+    fi
+fi
+
+### notify cloud formation
+if [ -z "$config_notify_cfn_stack" ] || [ -z "$config_notify_cfn_resource" ]; then
     echo "INFO: Skipping notification of CloudFormation."
 else
-    EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+    EC2_AVAIL_ZONE=$( curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone )
     EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-    echo "INFO: Notifying CloudFormation (region $EC2_REGION stack $CFN_STACK resource $CFN_RESOURCE status $result)..."
+    echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result)..."
 
-    cfn-signal -e $result --stack $CFN_STACK --resource $CFN_RESOURCE --region $EC2_REGION
+    cfn-signal -e $result --stack $config_notify_cfn_stack --resource $config_notify_cfn_resource --region $EC2_REGION
 fi
 
 END_TIME=$(date +"%s")
 ELAPSED_SECONDS=$(($END_TIME-$START_TIME))
 
-if [ $result -eq 0 ]; then
+if [ "$result" -eq 0 ]; then
     echo "SUCCESS: Initialization completed successfully in $ELAPSED_SECONDS seconds"
 else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
