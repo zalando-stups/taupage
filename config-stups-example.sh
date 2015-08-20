@@ -11,7 +11,7 @@ region="eu-west-1"
 # base AMI (Ubuntu 14.04 LTS)
 base_ami="ami-accff2b1"
 
-instance_type="t2.small"
+instance_type="c3.large"
 
 config_dir=$(dirname $1)
 secret_dir="$config_dir/secret"

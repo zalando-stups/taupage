@@ -55,7 +55,7 @@ result=$(aws ec2 run-instances \
     --iam-instance-profile Name=${INSTANCE_PROFILE} \
     --image-id $AMI_ID \
     --count 1 \
-    --instance-type t2.micro \
+    --instance-type c3.large \
     --associate-public-ip-address \
     --key-name $keypair \
     --security-group-ids $security_group \
@@ -141,4 +141,3 @@ else
     echo "TEST FAILED: http did not come up properly"
     exit 1
 fi
-
