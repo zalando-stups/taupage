@@ -151,6 +151,7 @@ file=/etc/resolv.conf.pcmcia.save
 file=/etc/nologin
 file=/etc/network/run
 dir=/mounts
+dir=/var/run/docker
 
 [IgnoreNone]
 ##
