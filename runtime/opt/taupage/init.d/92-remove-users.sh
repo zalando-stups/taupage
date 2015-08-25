@@ -15,3 +15,10 @@ if [ -f /root/.ssh/authorized_keys ]; then
 else
     echo "/root/.ssh/authorized_keys does not exist...skipping"
 fi
+
+if [ -f /home/ubuntu/.ssh/authorized_keys ]; then
+    echo "Deleting /home/ubuntu/.ssh/authorized_keys"
+    rm /home/ubuntu/.ssh/authorized_keys
+else
+    echo "/home/ubuntu/.ssh/authorized_keys does not exist...skipping"
+fi
