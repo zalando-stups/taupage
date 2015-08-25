@@ -230,7 +230,7 @@ def wait_for_health_check(config: dict):
 
     start = time.time()
     while time.time() < start + health_check_timeout_seconds:
-        logging.info('Waiting for health check {}:{}..'.format(health_check_port, health_check_path))
+        logging.info('Waiting for health check :{}{}..'.format(health_check_port, health_check_path))
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
@@ -241,7 +241,7 @@ def wait_for_health_check(config: dict):
 
         time.sleep(2)
 
-    logging.error('Timeout of {}s expired for health check {}:{}'.format(
+    logging.error('Timeout of {}s expired for health check :{}{}'.format(
                   health_check_timeout_seconds, health_check_port, health_check_path))
     sys.exit(2)
 
