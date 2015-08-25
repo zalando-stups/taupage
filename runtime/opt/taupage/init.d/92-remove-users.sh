@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Delete ubuntu user
 if [ -z "$(getent passwd ubuntu)" ]; then
     echo "User does not exist...skipping"
 else
