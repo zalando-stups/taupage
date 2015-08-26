@@ -6,7 +6,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 # Set variable from metadata
 keep_instance_users=$config_keep_instance_users
 
-if [ "$keep_instance_users" = true ] ; then
+if [ "$keep_instance_users" = True ] ; then
     echo "keep_instance_users detected...skipping deletion of users and authorized_keys"
 else
     # Delete ubuntu user
