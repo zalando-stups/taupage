@@ -15,6 +15,8 @@ import sys
 import subprocess
 import time
 import yaml
+import shutil
+import glob
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
@@ -82,6 +84,11 @@ def get_env_options(config: dict):
         # TODO: use dynamic IP of docker0
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
+
+    if config.get('appdynamics_application'):
+        # set appdynamics analytics url
+        yield '-e'
+        yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
 
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
     # NOTE: we should not add other environment variables here (even if it sounds tempting),
@@ -268,6 +275,12 @@ def main(args):
     except Exception as e:
         logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
+
+    # copy job files from docker container to the machine agent
+    dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
+    for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
+        print('copy jobfile: ', file)
+        shutil.copy(file, dest_dir)
 
     wait_for_health_check(config)
 
