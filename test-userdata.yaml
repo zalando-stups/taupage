@@ -12,6 +12,7 @@ environment:
 
 root: false
 read_only: true
+keep_instance_users: true
 
 dockercfg:
   "https://hub.docker.com":
