@@ -10,6 +10,7 @@
 /etc/logrotate.d/auditlog root:root 0644
 
 /etc/samhain/samhainrc root:root 0644
+/etc/samhain root:root 0755
 
 /etc/sudoers root:root 0440
 
