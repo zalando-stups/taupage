@@ -115,13 +115,10 @@ def get_volume_options(config: dict):
     # yield '/var/log:/var/log:ro'
 
     # if NewRelic Agent exisits than mount the agent to the docker container
+    # TODO move newrelic to /opt/proprietary and mount to /agents/newrelic-jvm
     if 'newrelic_account_key' in config:
-        # thats deprecated and has to be removed in some
-        print('DEPRECATED WARNING: /data/newrelic will be removed please use /agents/newrelic instead ')
         yield '-v'
         yield '/opt/proprietary/newrelic:/data/newrelic:rw'
-        yield '-v'
-        yield '/opt/proprietary/newrelic:/agents/newrelic:rw'
 
     if 'appdynamics_application' in config:
         yield '-v'
