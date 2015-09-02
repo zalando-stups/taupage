@@ -4,7 +4,7 @@
 service rsyslog restart
 
 #TODO First check if this is really necessary
-#restart is necessary for ruxit Agent 
+#restart is necessary for ruxit Agent
 #restart newrelic and docker because we add the user Newrelic to the "application" group
 service docker restart
 #service newrelic-sysmond restart
