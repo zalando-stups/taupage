@@ -23,7 +23,6 @@ rkhunter
 rsyslog-gnutls
 ruby
 scalyr-agent-2
-samhain
 unhide.rb
 unzip
 "
