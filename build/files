@@ -9,8 +9,6 @@
 
 /etc/logrotate.d/auditlog root:root 0644
 
-/etc/samhain/samhainrc root:root 0644
-
 /etc/sudoers root:root 0440
 
 /etc/rsyslog.d/keys root:root 0755
