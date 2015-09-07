@@ -2,6 +2,7 @@
 {
         rotate 4
         weekly
+        #size 10M
         missingok
         notifempty
         copytruncate

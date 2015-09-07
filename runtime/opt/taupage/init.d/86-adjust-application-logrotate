@@ -7,10 +7,10 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 application_logrotate="/etc/logroate.d/application"
 
-
+#set custom filesize 
 if [ -z "$config_application_logrotate_filesize" ]; then
 	echo "INFO: Set filesize to $config_application_logrotate_filesize for application.log Logrotate"
-        sed -i 
+        sed -i "s/\#size\b.*$/size $config_application_logrotate_filesize/g" $application_logrotate 
 fi
 
 
