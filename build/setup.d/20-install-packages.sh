@@ -25,6 +25,8 @@ ruby
 scalyr-agent-2
 unhide.rb
 unzip
+libwww-perl
+libdatetime-perl
 "
 
 echo "Installing packages..."
