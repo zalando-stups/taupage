@@ -1,6 +1,7 @@
 require 'spec_helper'
 
-python3package = [ 'boto3',
+python3package = [ 'boto',
+                   'boto3'
                    'botocore'
               ]
 
