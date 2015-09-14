@@ -23,7 +23,6 @@
 /var/log/cron.log
 /var/log/debug
 /var/log/messages
-/var/log/application.log
 {
 	rotate 4
 	weekly
