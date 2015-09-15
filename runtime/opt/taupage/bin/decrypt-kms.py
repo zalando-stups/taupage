@@ -8,6 +8,7 @@ import base64
 import requests
 import sys
 
+# fetch AWS metadata for EC2 instance region
 r = requests.get('http://169.254.169.254/latest/meta-data/placement/availability-zone')
 region_name = r.text[:-1]
 
