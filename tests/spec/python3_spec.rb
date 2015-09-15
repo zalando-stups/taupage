@@ -1,8 +1,9 @@
 require 'spec_helper'
 
 python3package = [ 'boto',
-                   'boto3'
-                   'botocore'
+                   'boto3',
+                   'botocore',
+                   'requests'
               ]
 
 # check if specific python3 module is installed
