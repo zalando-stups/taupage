@@ -17,6 +17,12 @@ then
     exit
 fi
 
+# If KMS decrypted, decrypt KMS and save to ACCOUNTKEY variable
+if [[ $ACCOUNTKEY == "aws:kms:"* ]]; then
+  ACCOUNTKEY=${ACCOUNTKEY##aws:kms:}
+  ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
+fi
+
 #if logentries account exists in the yaml file. Register the logentries Daemon to this Account
 if [ -n "$ACCOUNTKEY" ];
 then
