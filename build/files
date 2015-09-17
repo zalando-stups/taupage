@@ -26,3 +26,5 @@
 
 /tmp/delete-ubuntu-user.sh root:root 0700
 /tmp/delete-ubuntu-user-wrapper.sh root:root 7755
+
+/etc/logrotate.d/application root:root 0755
