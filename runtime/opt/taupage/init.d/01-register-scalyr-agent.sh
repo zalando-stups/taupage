@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # read /meta/taupage.yaml
 # get scalyr Key and register the agent
 
