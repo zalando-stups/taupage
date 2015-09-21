@@ -27,6 +27,7 @@ unhide.rb
 unzip
 libwww-perl
 libdatetime-perl
+libswitch-perl
 "
 
 echo "Installing packages..."
