@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2012 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You may not 
 # use this file except in compliance with the License. A copy of the License 
@@ -23,30 +23,23 @@ Usage: mon-put-instance-data.pl [options]
 Description of available options:
 
   --mem-util          Reports memory utilization in percentages.
-  --mem-used          Reports memory used in megabytes.
-  --mem-avail         Reports available memory in megabytes.
+  --mem-used          Reports memory used (excluding cache and buffers) in megabytes.
+  --mem-avail         Reports available memory (including cache and buffers) in megabytes.
   --swap-util         Reports swap utilization in percentages.
   --swap-used         Reports allocated swap space in megabytes.
   --disk-path=PATH    Selects the disk by the path on which to report.
   --disk-space-util   Reports disk space utilization in percentages.  
   --disk-space-used   Reports allocated disk space in gigabytes.
   --disk-space-avail  Reports available disk space in gigabytes.
-  
-  --aggregated[=only]    Adds aggregated metrics for instance type, AMI id, and region.
-                         If =only is specified, does not report individual instance metrics
-  --auto-scaling[=only]  Reports Auto Scaling metrics in addition to instance metrics. 	 
-                         If =only is specified, does not report individual instance metrics
-                         
-  --mem-used-incl-cache-buff  Count memory that is cached and in buffers as used.
-  --memory-units=UNITS        Specifies units for memory metrics.
-  --disk-space-units=UNITS    Specifies units for disk space metrics.
+
+  --memory-units=UNITS      Specifies units for memory metrics.
+  --disk-space-units=UNITS  Specifies units for disk space metrics.
   
     Supported UNITS are bytes, kilobytes, megabytes, and gigabytes.
 
   --aws-credential-file=PATH  Specifies the location of the file with AWS credentials.
   --aws-access-key-id=VALUE   Specifies the AWS access key ID to use to identify the caller.
   --aws-secret-key=VALUE      Specifies the AWS secret key to use to sign the request.
-  --aws-iam-role=VALUE        Specifies the IAM role used to provide AWS credentials.
 
   --from-cron  Specifies that this script is running from cron.
   --verify     Checks configuration and prepares a remote call.
@@ -71,6 +64,7 @@ USAGE
 
 use strict;
 use warnings;
+use Switch;
 use Getopt::Long;
 use File::Basename;
 use Sys::Hostname;
@@ -92,18 +86,7 @@ use constant
   GIGA => 1073741824,
 };
 
-use constant
-{
-  INCL_AGGREGATED => 1,
-  AGGREGATED_ONLY => 2,
-};
-
-use constant
-{
-  NOW => 0,
-};
-
-my $version = '1.2.1';
+my $version = '1.0.1';
 my $client_name = 'CloudWatch-PutInstanceData';
 
 my $mcount = 0;
@@ -115,14 +98,11 @@ my $report_swap_used;
 my $report_disk_util;
 my $report_disk_used;
 my $report_disk_avail;
-my $mem_used_incl_cache_buff;
 my @mount_path;
 my $mem_units;
 my $disk_units;
 my $mem_unit_div = 1;
 my $disk_unit_div = 1;
-my $aggregated;
-my $auto_scaling; 	 
 my $from_cron;
 my $verify;
 my $verbose;
@@ -132,7 +112,6 @@ my $enable_compression;
 my $aws_credential_file;
 my $aws_access_key_id;
 my $aws_secret_key;
-my $aws_iam_role;
 my $parse_result = 1;
 my $parse_error = '';
 my $argv_size = @ARGV;
@@ -153,21 +132,15 @@ my $argv_size = @ARGV;
     'disk-space-util' => \$report_disk_util,
     'disk-space-used' => \$report_disk_used,
     'disk-space-avail' => \$report_disk_avail,
-    'auto-scaling:s' => \$auto_scaling,
-    'aggregated:s' => \$aggregated,
     'memory-units:s' => \$mem_units,
     'disk-space-units:s' => \$disk_units,
-    'mem-used-incl-cache-buff' => \$mem_used_incl_cache_buff,
     'verify' => \$verify,
     'from-cron' => \$from_cron,
     'verbose' => \$verbose,
     'aws-credential-file:s' => \$aws_credential_file,
     'aws-access-key-id:s' => \$aws_access_key_id,
     'aws-secret-key:s' => \$aws_secret_key,
-    'enable-compression' => \$enable_compression,
-    'aws-iam-role:s' => \$aws_iam_role,
-    );
-
+    'enable-compression' => \$enable_compression);
 }
 
 # Prints out or logs an error and then exits.
@@ -239,9 +212,6 @@ if (defined($mem_units) && length($mem_units) == 0) {
 if (defined($disk_units) && length($disk_units) == 0) {
   exit_with_error("Value of disk space units is not specified.");
 }
-if (defined($aws_iam_role) && length($aws_iam_role) == 0) {
-  exit_with_error("Value of AWS IAM role is not specified.");
-}
 
 # check for inconsistency of provided arguments
 if (defined($aws_credential_file) && defined($aws_access_key_id)) {
@@ -255,12 +225,6 @@ elsif (defined($aws_access_key_id) && !defined($aws_secret_key)) {
 }
 elsif (!defined($aws_access_key_id) && defined($aws_secret_key)) {
   exit_with_error("AWS access key id is not specified.");
-}
-elsif (defined($aws_iam_role) && defined($aws_credential_file)) {
-  exit_with_error("Do not provide AWS IAM role and AWS credential file options together.");
-}
-elsif (defined($aws_iam_role) && defined($aws_secret_key)) {
-  exit_with_error("Do not provide AWS IAM role and AWS access key id/secret key options together.");
 }
 
 # decide on the reporting units for memory and swap usage
@@ -334,156 +298,51 @@ if (!$report_mem_util && !$report_mem_used && !$report_mem_avail
   exit_with_error("No metrics specified for collection and submission to CloudWatch.");
 }
 
-my $timestamp = CloudWatchClient::get_offset_time(NOW);
+my $now = time();
+my $timestamp = CloudWatchClient::get_timestamp($now);
 my $instance_id = CloudWatchClient::get_instance_id();
 
 if (!defined($instance_id) || length($instance_id) == 0) {
   exit_with_error("Cannot obtain instance id from EC2 meta-data.");
 }
 
-if ($aggregated && lc($aggregated) ne 'only') {
-  exit_with_error("Unrecognized value '$aggregated' for --aggregated option.");
-}
-if ($aggregated && lc($aggregated) eq 'only') {
-  $aggregated = AGGREGATED_ONLY;
-}
-elsif (defined($aggregated)) {
-  $aggregated = INCL_AGGREGATED;
-}
-
-my $image_id;
-my $instance_type;
-if ($aggregated) {
-  $image_id = CloudWatchClient::get_image_id();
-  $instance_type = CloudWatchClient::get_instance_type();
-}
-
-if ($auto_scaling && lc($auto_scaling) ne 'only') {
-  exit_with_error("Unrecognized value '$auto_scaling' for --auto-scaling option.");
-}
-if ($auto_scaling && lc($auto_scaling) eq 'only') {
-  $auto_scaling = AGGREGATED_ONLY;
-}
-elsif (defined($auto_scaling)) {
-  $auto_scaling = INCL_AGGREGATED;
-}
-
-my $as_group_name;
-if ($auto_scaling)
-{
-  my %opts = ();
-  $opts{'aws-credential-file'} = $aws_credential_file;
-  $opts{'aws-access-key-id'} = $aws_access_key_id;
-  $opts{'aws-secret-key'} = $aws_secret_key;
-  $opts{'verbose'} = $verbose;
-  $opts{'verify'} = $verify;
-  $opts{'user-agent'} = "$client_name/$version";
-  $opts{'aws-iam-role'} = $aws_iam_role;
-  
-  my ($code, $reply) = CloudWatchClient::get_auto_scaling_group(\%opts);
-
-  if ($code == 200) {
-    $as_group_name = $reply;
-  }
-  else {
-    report_message(LOG_WARNING, "Failed to call EC2 to obtain Auto Scaling group name. ".
-      "HTTP Status Code: $code. Error Message: $reply");
-  }
-
-  if (!$as_group_name)
-  {
-    if (!$verify)
-    {
-      report_message(LOG_WARNING, "The Auto Scaling metrics will not be reported this time.");
-      
-      if ($auto_scaling == AGGREGATED_ONLY) {
-        print("\n") if (!$from_cron);
-        exit 0;
-      }
-    }
-    else {
-      $as_group_name = 'VerificationOnly';
-    }
-  }
-}
-
 my %params = ();
-$params{'Input'} = {};
-my $input_ref = $params{'Input'}; 
-$input_ref->{'Namespace'} = "System/Linux";
+$params{'Action'} = 'PutMetricData';
+$params{'Namespace'} = 'System/Linux';
 
 #
-# Adds a new metric to the request
+# Adds a new metric to the CloudWatch request.
 #
-sub add_single_metric
-{
-  my $name = shift;
-  my $unit = shift;
-  my $value = shift;
-  my $dims = shift;
-  
-  my $metric = {};
-
-  $metric->{"MetricName"} = $name;
-  $metric->{"Timestamp"} = $timestamp;
-  $metric->{"RawValue"} = $value;
-  $metric->{"Unit"} = $unit;
-  
-  my $dimensions = [];
-  foreach my $key (sort keys %$dims)
-  {
-    push(@$dimensions, {"Name" => $key, "Value" => $dims->{$key}});
-  }
-  
-  $metric->{"Dimensions"} = $dimensions;  
-  push(@{$input_ref->{'MetricData'}},  $metric);
-  ++$mcount;
-}
-
-#
-# Adds all metric variations for the specified metric name
-#
-sub add_metric
+sub append_metric
 {
   my $name = shift;
   my $unit = shift;
   my $value = shift;
   my $filesystem = shift;
   my $mount = shift;
+  my $dimmcount = 0;
   
-  $input_ref->{'MetricData'} = [] if !(exists $input_ref->{'MetricData'});
+  ++$mcount;
+  $params{"MetricData.member.$mcount.MetricName"} = $name;
+  $params{"MetricData.member.$mcount.Timestamp"} = $timestamp;
+  $params{"MetricData.member.$mcount.Value"} = $value;
+  $params{"MetricData.member.$mcount.Unit"} = $unit;
   
-  my %dims = ();
-  my %xdims = ();
-  $xdims{'MountPath'} = $mount if $mount;
-  $xdims{'Filesystem'} = $filesystem if $filesystem;
+  $dimmcount = 1;
+  $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Name"} = 'InstanceId';
+  $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Value"} = $instance_id;
   
-  my $auto_scaling_only = defined($auto_scaling) && $auto_scaling == AGGREGATED_ONLY;
-  my $aggregated_only = defined($aggregated) && $aggregated == AGGREGATED_ONLY;
-  
-  if (!$auto_scaling_only && !$aggregated_only) {
-    %dims = (('InstanceId' => $instance_id), %xdims);
-    add_single_metric($name, $unit, $value, \%dims);
-  }
-  
-  if ($as_group_name) {
-    %dims = (('AutoScalingGroupName' => $as_group_name), %xdims);
-    add_single_metric($name, $unit, $value, \%dims);
-  }
-
-  if ($instance_type) {
-    %dims = (('InstanceType' => $instance_type), %xdims);
-    add_single_metric($name, $unit, $value, \%dims);
-  }
-
-  if ($image_id) {
-    %dims = (('ImageId' => $image_id), %xdims);
-    add_single_metric($name, $unit, $value, \%dims);
-  }
-
-  if ($aggregated) {
-    %dims = %xdims;
-    add_single_metric($name, $unit, $value, \%dims);
+  if ($filesystem)
+  {
+    ++$dimmcount;
+    $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Name"} = 'Filesystem';
+    $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Value"} = $filesystem;
+  }  
+  if ($mount)
+  {
+    ++$dimmcount;
+    $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Name"} = 'MountPath';
+    $params{"MetricData.member.$mcount.Dimensions.member.$dimmcount.Value"} = $mount;
   }
 
   print "$name [$mount]: $value ($unit)\n" if ($verbose && $mount);
@@ -511,10 +370,7 @@ if ($report_mem_util || $report_mem_used || $report_mem_avail || $report_swap_ut
   my $mem_free = $meminfo{'MemFree'} * KILO;
   my $mem_cached = $meminfo{'Cached'} * KILO;
   my $mem_buffers = $meminfo{'Buffers'} * KILO;
-  my $mem_avail = $mem_free;
-  if (!defined($mem_used_incl_cache_buff)) {
-     $mem_avail += $mem_cached + $mem_buffers;
-  }
+  my $mem_avail = $mem_free + $mem_cached + $mem_buffers;
   my $mem_used = $mem_total - $mem_avail;
   my $swap_total = $meminfo{'SwapTotal'} * KILO;
   my $swap_free = $meminfo{'SwapFree'} * KILO;  
@@ -523,22 +379,22 @@ if ($report_mem_util || $report_mem_used || $report_mem_avail || $report_swap_ut
   if ($report_mem_util) {
     my $mem_util = 0;
     $mem_util = 100 * $mem_used / $mem_total if ($mem_total > 0);
-    add_metric('MemoryUtilization', 'Percent', $mem_util);
+    append_metric('MemoryUtilization', 'Percent', $mem_util);
   }
   if ($report_mem_used) {
-    add_metric('MemoryUsed', $mem_units, $mem_used / $mem_unit_div);
+    append_metric('MemoryUsed', $mem_units, $mem_used / $mem_unit_div);
   }
   if ($report_mem_avail) {
-    add_metric('MemoryAvailable', $mem_units, $mem_avail / $mem_unit_div);
+    append_metric('MemoryAvailable', $mem_units, $mem_avail / $mem_unit_div);
   }
 
   if ($report_swap_util) {
     my $swap_util = 0;
     $swap_util = 100 * $swap_used / $swap_total if ($swap_total > 0);
-    add_metric('SwapUtilization', 'Percent', $swap_util);
+    append_metric('SwapUtilization', 'Percent', $swap_util);
   }
   if ($report_swap_used) {
-    add_metric('SwapUsed', $mem_units, $swap_used / $mem_unit_div);
+    append_metric('SwapUsed', $mem_units, $swap_used / $mem_unit_div);
   }
 }
 
@@ -562,13 +418,13 @@ if ($report_disk_space)
     if ($report_disk_util) {
       my $disk_util = 0;
       $disk_util = 100 * $disk_used / $disk_total if ($disk_total > 0);
-      add_metric('DiskSpaceUtilization', 'Percent', $disk_util, $fsystem, $mount);
+      append_metric('DiskSpaceUtilization', 'Percent', $disk_util, $fsystem, $mount);
     }
     if ($report_disk_used) {
-      add_metric('DiskSpaceUsed', $disk_units, $disk_used / $disk_unit_div, $fsystem, $mount);
+      append_metric('DiskSpaceUsed', $disk_units, $disk_used / $disk_unit_div, $fsystem, $mount);
     }
     if ($report_disk_avail) {
-      add_metric('DiskSpaceAvailable', $disk_units, $disk_avail / $disk_unit_div, $fsystem, $mount);
+      append_metric('DiskSpaceAvailable', $disk_units, $disk_avail / $disk_unit_div, $fsystem, $mount);
     }
   }
 }
@@ -581,30 +437,27 @@ if ($mcount > 0)
   $opts{'aws-credential-file'} = $aws_credential_file;
   $opts{'aws-access-key-id'} = $aws_access_key_id;
   $opts{'aws-secret-key'} = $aws_secret_key;
+  $opts{'short-response'} = 1;
   $opts{'retries'} = 2;
   $opts{'verbose'} = $verbose;
   $opts{'verify'} = $verify;
   $opts{'user-agent'} = "$client_name/$version";
   $opts{'enable_compression'} = 1 if ($enable_compression);
-  $opts{'aws-iam-role'} = $aws_iam_role;
-  
-  my $response = CloudWatchClient::call_json('PutMetricData', \%params, \%opts);
-  my $code = $response->code;
-  my $message = $response->message;
+
+  my ($code, $reply) = CloudWatchClient::call(\%params, \%opts);
   
   if ($code == 200 && !$from_cron) {
     if ($verify) {
       print "\nVerification completed successfully. No actual metrics sent to CloudWatch.\n\n";
     } else {
-      my $request_id = $response->headers->{'x-amzn-requestid'};
-      print "\nSuccessfully reported metrics to CloudWatch. Reference Id: $request_id\n\n";
+      print "\nSuccessfully reported metrics to CloudWatch. Reference Id: $reply\n\n";
     }
   }
   elsif ($code < 100) {
-    exit_with_error($message);
+    exit_with_error("Failed to initialize: $reply");
   }
   elsif ($code != 200) {
-    exit_with_error("Failed to call CloudWatch: HTTP $code. Message: $message");
+    exit_with_error("Failed to call CloudWatch: HTTP $code. Message: $reply");
   }
 }
 else {
