@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright 2012 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You may not 
 # use this file except in compliance with the License. A copy of the License 
@@ -28,10 +28,11 @@ Description of available options:
   --verbose         Displays details of what the script is doing.
   --version         Displays the version number.
   --help            Displays detailed usage information.
-
+  
   --aws-credential-file=PATH  Specifies the location of the file with AWS credentials.
   --aws-access-key-id=VALUE   Specifies the AWS access key ID to use to identify the caller.
   --aws-secret-key=VALUE      Specifies the AWS secret key to use to sign the request.
+  --aws-iam-role=VALUE        Specifies the IAM role used to provide AWS credentials.
   
 For more information on how to use this utility, see Amazon CloudWatch Developer Guide at
 http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/mon-scripts-perl.html
@@ -55,7 +56,7 @@ BEGIN
 
 use CloudWatchClient;
 
-my $version = '1.0.1';
+my $version = '1.1.0';
 my $client_name = 'CloudWatch-GetInstanceStats';
 
 my $verify;
@@ -66,6 +67,7 @@ my $recent_hours = 1;
 my $aws_credential_file;
 my $aws_access_key_id;
 my $aws_secret_key;
+my $aws_iam_role;
 my $parse_result = 1;
 my $parse_error = '';
 
@@ -81,7 +83,8 @@ my $parse_error = '';
     'verbose' => \$verbose,
     'aws-credential-file:s' => \$aws_credential_file,
     'aws-access-key-id:s' => \$aws_access_key_id,
-    'aws-secret-key:s' => \$aws_secret_key);
+    'aws-secret-key:s' => \$aws_secret_key,
+    'aws-iam-role:s' => \$aws_iam_role);
 }
 
 sub exit_with_error
@@ -115,6 +118,10 @@ if (defined($aws_access_key_id) && length($aws_access_key_id) == 0) {
 if (defined($aws_secret_key) && length($aws_secret_key) == 0) {
   exit_with_error("Value of AWS secret key is not specified.");
 }
+if (defined($aws_iam_role) && length($aws_iam_role) == 0) {
+  exit_with_error("Value of AWS IAM role is not specified.");
+}
+
 
 # check for inconsistency of provided arguments
 if (defined($aws_credential_file) && defined($aws_access_key_id)) {
@@ -129,6 +136,13 @@ elsif (defined($aws_access_key_id) && !defined($aws_secret_key)) {
 elsif (!defined($aws_access_key_id) && defined($aws_secret_key)) {
   exit_with_error("AWS access key id is not specified.");
 }
+elsif (defined($aws_iam_role) && defined($aws_credential_file)) {
+  exit_with_error("Do not provide AWS IAM role and AWS credential file options together.");
+}
+elsif (defined($aws_iam_role) && defined($aws_secret_key)) {
+  exit_with_error("Do not provide AWS IAM role and AWS access key id/secret key options together.");
+}
+
 
 my $now = time();
 my $timestamp = CloudWatchClient::get_timestamp($now);
@@ -147,11 +161,14 @@ sub call_cloud_watch
 
   my %call_opts = ();
   $call_opts{'aws-credential-file'} = $aws_credential_file;
+  $call_opts{'aws-access-key-id'} = $aws_access_key_id;
+  $call_opts{'aws-secret-key'} = $aws_secret_key;
   $call_opts{'short-response'} = 0;
   $call_opts{'retries'} = 1;
   $call_opts{'verbose'} = $verbose;
   $call_opts{'verify'} = $verify;
   $call_opts{'user-agent'} = "$client_name/$version";
+  $call_opts{'aws-iam-role'} = $aws_iam_role;
   
   my ($response_code, $response_content) = CloudWatchClient::call($params, \%call_opts);
   

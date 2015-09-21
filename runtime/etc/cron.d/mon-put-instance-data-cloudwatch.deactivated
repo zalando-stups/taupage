@@ -1,0 +1,1 @@
+*/5 * * * * /opt/taupage/cloudwatch/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron
