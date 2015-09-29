@@ -1,0 +1,15 @@
+/var/log/application.log {
+    # do not use datesuffix, aws logs could not deal with
+    su root root
+    missingok
+    notifempty
+    daily
+    create 0640 syslog adm
+    # aws takes a while to switch to new logfile
+    delaycompress
+    compress
+    rotate 7
+    postrotate
+        service rsyslog restart
+    endscript
+}
