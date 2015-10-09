@@ -101,21 +101,21 @@ fi
 
 # upload files
 echo "Uploading runtime/* files to server..."
-tar c -C runtime --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-overwrite-dir -C /
+tar c -C runtime --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner --no-overwrite-dir -C /
 
 echo "Set link to old taupage file"
 ssh $ssh_args ubuntu@$ip sudo ln -s /meta/taupage.yaml /etc/taupage.yaml
 
 echo "Uploading build/* files to server..."
-tar c build | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp
+tar c build | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner -C /tmp
 
 echo "Uploading secret/* files to server..."
-tar c -C $secret_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /tmp/build
+tar c -C $secret_dir . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner -C /tmp/build
 
 if [ ! -z "$proprietary_dir" ]; then
     echo "Uploading proprietary/* files to server..."
     ssh $ssh_args ubuntu@$ip sudo mkdir /opt/proprietary
-    tar c -C $proprietary_dir . | ssh $ssh_args ubuntu@$ip sudo tar x -C /opt/proprietary
+    tar c -C $proprietary_dir . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner -C /opt/proprietary
 fi
 
 ssh $ssh_args ubuntu@$ip find /tmp/build
@@ -235,4 +235,3 @@ else
     echo "AMI $ami_name ($imageid) create failed "
 
 fi
-

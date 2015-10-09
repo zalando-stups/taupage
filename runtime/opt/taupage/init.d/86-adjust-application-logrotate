@@ -1,0 +1,30 @@
+#!/bin/sh
+# the script can adjust the logrotate of the application.log if needed. 
+
+# read global taupage config
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
+
+
+application_logrotate="/etc/logrotate.d/application"
+
+#set custom filesize 
+if [ -z "$config_application_logrotate_size" ]; then
+	echo "INFO: Set filesize to $config_application_logrotate_size for application.log Logrotate"
+        sed -i "s/\#size\b.*$/size $config_application_logrotate_size/g" $application_logrotate 
+fi
+
+
+#change period if it is set in the yaml ( weekly, daily, monthly )
+#hourly is only possible if we also adjust the logrotate cronjob 
+if [ -z "$config_application_logrotate_interval" ]; then
+	echo "INFO: Set period to $config_application_logrotate_interval for application.log Logrotate"
+        sed -i "1,$ s/weekly/$config_application_logrotate_interval/" $application_logrotate
+fi
+
+#change how often the file will be rotated until overwrite
+#default is "4" 
+if [ -z "$config_application_logrotate_rotate" ]; then
+        echo "INFO: Set rotate to $config_application_logrotate_rotate for application.log Logrotate"
+        sed -i "s/\brotate\b.*$/rotate $config_application_logrotate_rotate/g" $application_logrotate
+fi
+   

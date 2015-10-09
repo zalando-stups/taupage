@@ -65,7 +65,7 @@ def is_mounted(mountpoint):
     return os.path.ismount(mountpoint)
 
 
-def wait_for_device(device, max_tries=3, wait_time=2.5):
+def wait_for_device(device, max_tries=3, wait_time=5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
     while tries < max_tries and not os.path.exists(device):
@@ -148,7 +148,6 @@ def raid_device_exists(raid_device):
 
 
 def create_raid_device(raid_device, raid_config):
-    subprocess.check_call(["udevadm", "control", "--stop-exec-queue"])
     devices = raid_config.get("devices", [])
     num_devices = len(devices)
     if num_devices < 2:
@@ -168,7 +167,6 @@ def create_raid_device(raid_device, raid_config):
 
         subprocess.check_call(call)
         logging.info("Created RAID%d device '%s'", raid_level, raid_device)
-        subprocess.check_call(["udevadm", "control", "--start-exec-queue"])
 
 
 def handle_raid_volumes(raid_volumes):

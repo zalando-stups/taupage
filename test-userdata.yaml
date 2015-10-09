@@ -12,6 +12,7 @@ environment:
 
 root: false
 read_only: true
+keep_instance_users: true
 
 dockercfg:
   "https://hub.docker.com":
@@ -37,23 +38,13 @@ cloudwatch_logs:
   /var/log/application.log: my-application-loggroup
 
 volumes:
-  ebs:
-    /dev/sdf: taupage-ami-test-vol1
-    /dev/sdg: taupage-ami-test-vol2
-    /dev/sdh: taupage-ami-test-vol3
-    /dev/sdi: taupage-ami-test-vol4
-
   raid:
+    # Defines RAID0 volume with the attached devices above (note the different device names)
     /dev/md/sampleraid0:
-      level: 0
-      devices:
-        - /dev/xvdf
-        - /dev/xvdg
-    /dev/md/sampleraid1:
       level: 1
       devices:
-        - /dev/xvdh
-        - /dev/xvdi
+        - /dev/xvdb
+        - /dev/xvdc
 
 
 mounts:
@@ -61,6 +52,3 @@ mounts:
         partition: /dev/md/sampleraid0
         erase_on_boot: true
         filesystem: ext4
-    /other_volume:
-        partition: /dev/md/sampleraid1
-        erase_on_boot: true

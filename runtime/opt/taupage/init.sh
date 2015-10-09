@@ -65,8 +65,6 @@ if [ "$result" -eq 0 ]; then
 
         $HEALTHCHECK_BIN
         result=$?
-    else
-        echo "WARNING: No healthcheck configuration found!" >&2
     fi
 fi
 

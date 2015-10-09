@@ -1,0 +1,2 @@
+Amazon CloudWatch Monitoring Scripts for Linux version 1.1.0
+Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.

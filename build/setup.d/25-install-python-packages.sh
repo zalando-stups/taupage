@@ -1,5 +1,6 @@
 pkgs="
 boto
+boto3
 botocore
 "
 

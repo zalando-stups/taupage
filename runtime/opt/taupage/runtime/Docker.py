@@ -15,6 +15,8 @@ import sys
 import subprocess
 import time
 import yaml
+import shutil
+import glob
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
@@ -83,6 +85,11 @@ def get_env_options(config: dict):
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
 
+    if config.get('appdynamics_application'):
+        # set appdynamics analytics url
+        yield '-e'
+        yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
+
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
     # NOTE: we should not add other environment variables here (even if it sounds tempting),
     # esp. EC2 metadata should not be passed as env. variables!
@@ -103,15 +110,18 @@ def get_volume_options(config: dict):
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
     # mount logdirectory as read-only
-    # Todo: this has to be made optional.
-    # yield '-v'
-    # yield '/var/log:/var/log:ro'
+    if config.get('mount_var_log'):
+        yield '-v'
+        yield '/var/log:/var/log:ro'
 
     # if NewRelic Agent exisits than mount the agent to the docker container
-    # TODO move newrelic to /opt/proprietary and mount to /agents/newrelic-jvm
     if 'newrelic_account_key' in config:
+        # thats deprecated and has to be removed in some
+        print('DEPRECATED WARNING: /data/newrelic will be removed please use /agents/newrelic instead ')
         yield '-v'
         yield '/opt/proprietary/newrelic:/data/newrelic:rw'
+        yield '-v'
+        yield '/opt/proprietary/newrelic:/agents/newrelic:rw'
 
     if 'appdynamics_application' in config:
         yield '-v'
@@ -230,7 +240,7 @@ def wait_for_health_check(config: dict):
 
     start = time.time()
     while time.time() < start + health_check_timeout_seconds:
-        logging.info('Waiting for health check {}:{}..'.format(health_check_port, health_check_path))
+        logging.info('Waiting for health check :{}{}..'.format(health_check_port, health_check_path))
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
@@ -241,7 +251,7 @@ def wait_for_health_check(config: dict):
 
         time.sleep(2)
 
-    logging.error('Timeout of {}s expired for health check {}:{}'.format(
+    logging.error('Timeout of {}s expired for health check :{}{}'.format(
                   health_check_timeout_seconds, health_check_port, health_check_path))
     sys.exit(2)
 
@@ -268,6 +278,12 @@ def main(args):
     except Exception as e:
         logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
+
+    # copy job files from docker container to the machine agent
+    dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
+    for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
+        print('copy jobfile: ', file)
+        shutil.copy(file, dest_dir)
 
     wait_for_health_check(config)
 

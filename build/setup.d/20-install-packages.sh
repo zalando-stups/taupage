@@ -22,10 +22,12 @@ python-setuptools
 rkhunter
 rsyslog-gnutls
 ruby
-samhain
 scalyr-agent-2
 unhide.rb
 unzip
+libwww-perl
+libdatetime-perl
+libswitch-perl
 "
 
 echo "Installing packages..."
