@@ -2,8 +2,8 @@
 *.swp
 
 # IntelliJ IDEA
-/.idea
-/*.iml
+.idea
+*.iml
 test-volumes-ami-*
 
 # Python
