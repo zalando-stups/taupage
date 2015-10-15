@@ -1,3 +1,0 @@
-#!/bin/bash
-
-logrotate -f /etc/logrotate.d/auditlog
