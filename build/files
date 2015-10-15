@@ -7,8 +7,6 @@
 
 /etc/cron.hourly/logrotate_auditlog root:root 0755
 
-/etc/logrotate.d/auditlog root:root 0644
-
 /etc/sudoers root:root 0440
 
 /etc/rsyslog.d/keys root:root 0755
@@ -29,6 +27,6 @@
 /tmp/delete-ubuntu-user.sh root:root 0700
 /tmp/delete-ubuntu-user-wrapper.sh root:root 7755
 
-/etc/logrotate.d/application root:root 0755
-/etc/logrotate.d/auditlog root:root 0755
-/etc/logrotate.d/rsyslog root:root 0755
+/etc/logrotate.d/application root:root 0644
+/etc/logrotate.d/auditlog root:root 0644
+/etc/logrotate.d/rsyslog root:root 0644
