@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mv /etc/update-motd.d/00-taupage /temp-motd
 rm /etc/update-motd.d/*
 mv /temp-motd /etc/update-motd.d/00-taupage

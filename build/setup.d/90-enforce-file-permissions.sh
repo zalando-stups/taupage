@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # 'files' contains owner and permission configuration for files and directories
 #
 # format:

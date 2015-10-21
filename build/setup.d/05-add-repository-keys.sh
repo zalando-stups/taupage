@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Docker repository key
 apt_keys="
 58118E89F3A912897C070ADBF76221572C52609D

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Updating system..."
 
 sudo rm -rf /var/lib/apt/lists/*
