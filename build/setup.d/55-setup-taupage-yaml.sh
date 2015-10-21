@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # pre-configure the endpoint to generate access tokens
 . ./secret-vars.sh
 if [ -n "$OAUTH_ACCESS_TOKEN_URL" ]; then

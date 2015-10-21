@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # download newest version
 wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz >>cfn.log
 

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Setting up SSH access granting service user..."
 
 echo "Downloading forced command..."

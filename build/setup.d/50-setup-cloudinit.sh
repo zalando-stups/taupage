@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Patching cloudinit to enable and restrict #taupage-ami-config..."
 
 # cloudinit is not configurable enough, patch the source for us

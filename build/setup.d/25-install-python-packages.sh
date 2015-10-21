@@ -1,3 +1,5 @@
+#!/bin/bash
+
 pkgs="
 boto
 boto3
