@@ -28,7 +28,6 @@ healthcheck:
 
 health_check_path: /
 
-
 ssh_ports:
   - 22
   - 2222
@@ -46,9 +45,10 @@ volumes:
         - /dev/xvdb
         - /dev/xvdc
 
-
 mounts:
     /some_volume:
         partition: /dev/md/sampleraid0
         erase_on_boot: true
         filesystem: ext4
+
+mount_certs: true
