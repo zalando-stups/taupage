@@ -109,10 +109,16 @@ def get_volume_options(config: dict):
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
+
     # mount logdirectory as read-only
     if config.get('mount_var_log'):
         yield '-v'
         yield '/var/log:/var/log:ro'
+
+    # mount certs dir as read-only. 'private' is currently empty on Taupage
+    if config.get('mount_certs'):
+        yield '-v'
+        yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
     # if NewRelic Agent exisits than mount the agent to the docker container
     if 'newrelic_account_key' in config:
