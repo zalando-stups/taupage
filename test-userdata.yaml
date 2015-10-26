@@ -52,3 +52,4 @@ mounts:
         filesystem: ext4
 
 mount_certs: true
+mount_var_log: true
