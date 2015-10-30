@@ -133,6 +133,12 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
 
+    # typically, for continuous integration/delivery systems, you need to be able to builder
+    # Docker images and there is no better solution currently.
+    if config.get('docker_daemon_access'):
+        yield '-v'
+        yield '/var/run/docker.sock:/var/run/docker.sock'
+
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
