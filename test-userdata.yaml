@@ -37,9 +37,3 @@ cloudwatch_logs:
   /var/log/syslog: my-syslog-loggroup
   /var/log/application.log: my-application-loggroup
 
-
-mounts:
-    /some_volume:
-        partition: /dev/md/sampleraid0
-        erase_on_boot: true
-        filesystem: ext4
