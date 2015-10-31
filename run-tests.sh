@@ -14,7 +14,6 @@ python3 -m doctest -v runtime/usr/local/lib/python3.4/dist-packages/taupage/__in
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages python3 -m doctest -v runtime/opt/taupage/runtime/Docker.py
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages python3 -m doctest -v runtime/opt/taupage/init.d/03-push-taupage-yaml.py
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages python3 -m doctest -v runtime/opt/taupage/init.d/10-prepare-disks.py
-PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages python3 -m doctest -v runtime/opt/taupage/bin/push-audit-logs.py
 
 echo "### python unittests"
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages:runtime/opt/taupage/healthcheck python3 tests/python/test_elbHealthChecker.py
