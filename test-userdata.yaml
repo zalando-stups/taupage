@@ -37,15 +37,6 @@ cloudwatch_logs:
   /var/log/syslog: my-syslog-loggroup
   /var/log/application.log: my-application-loggroup
 
-volumes:
-  raid:
-    # Defines RAID0 volume with the attached devices above (note the different device names)
-    /dev/md/sampleraid0:
-      level: 1
-      devices:
-        - /dev/xvdb
-        - /dev/xvdc
-
 
 mounts:
     /some_volume:
