@@ -138,6 +138,8 @@ def get_volume_options(config: dict):
     if config.get('docker_daemon_access'):
         yield '-v'
         yield '/var/run/docker.sock:/var/run/docker.sock'
+        yield '-v'
+        yield '/usr/bin/docker:/usr/bin/docker'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
