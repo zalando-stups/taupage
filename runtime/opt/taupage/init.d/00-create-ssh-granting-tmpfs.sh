@@ -7,5 +7,13 @@ if [ ! -d /run/user/root/.ssh/ ]; then
   chmod 700 /run/user/root/.ssh
   touch /run/user/root/.ssh/authorized_keys
   chmod 600 /run/user/root/.ssh/authorized_keys
+  #check if /root/.ssh/authorized_keys exists
+  if [ -f /root/.ssh/authorized_keys ];
+  then
+	#copy content of /root/.ssh/authorized_keys to /run/user/root/.ssh/authorized_keys and delete the root one to create the link
+	cp /root/.ssh/authorized_keys /run/user/root/.ssh/authorized_keys
+	rm /root/.ssh/authorized_keys
+
+  fi
   ln -s /run/user/root/.ssh/authorized_keys /root/.ssh/
 fi
