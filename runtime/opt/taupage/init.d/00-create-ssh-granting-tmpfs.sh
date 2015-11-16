@@ -15,6 +15,7 @@ if [ -f /root/.ssh/authorized_keys ];
   # copy content of /root/.ssh/authorized_keys to /run/user/root/.ssh/authorized_keys and delete the root one to create the link
   cp /root/.ssh/authorized_keys /run/user/root/.ssh/authorized_keys
   rm /root/.ssh/authorized_keys
+  ln -s /run/user/root/.ssh/authorized_keys /root/.ssh/
 else
   ln -s /run/user/root/.ssh/authorized_keys /root/.ssh/
 fi
