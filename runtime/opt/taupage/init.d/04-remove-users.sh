@@ -26,11 +26,13 @@ else
         echo "/home/ubuntu/.ssh/authorized_keys does not exist...skipping"
     fi
 
+    # IMPORTANT:
+    # This now gets handled by init script 00-create-ssh-granting-tmpfs.sh
     # Remove root user authorized_keys on boot if exists
-    if [ -f /root/.ssh/authorized_keys ]; then
-        echo "Deleting /root/.ssh/authorized_keys"
-        rm /root/.ssh/authorized_keys
-    else
-        echo "/root/.ssh/authorized_keys does not exist...skipping"
-    fi
+    # if [ -f /root/.ssh/authorized_keys ]; then
+    #     echo "Deleting /root/.ssh/authorized_keys"
+    #     rm /root/.ssh/authorized_keys
+    # else
+    #     echo "/root/.ssh/authorized_keys does not exist...skipping"
+    # fi
 fi
