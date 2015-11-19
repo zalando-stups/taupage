@@ -12,7 +12,7 @@ newrelic_yaml=/opt/proprietary/newrelic/newrelic.yml
 newrelic_dir=/opt/proprietary/newrelic/
 APPVERSION=$config_application_version
 
-# If KMS decrypted, decrypt KMS and save to ACCOUNTKEY variable
+# If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCOUNTKEY == "aws:kms:"* ]]; then
   ACCOUNTKEY=${ACCOUNTKEY##aws:kms:}
   ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
