@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # read /etc/taupage.yaml
 # get NewRelic Key and register the agent
 
@@ -10,6 +10,12 @@ ACCOUNTKEY=$config_newrelic_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 newrelic_sysmoncfg=/etc/newrelic/nrsysmond.cfg
+
+# If KMS decrypted, decrypt KMS and save to ACCOUNTKEY variable
+if [[ $ACCOUNTKEY == "aws:kms:"* ]]; then
+  ACCOUNTKEY=${ACCOUNTKEY##aws:kms:}
+  ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
+fi
 
 #if NewRelic account exists in the yaml file. Register the NewRelic Daemon to this Account
 if [ -n "$ACCOUNTKEY" ];
