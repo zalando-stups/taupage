@@ -165,6 +165,20 @@ def get_port_options(config: dict):
         yield '{}:{}'.format(host_port, container_port)
 
 
+def get_log_options(config: dict):
+    for val in get_or(config, 'logs', "").split(" "):
+        # check for no key, maybe that can be better handled?
+        if val != "":
+            # if dir is not writeable by all, the docker process cannot write something in it
+            subprocess.call(["mkdir", "-p", "/var/log/application{0}".format(val)])
+            subprocess.call(["chmod", "777", "/var/log/application{0}".format(val)])
+            # uncomment when python 3.5 is available
+            # subprocess.run("mkdir -p /var/log/application{0}".format(val))
+            # subprocess.run("chmod 777 /var/log/application{0}".format(val))
+            yield '-v'
+            yield '/var/log/application{0}:{0}'.format(val)
+
+
 def get_other_options(config: dict):
     if not config.get('root'):
         # Docker only accepts UNIX user IDs (not names)
@@ -283,7 +297,7 @@ def main(args):
         registry_login(config, registry)
 
     cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--restart=on-failure:10']
-    for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+    for f in get_env_options, get_volume_options, get_port_options, get_log_options, get_other_options:
         cmd += list(f(config))
     cmd += [source]
 

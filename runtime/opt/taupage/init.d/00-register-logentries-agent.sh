@@ -42,6 +42,13 @@ then
     le follow /var/log/syslog
     le follow /var/log/auth.log
     le follow /var/log/application.log
+    for log_location in $config_logs; do
+        # wildcard if a dir was specified
+        if [[ ${log_location: -1} == '/' ]]; then
+            log_location="$log_location*"
+        fi
+        le follow /var/log/application$log_location
+    done
 
 echo "
 [syslog]

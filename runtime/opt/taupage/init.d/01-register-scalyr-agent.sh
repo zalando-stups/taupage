@@ -112,6 +112,26 @@ else
     exit
 fi
 
+#follow custom logs
+echo "";
+echo -n "insert custom logs to follow ... ";
+for log_location in $config_logs; do
+    # wildcard if a dir was specified
+    if [[ ${log_location: -1} == '/' ]]; then
+        log_location="$log_location*"
+    fi
+    echo "insert $log_location to follow ... ";
+    sed -i "/logs\:\ \[/a { path: \"/var/log/application$log_location\", attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+    if [ $? -eq 0 ];
+    then
+        echo -n "DONE";
+        echo "";
+    else
+        echo -n "ERROR";
+        exit
+    fi
+done
+
 #add max_log_offset_size
 echo "";
 echo -n "adding max_log_offset_size... ";
