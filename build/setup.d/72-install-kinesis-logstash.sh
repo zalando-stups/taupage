@@ -24,7 +24,8 @@ script
   else
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
-    stream=\$(cat /etc/default/log-stream-name)
+    # http://stackoverflow.com/questions/29969527/linux-shell-get-value-of-a-field-from-a-yml-file
+    stream=\$(grep -A3 'kinesis_logstream:' /etc/taupage.yaml | head -n1 | awk '{ print \$2}')
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {
@@ -65,17 +66,6 @@ filter {
     # https://www.elastic.co/guide/en/logstash/current/plugins-filters-json.html
     source => "jsonMessage"
     remove_field => "jsonMessage"
-  }
-}
-
-filter {
-  # extract ecs 'task', 'taskRevision' and 'container' name 
-  # http://grokconstructor.appspot.com/do/match
-  grok {
-    match => [
-      "container_name",
-      "^ecs-%{GREEDYDATA:task}-%{INT:taskRevision}-%{GREEDYDATA:container}-[^-]{20}$"
-    ]
   }
 }
 
