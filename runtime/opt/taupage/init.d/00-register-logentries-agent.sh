@@ -33,6 +33,7 @@ then
     if [ "$?" = "0" ];
     then
         echo -n "DONE"
+        echo ""
     else
         echo -n "ERROR: Register to Logentries account failed";
         exit
