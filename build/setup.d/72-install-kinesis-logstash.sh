@@ -24,8 +24,8 @@ script
   else
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
-    # http://stackoverflow.com/questions/29969527/linux-shell-get-value-of-a-field-from-a-yml-file
-    stream=\$(grep -A3 'kinesis_logstream:' /meta/taupage.yaml | head -n1 | awk '{ print \$2}')
+    eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
+    stream=\${config_kinesis_logstream}
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {
