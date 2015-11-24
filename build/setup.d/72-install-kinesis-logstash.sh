@@ -27,7 +27,7 @@ script
     
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
-    eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
+    eval \$(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
     stream=\${config_kinesis_logstream}
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
