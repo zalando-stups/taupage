@@ -13,7 +13,7 @@ docker pull busybox
 cat <<EOF > /etc/init/logstash.conf
 description "logstash"
 
-start on filesystem and started docker and stopped cloud-final
+start on filesystem and started docker and stopped cloud-final and stopped taupage
 stop on runlevel [!2345]
 
 script
