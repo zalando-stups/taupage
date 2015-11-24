@@ -4,12 +4,17 @@
 
 ## Prerequisites
 
-You need to have [jq](http://stedolan.github.io/jq/) and [AWS CLI](http://aws.amazon.com/cli/) preinstalled.
+- [jq](http://stedolan.github.io/jq/) installed
+- [AWS CLI](http://aws.amazon.com/cli/) installed
+- config-stups.sh created/modified (see config-stups-example.sh in the code base and modify it to your needs)
+- adapt other config files
+    - e.g. probably all files in the secret/ folder
+    - for a detailed listing, consult the [STUPS documentation](https://docs.stups.io/en/latest/installation/taupage-ami-creation.html)
+- have AWS credentials ready (e.g. log in with mai)
 
 ## Build a new AMI
 
-You need to be logged in (mai login).
-(As a configuration example, you can find the file config-stups-example.sh in the code base. You should modify it to suit it to your needs.)
+When all prerequisites are met, execute this (adapt the config file location to your needs):
 
     $ ./create-ami.sh ./config-stups.sh
 
