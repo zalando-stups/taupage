@@ -13,7 +13,7 @@ docker pull busybox
 cat <<EOF > /etc/init/logstash.conf
 description "logstash"
 
-start on filesystem and started docker and stopped cloud-final and stopped taupage
+start on filesystem and started docker and stopped cloud-final
 stop on runlevel [!2345]
 
 script
@@ -25,7 +25,7 @@ script
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
     # http://stackoverflow.com/questions/29969527/linux-shell-get-value-of-a-field-from-a-yml-file
-    stream=\$(grep -A3 'kinesis_logstream:' /etc/taupage.yaml | head -n1 | awk '{ print \$2}')
+    stream=\$(grep -A3 'kinesis_logstream:' /meta/taupage.yaml | head -n1 | awk '{ print \$2}')
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {
