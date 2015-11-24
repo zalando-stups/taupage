@@ -13,7 +13,7 @@ docker pull busybox
 cat <<EOF > /etc/init/logstash.conf
 description "logstash"
 
-start on filesystem and started docker and stopped cloud-final
+start on filesystem and started docker and stopped cloud-init-local
 stop on runlevel [!2345]
 
 script
@@ -22,6 +22,9 @@ script
   if [ \$? = 0 ]; then
     true
   else
+    echo "/meta/taupage.yaml"
+    cat /meta/taupage.yaml
+    
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
     eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
