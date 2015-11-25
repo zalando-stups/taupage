@@ -30,6 +30,7 @@ unzip
 libwww-perl
 libdatetime-perl
 libswitch-perl
+jq
 "
 
 echo "Installing packages..."

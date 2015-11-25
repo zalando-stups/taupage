@@ -6,31 +6,27 @@
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
-ACCOUNTKEY=$config_newrelic_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 newrelic_sysmoncfg=/etc/newrelic/nrsysmond.cfg
+newrelic_sysmoncfg_prop=/opt/proprietary/newrelic-sysmond/nrsysmond.cfg
+AWS_ACCOUNT_ID=$(curl  --silent http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn' | cut -d ':' -f5)
+NR_HOSTNAME="aws-${AWS_ACCOUNT_ID}-$(hostname)"
+EC2_AZ=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-# If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
-if [[ $ACCOUNTKEY == "aws:kms:"* ]]; then
-  ACCOUNTKEY=${ACCOUNTKEY##aws:kms:}
-  ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
-fi
-
-#if NewRelic account exists in the yaml file. Register the NewRelic Daemon to this Account
-if [ -n "$ACCOUNTKEY" ];
+#copy the proprietary agent config to /etc/ the licensekey is already in the config
+if [ -f $newrelic_sysmoncfg_prop ]
 then
-
-    echo -n "Configuring newrelic-sysmond ... ";
-		nrsysmond-config --set license_key="$ACCOUNTKEY"
-    # add labels to newrelic.yaml
-    sed -i "/labels=label_type:/a labels=application_id:$APPID;application_version:$APPVERSION" $newrelic_sysmoncfg
-    if [ $? -eq 0 ];
-    then
-        echo -n "DONE";
-        echo "";
+    #copy proprietary file to system
+    cp $newrelic_sysmoncfg_prop $newrelic_sysmoncfg
+    # add labels to nrsysmond.cfg
+    sed -i "/labels=label_type:/a labels=application_id:$APPID;application_version:$APPVERSION;provider:aws;aws-region:$EC2_REGION;aws-az:$EC2_AZ" $newrelic_sysmoncfg
+    #set hostname
+    sed -i "/hostname=myhost/a hostname=$NR_HOSTNAME" $newrelic_sysmoncfg
+        
+	echo "";
 	echo -n "Starting newrelic-sysmond ... ";
-	 service newrelic-sysmond stop # just in case, TODO: check if this is necessary
 	 service newrelic-sysmond start
 	if [ $? -eq 0 ];
 	then
@@ -39,11 +35,7 @@ then
 	    echo -n "ERROR: Failed to start newrelic-sysmond!";
             exit;
 	fi
-    else
-        echo -n "ERROR: Registration with NewRelic has failed";
-        exit;
-    fi
-else
-    echo "INFO: NewRelic is not configured; skipping daemon setup.";
-    exit;
+else 
+
+	echo -n "INFO: No NewRelic sysmond config found - skiping setup";
 fi

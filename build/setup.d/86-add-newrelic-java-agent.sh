@@ -19,9 +19,6 @@ else
 
 	echo "INFO: change default newrelic.yaml"
 
-	#change newrelicToken to default
-	sed -i "1,$ s/license_key:.*$/license_key:\ LICENSEKEY/" $newrelic_yaml
-
 	#set high security
 	sed -i "1,$ s/high_security:.*$/high_security:\ false/" $newrelic_yaml
 

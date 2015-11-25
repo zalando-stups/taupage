@@ -3,7 +3,7 @@
 # read global taupage config
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
-if [ -z "$config_appdynamics_application" ]; then
+if [ -z "$config_appdynamics_application_noinstall" ]; then
 	echo "INFO: no AppDynamics application configured; skipping AppDynamics setup"
 	exit 0
 fi

@@ -3,7 +3,7 @@
 set -x
 
 # check if directory exists
-if [ ! -d /opt/proprietary/appdynamics-machine ]; then
+if [ ! -d /opt/proprietary/appdynamics-machine_noinstall ]; then
 	echo "INFO: no AppDynamics agent found, skip configuration"
 else
 
