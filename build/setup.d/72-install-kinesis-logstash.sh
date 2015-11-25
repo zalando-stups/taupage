@@ -4,7 +4,7 @@
 logstashImage="immobilienscout24/lma-logstash:1"
 
 cat <<EOF > /etc/default/docker
-DOCKER_OPTS="--log-driver=gelf --log-opt gelf-address=udp://localhost:12201" 
+DOCKER_OPTS="--log-opt gelf-address=udp://localhost:12201"
 EOF
 
 docker pull ${logstashImage}

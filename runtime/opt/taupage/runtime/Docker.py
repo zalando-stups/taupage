@@ -175,6 +175,8 @@ def get_other_options(config: dict):
     if config.get('read_only'):
         yield '--read-only'
 
+    yield '--log-driver={}'.format(config.get('log_driver', 'syslog'))
+
 
 def extract_registry(docker_image: str) -> str:
     """
