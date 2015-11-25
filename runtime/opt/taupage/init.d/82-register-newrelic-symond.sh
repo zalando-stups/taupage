@@ -13,7 +13,7 @@ newrelic_sysmoncfg_prop=/opt/proprietary/newrelic-sysmond/nrsysmond.cfg
 AWS_ACCOUNT_ID=$(curl  --silent http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn' | cut -d ':' -f5)
 NR_HOSTNAME="aws-${AWS_ACCOUNT_ID}-$(hostname)"
 EC2_AZ=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
-EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
+EC2_REGION="`echo \"$EC2_AZ\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
 #copy the proprietary agent config to /etc/ the licensekey is already in the config
 if [ -f $newrelic_sysmoncfg_prop ]
