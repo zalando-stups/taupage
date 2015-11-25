@@ -171,7 +171,7 @@ def get_log_options(config: dict):
         if val != "":
             # if dir is not writeable by all, the docker process cannot write something in it
             # rsplit for finding the dir, regardless if file or not ...
-            target = val.rsplit("/",1)
+            target = val.rsplit("/", 1)
             logging.info("creating and setting rights for {0}".format(target))
             subprocess.call(["mkdir", "-p", "/var/log/application{0}".format(target[0])])
             subprocess.call(["chmod", "777", "/var/log/application{0}".format(target[0])])
@@ -247,8 +247,8 @@ def run_docker(cmd, dry_run):
                 out = subprocess.check_output(cmd)
                 break
             except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                if i + 1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
