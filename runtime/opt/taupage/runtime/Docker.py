@@ -170,11 +170,16 @@ def get_log_options(config: dict):
         # check for no key, maybe that can be better handled?
         if val != "":
             # if dir is not writeable by all, the docker process cannot write something in it
-            subprocess.call(["mkdir", "-p", "/var/log/application{0}".format(val)])
-            subprocess.call(["chmod", "777", "/var/log/application{0}".format(val)])
-            # uncomment when python 3.5 is available
-            # subprocess.run("mkdir -p /var/log/application{0}".format(val))
-            # subprocess.run("chmod 777 /var/log/application{0}".format(val))
+            # rsplit for finding the dir, regardless if file or not ...
+            target = val.rsplit("/",1)
+            logging.info("creating and setting rights for {0}".format(target))
+            subprocess.call(["mkdir", "-p", "/var/log/application{0}".format(target[0])])
+            subprocess.call(["chmod", "777", "/var/log/application{0}".format(target[0])])
+            # if we have files to mount, we need to create them on the host, if not
+            # docker will create dirs instead
+            if val[-1:] != "/":
+                subprocess.call(["touch", "/var/log/application{0}".format(val)])
+                subprocess.call(["chmod", "777", "/var/log/application{0}".format(val)])
             yield '-v'
             yield '/var/log/application{0}:{0}'.format(val)
 
