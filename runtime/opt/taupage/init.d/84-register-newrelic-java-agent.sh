@@ -27,7 +27,7 @@ EC2_REGION="`echo \"$EC2_AZ\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
                 #set ApplicationName
                 sed -i "1,$ s/APPNAME/\ $APPID/" $newrelic_yaml
                 #add labels
-		sed "s/#label_name:\ label_value/application_id:$APPID;application_version:$APPVERSION;provider:aws;aws-region:$EC2_REGION;aws-az:$EC2_AZ;host:$NR_HOSTNAME;/" $newrelic_yaml
+		sed "s/#label_name:\ label_value/application_version:$APPVERSION;provider:aws;aws-region:$EC2_REGION;aws-az:$EC2_AZ;/" $newrelic_yaml
                 # create logs dir log file and set permissions
                 mkdir -p $newrelic_dir/logs
                 touch $newrelic_dir/logs/newrelic_agent.log
