@@ -15,8 +15,6 @@ import sys
 import subprocess
 import time
 import yaml
-import shutil
-import glob
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
