@@ -3,9 +3,7 @@
 # pull at install time, to have agent be available and in a stable version on ami launch
 logstashImage="immobilienscout24/lma-logstash:1"
 
-cat <<EOF > /etc/default/docker
-DOCKER_OPTS="--log-opt gelf-address=udp://localhost:12201"
-EOF
+pip install shyaml
 
 docker pull ${logstashImage}
 docker pull busybox
@@ -25,10 +23,15 @@ script
     echo "/meta/taupage.yaml"
     cat /meta/taupage.yaml
     
+    if [ "\$(cat /meta/taupage.yaml | shyaml get-value 'logging.enabled' 'false')" = "false" ]; then
+      echo "Logging not enabled."
+      exit 0
+    fi
+    
+    instanceId=\$(ec2metadata --instance-id)
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
-    eval \$(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
-    stream=\${config_kinesis_logstream}
+    stream=\$(cat /meta/taupage.yaml | shyaml get-value "logging.kinesis_stream" "logging")
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {
@@ -69,6 +72,15 @@ filter {
     # https://www.elastic.co/guide/en/logstash/current/plugins-filters-json.html
     source => "jsonMessage"
     remove_field => "jsonMessage"
+  }
+}
+
+filter {
+  # add instanceId, availabilityZone, region
+  mutate {
+    add_field => { "instance_id" => "\${instanceId}" }
+    add_field => { "availability_zone" => "\${availabilityZone}" }
+    add_field => { "region" => "\${region}" }
   }
 }
 

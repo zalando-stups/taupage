@@ -5,4 +5,3 @@
 
 # the container should not run as root if not required
 root: false
-log_driver: "gelf"

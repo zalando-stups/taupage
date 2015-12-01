@@ -177,6 +177,11 @@ def get_other_options(config: dict):
 
     yield '--log-driver={}'.format(config.get('log_driver', 'syslog'))
 
+    if config.get('log_opt'):
+        for key, value in config.get('log_opt').items(): 
+            yield '--log-opt'
+            yield '{}={}'.format(key, value)
+
 
 def extract_registry(docker_image: str) -> str:
     """
