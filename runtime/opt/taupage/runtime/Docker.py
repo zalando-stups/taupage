@@ -175,6 +175,13 @@ def get_other_options(config: dict):
     if config.get('read_only'):
         yield '--read-only'
 
+    yield '--log-driver={}'.format(config.get('log_driver', 'syslog'))
+
+    if config.get('log_opt'):
+        for key, value in config.get('log_opt').items(): 
+            yield '--log-opt'
+            yield '{}={}'.format(key, value)
+
 
 def extract_registry(docker_image: str) -> str:
     """
@@ -268,7 +275,7 @@ def main(args):
     if registry:
         registry_login(config, registry)
 
-    cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--restart=on-failure:10']
+    cmd = ['docker', 'run', '-d', '--restart=on-failure:10']
     for f in get_env_options, get_volume_options, get_port_options, get_other_options:
         cmd += list(f(config))
     cmd += [source]
