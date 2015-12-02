@@ -7,4 +7,4 @@ config = yaml.load(stream)
 
 if config.get('logstash', {}).get('tags'):
     for k,v in config.get('logstash', {}).get('tags').items():
-        print('add_field => {{ "{0}" => "{1} }}" '.format(k, v))
+        print('    add_field => {{ "{0}" => "{1}" }}" '.format(k, v))
