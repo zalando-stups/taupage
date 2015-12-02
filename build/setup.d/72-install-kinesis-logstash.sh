@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# pull at install time, to have agent be available and in a stable version on ami launch
-logstashImage="immobilienscout24/lma-logstash:1"
+logstashImage="local/logstash:1"
 
 pip install shyaml
 
-docker pull ${logstashImage}
+cat <<EOF > /tmp/logstash.docker
+FROM logstash:1.5.5
+RUN /opt/logstash/bin/plugin install logstash-output-kinesis
+EOF
+docker build --tag=${logstashImage} 
+
 docker pull busybox
 
 cat <<EOF > /etc/init/logstash.conf
@@ -23,7 +27,7 @@ script
     echo "/meta/taupage.yaml"
     cat /meta/taupage.yaml
     
-    if [ "\$(cat /meta/taupage.yaml | shyaml get-value 'logging.enabled' 'false')" = "false" ]; then
+    if [ "\$(cat /meta/taupage.yaml | shyaml get-value 'logstash.enabled' 'false')" = "false" ]; then
       echo "Logging not enabled."
       exit 0
     fi
@@ -31,7 +35,7 @@ script
     instanceId=\$(ec2metadata --instance-id)
     availabilityZone=\$(ec2metadata --availability-zone)
     region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
-    stream=\$(cat /meta/taupage.yaml | shyaml get-value "logging.kinesis_stream" "logging")
+    stream=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_stream" "logging")
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {

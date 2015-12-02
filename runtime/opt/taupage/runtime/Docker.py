@@ -175,10 +175,10 @@ def get_other_options(config: dict):
     if config.get('read_only'):
         yield '--read-only'
 
-    yield '--log-driver={}'.format(config.get('log_driver', 'syslog'))
+    yield '--log-driver={}'.format(config.get('docker',{}).get('log_driver', 'syslog'))
 
-    if config.get('log_opt'):
-        for key, value in config.get('log_opt').items(): 
+    if config.get('docker',{}).config.get('log_opt'):
+        for key, value in config.get('docker').get('log_opt').items(): 
             yield '--log-opt'
             yield '{}={}'.format(key, value)
 
