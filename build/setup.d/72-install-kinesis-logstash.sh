@@ -107,7 +107,7 @@ filter {
     add_field => { "region" => "\${region}" }
 __EOF
 
-  /opt/taupage/logstash/tags-to-logstash.sh >> /etc/logstash.conf
+  /bin/tags-to-logstash.sh >> /etc/logstash.conf
 
 cat <<__EOF >> /etc/logstash.conf
   }
