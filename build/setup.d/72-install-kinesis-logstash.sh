@@ -2,21 +2,37 @@
 
 logstashImage="local/logstash:1"
 
-pip install shyaml
-
-chmod +x /opt/taupage/logstash/tags-to-logstash.sh
-
-cat <<EOF > /tmp/Dockerfile
+function buildLogstashDockerContainer {
+  cat <<__EOF > /tmp/Dockerfile
 FROM logstash:1.5.5
 RUN /opt/logstash/bin/plugin install logstash-output-kinesis
-EOF
-cd /tmp/
-docker build --tag=${logstashImage} .
-cd -
+__EOF
+  cd /tmp/
+  docker build --tag=${logstashImage} .
+  cd -
+  
+  docker pull busybox
+}
 
-docker pull busybox
+function createTagsToLogstashHelper {
+  # store logstash to 
+  cat <<__EOF > /bin/tags-to-logstash.sh
+#!/usr/bin/env python3
 
-cat <<EOF > /etc/init/logstash.conf
+import yaml
+
+stream = open("/meta/taupage.yaml", "r")
+config = yaml.load(stream)
+
+if config.get('logstash', {}).get('tags'):
+    for k,v in config.get('logstash', {}).get('tags').items():
+        print('    add_field => {{ "{0}" => "{1}" }}" '.format(k, v))
+__EOF
+  chmod +x /bin/tags-to-logstash.sh
+}
+
+function createLogstashUpstartService {
+  cat <<EOF > /etc/init/logstash.conf
 description "logstash"
 
 start on filesystem and started docker and stopped cloud-init-local
@@ -32,7 +48,7 @@ script
     cat /meta/taupage.yaml
     
     if [ "\$(cat /meta/taupage.yaml | shyaml get-value 'logstash.enabled' 'false')" = "false" ]; then
-      echo "Logging not enabled."
+      echo "logstash not enabled."
       exit 0
     fi
     
@@ -130,5 +146,12 @@ __EOF
   fi
 end script
 EOF
+}
 
-#docker kill logstash || true; docker rm logstash || true; rm -rf /var/log/upstart/logstash.log && service logstash start && sleep 2 && less /var/log/upstart/logstash.log
+pip install shyaml
+buildLogstashDockerContainer
+createTagsToLogstashHelper
+createLogstashUpstartService
+
+# testing
+# docker kill logstash || true; docker rm logstash || true; rm -rf /var/log/upstart/logstash.log && service logstash start && sleep 2 && less /var/log/upstart/logstash.log
