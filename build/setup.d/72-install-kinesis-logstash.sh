@@ -4,11 +4,13 @@ logstashImage="local/logstash:1"
 
 pip install shyaml
 
-cat <<EOF > /tmp/logstash.docker
+cat <<EOF > /tmp/Dockerfile
 FROM logstash:1.5.5
 RUN /opt/logstash/bin/plugin install logstash-output-kinesis
 EOF
-docker build --tag=${logstashImage} 
+cd /tmp/
+docker build --tag=${logstashImage} .
+cd -
 
 docker pull busybox
 
@@ -85,6 +87,24 @@ filter {
     add_field => { "instance_id" => "\${instanceId}" }
     add_field => { "availability_zone" => "\${availabilityZone}" }
     add_field => { "region" => "\${region}" }
+  
+__EOF
+
+  # https://github.com/0k/shyaml
+  read-0() {
+    while [ "\$1" ]; do
+        IFS=\$'\0' read -r -d '' "\$1" || return 1
+        shift
+    done
+  }
+  
+  # add logstash tags
+  cat /meta/taupage.yaml | shyaml key-values-0 'logstash.tags' |
+  while read-0 key value; do
+      echo "add_field => { \"\${key}\" => \"\${value}\" }" >> /etc/logstash.conf
+  done  
+
+cat <<__EOF >> /etc/logstash.conf
   }
 }
 
