@@ -177,6 +177,9 @@ def get_other_options(config: dict):
 
     yield '--log-driver={}'.format(config.get('docker',{}).get('log_driver', 'syslog'))
 
+    if config.get('docker',{}).get('container_name'):
+        yield '--name={}'.format(config.get('docker',{}).get('container_name'))
+
     if config.get('docker',{}).get('log_opt'):
         for key, value in config.get('docker').get('log_opt').items(): 
             yield '--log-opt'
