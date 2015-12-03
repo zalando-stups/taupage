@@ -28,7 +28,6 @@ healthcheck:
 
 health_check_path: /
 
-
 ssh_ports:
   - 22
   - 2222
@@ -36,4 +35,11 @@ ssh_ports:
 cloudwatch_logs:
   /var/log/syslog: my-syslog-loggroup
   /var/log/application.log: my-application-loggroup
+  
+logstash:
+  enabled: true
+  kinesis_stream: "the-kinesis-stream"          
+  tags:
+    origin: "ooooorigin"
+    foo : "bar"
 
