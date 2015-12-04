@@ -51,6 +51,10 @@ create_test_volumes
 
 # get a server
 echo "Starting test server..."
+
+# wait a little for the instance-profile to settle
+sleep 5
+
 result=$(aws ec2 run-instances \
     --iam-instance-profile Name=${INSTANCE_PROFILE} \
     --image-id $AMI_ID \
