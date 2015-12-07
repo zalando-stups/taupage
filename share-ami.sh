@@ -10,10 +10,10 @@ TAUPAGEVERSION=./$2
 if [ "$disable_ami_sharing" = true ]; then
     echo "skipping AMI sharing as disable_ami_sharing set to true"
 else
+    imageid=$(aws ec2 describe-images --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
     for account in $accounts; do
         echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $region --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}" --value "v1" # --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}" # --value "v1", remove imageid? --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}" # --value "v1", remove imageid?
-    done
+        aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
 
     for target_region in $copy_regions; do
         echo "Copying AMI to region $target_region ..."
