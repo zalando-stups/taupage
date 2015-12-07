@@ -27,8 +27,8 @@ else
     DRY_RUN=false
 fi
 
-if [ -z "$1" ] || [ ! -r "$1" ]; then
-    echo "Usage:  $0 [--dry-run] <config-file>" >&2
+if [ -z "$1" ] || [ ! -r "$1" ] || [ -z "$2" ] || [ ! -r "$2" ]; then
+    echo "Usage:  $0 [--dry-run] <config-file> <taupage-version>" >&2
     exit 1
 fi
 CONFIG_FILE=./$1
@@ -91,7 +91,6 @@ while [ true ]; do
     if [ $alive -eq 0 ]; then
         break
     fi
-
     sleep 2
 done
 

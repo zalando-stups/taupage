@@ -29,7 +29,7 @@ else
 fi
 
 if [ -z "$2" ]; then
-    echo "Usage:  $0 <config-file> <TAUPAGE_VERSION>" >&2
+    echo "Usage:  $0 <config-file> <taupage-version>" >&2
     exit 1
 fi
 CONFIG_FILE=$1
