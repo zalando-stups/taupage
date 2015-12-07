@@ -28,7 +28,7 @@ else
     DRY_RUN=false
 fi
 
-if [ -z "$1" ] || [ ! -r "$1" ] || [ -z "$2" ] || [ ! -r "$2" ]; then
+if [ -z "$1" ] || [ ! -r "$1" ] || [ -z "$2" ]; then
     echo "Usage:  $0 [--dry-run] <config-file> <taupage-version>" >&2
     exit 1
 fi
