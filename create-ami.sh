@@ -185,7 +185,7 @@ then
     if [ "$disable_ami_sharing" = true ]; then
         echo "skipping AMI sharing as disable_ami_sharing set to true"
     else
-        ./share-ami.sh $CONFIG_FILE $TAUPAGE_VERSION    
+        ./share-ami.sh $CONFIG_FILE $TAUPAGE_VERSION
     fi
     # TODO exit if git is dirty
 
