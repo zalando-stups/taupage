@@ -29,11 +29,11 @@ else
 fi
 
 if [ -z "$2" ]; then
-    echo "Usage:  $0 <config-file> <ami-id>" >&2
+    echo "Usage:  $0 <config-file> <TAUPAGE_VERSION>" >&2
     exit 1
 fi
 CONFIG_FILE=$1
-AMI_ID=$2
+TAUPAGE_VERSION=$2
 
 # start!
 set -e
@@ -67,7 +67,7 @@ result=$(aws ec2 run-instances \
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
 echo "Instance: $instanceid"
 
-aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Test"
+aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Test, Key=Version,Value=$TAUPAGE_VERSION"
 
 while [ true ]; do
     result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)

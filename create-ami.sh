@@ -32,6 +32,7 @@ if [ -z "$1" ] || [ ! -r "$1" ]; then
     exit 1
 fi
 CONFIG_FILE=./$1
+TAUPAGE_VERSION=./$2
 
 # load configuration file
 . $CONFIG_FILE
@@ -64,7 +65,7 @@ result=$(aws ec2 run-instances \
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
 echo "Instance: $instanceid"
 
-aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Builder"
+aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Builder, Key=Version,Value=$TAUPAGE_VERSION"
 
 while [ true ]; do
     result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
@@ -152,6 +153,8 @@ result=$(aws ec2 create-image \
 imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 echo "Image: $imageid"
 
+aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CDVersion,Value=$TAUPAGE_VERSION
+
 state="no state yet"
 while [ true ]; do
     echo "Waiting for AMI creation... ($state)"
@@ -170,47 +173,23 @@ while [ true ]; do
 done
 
 # run tests
-./test.sh $CONFIG_FILE $imageid
+if [ "$disable_tests" = true ]; then
+    echo "skipping tests as DISABLE_TESTS set to TRUE"
+else
+    ./test.sh $CONFIG_FILE $imageid
+fi
+
 
 #if test failed then dont share and copy the image to other regions
 if [ $? -eq 0 ];
 then
-
+    if [ "$disable_ami_sharing" = true ]; then
+        echo "skipping AMI sharing as disable_ami_sharing set to true"
+    else
+        ./share-ami.sh
+    fi
     # TODO exit if git is dirty
 
-    # share ami
-    for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
-    done
-
-    for target_region in $copy_regions; do
-        echo "Copying AMI to region $target_region ..."
-        result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
-        target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
-
-        state="no state yet"
-        while [ true ]; do
-        echo "Waiting for AMI creation in $target_region ... ($state)"
-
-        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-        state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
-
-        if [ "$state" = "failed" ]; then
-            echo "Image creation failed."
-            exit 1
-        elif [ "$state" = "available" ]; then
-            break
-        fi
-
-        sleep 10
-        done
-
-        for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
-        done
-    done
     #git add new release tag
     git tag $ami_name
     git push --tags
