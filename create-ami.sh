@@ -152,8 +152,6 @@ result=$(aws ec2 create-image \
 imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 echo "Image: $imageid"
 
-aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CDVersion,Value=$TAUPAGE_VERSION
-
 state="no state yet"
 while [ true ]; do
     echo "Waiting for AMI creation... ($state)"
@@ -165,6 +163,8 @@ while [ true ]; do
         echo "Image creation failed."
         exit 1
     elif [ "$state" = "available" ]; then
+        # set AMI Version Tag
+        aws ec2 create-tags --region $region --resources $imageid --tags Key=Version,Value=$TAUPAGE_VERSION
         break
     fi
 
@@ -175,7 +175,7 @@ done
 if [ "$disable_tests" = true ]; then
     echo "skipping tests as DISABLE_TESTS set to TRUE"
 else
-    ./test.sh $CONFIG_FILE $imageid
+    ./test.sh $CONFIG_FILE $TAUPAGE_VERSION
 fi
 
 
@@ -185,19 +185,10 @@ then
     if [ "$disable_ami_sharing" = true ]; then
         echo "skipping AMI sharing as disable_ami_sharing set to true"
     else
-        ./share-ami.sh
+        ./share-ami.sh $CONFIG_FILE $TAUPAGE_VERSION    
     fi
     # TODO exit if git is dirty
 
-    #git add new release tag
-    git tag $ami_name
-    git push --tags
-    # get commitID
-    commit_id=$(git log | head -n 1 | awk {'print $2'})
-    #tag image in Frankfurt with commitID
-    aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
-    #tag image in Ireland with commitID
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."

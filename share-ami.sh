@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG_FILE=./$1
-TAUPAGEVERSION=./$2
+TAUPAGE_VERSION=./$2
 
 # load configuration file
 . $CONFIG_FILE
@@ -42,4 +42,16 @@ else
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
         done
     done
+    #git add new release tag
+    # get AMI-name
+    ami_name=$(aws ec2 describe-images --region $region --filters Name=image-id,Values=$imageid --query 'Images[*].{ID:Name}' --output text)
+    git tag $ami_name
+    git push --tags
+    # get commitID
+    commit_id=$(git log | head -n 1 | awk {'print $2'})
+    #tag image in Frankfurt with commitID
+    aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
+    #tag image in Ireland with commitID
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
+    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=Version,Value=$TAUPAGE_VERSION
 fi
