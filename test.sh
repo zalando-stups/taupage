@@ -45,7 +45,7 @@ set -e
 # load volume testing definitions
 . volume_testing.sh
 
-AMI_ID=$(aws ec2 describe-images --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+AMI_ID=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 
 echo "Running AMI tests for $AMI_ID"
 
