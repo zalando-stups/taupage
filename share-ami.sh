@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG_FILE=./$1
-TAUPAGE_VERSION=./$2
+TAUPAGE_VERSION=$2
 
 # load configuration file
 . $CONFIG_FILE
