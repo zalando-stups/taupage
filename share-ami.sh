@@ -8,8 +8,8 @@ cd $(dirname $0)
 # load configuration file
 . $CONFIG_FILE
 
-# get ami_id and share ami 
-imageid=$(aws ec2 describe-images --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+# get ami_id and share ami
+imageid=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 for account in $accounts; do
     echo "Sharing AMI with account $account ..."
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
