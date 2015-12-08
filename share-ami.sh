@@ -3,6 +3,8 @@
 CONFIG_FILE=$1
 TAUPAGE_VERSION=$2
 
+cd $(dirname $0)
+
 # load configuration file
 . $CONFIG_FILE
 
