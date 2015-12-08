@@ -42,7 +42,7 @@ TAUPAGE_VERSION=./$2
 set -e
 
 # reset path
-cd $(dirname $0)
+#cd $(dirname $0)
 
 if [ ! -f "$secret_dir/secret-vars.sh" ]; then
     echo "Missing secret-vars.sh in secret dir" >&2
