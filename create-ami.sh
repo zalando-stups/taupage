@@ -32,7 +32,7 @@ if [ -z "$1" ] || [ ! -r "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 CONFIG_FILE=./$1
-TAUPAGE_VERSION=./$2
+TAUPAGE_VERSION=$2
 
 # load configuration file
 . $CONFIG_FILE
