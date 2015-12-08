@@ -39,10 +39,10 @@ TAUPAGE_VERSION=$2
 set -e
 
 # load config
-. ./$CONFIG_FILE
+. $CONFIG_FILE
 
 # load volume testing definitions
-. ./volume_testing.sh
+. volume_testing.sh
 
 echo "Running AMI tests for $AMI_ID"
 
