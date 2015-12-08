@@ -8,9 +8,10 @@ cd $(dirname $0)
 # load configuration file
 . $CONFIG_FILE
 
-# get ami_id and ami_name  
+# get ami_id, ami_name and commitID
 imageid=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 ami_name=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:Name}' --output  text)
+commit_id=$(git log | head -n 1 | awk {'print $2'})
 
 for account in $accounts; do
     echo "Sharing AMI with account $account ..."
@@ -41,6 +42,9 @@ for account in $accounts; do
         for account in $accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+        # set tags in other account
+        aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=Version,Value=$TAUPAGE_VERSION
+        aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=CommitID,Value=$commit_id
         done
     done
     #git add new release tag
@@ -48,11 +52,6 @@ for account in $accounts; do
     ami_name=$(aws ec2 describe-images --region $region --filters Name=image-id,Values=$imageid --query 'Images[*].{ID:Name}' --output text)
     git tag $ami_name
     git push --tags
-    # get commitID
-    commit_id=$(git log | head -n 1 | awk {'print $2'})
     #tag image in Frankfurt with commitID
     aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
-    #tag image in Ireland with commitID
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=Version,Value=$TAUPAGE_VERSION
 done
