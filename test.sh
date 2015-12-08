@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 # finally cleanup ec2 instance
 function finally() {
