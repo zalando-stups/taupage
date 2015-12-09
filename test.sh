@@ -50,6 +50,7 @@ echo "Running AMI tests for $AMI_ID"
 
 create_profile_for_volume_attachment
 create_test_volumes
+sleep 10
 
 # get a server
 echo "Starting test server..."
