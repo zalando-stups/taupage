@@ -27,7 +27,7 @@ echo 'deb http://rep.logentries.com/ trusty main' > /etc/apt/sources.list.d/loge
 gpg --keyserver pgp.mit.edu --recv-keys C43C79AD && gpg -a --export C43C79AD | apt-key add -
 
 # Docker key Yandex
-wget -qO- http://mirror.yandex.ru/mirrors/docker/DOCKER-GPG-KEY | apt-key add -
+wget -qO- http://mirror.yandex.ru/mirrors/docker/gpg | apt-key add -
 
 
 # add Newrelic repo

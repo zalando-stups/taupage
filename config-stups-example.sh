@@ -42,3 +42,7 @@ hipchat_server_address="hipchat.com" # Put your server address here
 hipchat_room_id="notifications" # Room ID (the room name)
 hipchat_auth_token="" # Auth token for the HipChat room
 hipchat_message="[Taupage] AMI $ami_name ($imageid) successfully created and shared."
+
+# Disable AMI sharing for CD build pipeline or different purposes, default: false
+disable_ami_sharing="false"
+disable_tests="false"
