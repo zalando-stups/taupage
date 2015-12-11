@@ -57,7 +57,8 @@ if [ "$state" = "available" ]; then
   git tag $ami_name
   git push --tags
   #tag image in Frankfurt with commitID
-  aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
+  commit_id=$(git log | head -n 1 | awk {'print $2'})
+  aws ec2 create-tags --region $region --resources $imageid --tags Key=CommitID,Value=$commit_id
 else
   echo "Image creation/copy failed."
 fi
