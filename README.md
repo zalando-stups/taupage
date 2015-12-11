@@ -11,14 +11,14 @@ You need to have [jq](http://stedolan.github.io/jq/) and [AWS CLI](http://aws.am
 You need to be logged in (mai login).
 (As a configuration example, you can find the file config-stups-example.sh in the code base. You should modify it to suit it to your needs.)
 
-    $ ./create-ami.sh ./config-stups.sh
+    $ ./create-ami.sh ./config-stups.sh <version>
 
 This will spin up a new server, configure it, create an AMI from it, terminate the server and share the AMI. If you
 want to debug the server after setup, you can add a `--dry-run` flag: AMI generation, terminating and sharing will be
 skipped.
 
     $ ./create-ami.sh --dry-run ./config-stups.sh
-    
+
 See the [STUPS documentation](https://docs.stups.io/en/latest/installation/taupage-ami-creation.html) for more information.
 
 ## Directory structure
