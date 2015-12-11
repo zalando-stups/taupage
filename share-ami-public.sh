@@ -46,7 +46,7 @@ for account in $all_accounts; do
         sleep 10
         done
 
-        for account in $accounts; do
+        for account in $all_accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
         # set tags in other account
