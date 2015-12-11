@@ -8,12 +8,19 @@ cd $(dirname $0)
 # load configuration file
 . $CONFIG_FILE
 
+
+config_dir=$(dirname $1)
+
+# accounts to share with
+all_accounts=`$config_dir/get-aws-account-ids.py`
+
 # get ami_id, ami_name and commitID
 imageid=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 ami_name=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:Name}' --output  text)
 commit_id=$(git log | head -n 1 | awk {'print $2'})
 
-for account in $accounts; do
+
+for account in $all_accounts; do
     echo "Sharing AMI with account $account ..."
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
 
@@ -48,16 +55,3 @@ for account in $accounts; do
         done
     done
 done
-
-#check if image creation/copy was successfull
-if [ "$state" = "available" ]; then
-  #git add new release tag
-  # get AMI-name
-  ami_name=$(aws ec2 describe-images --region $region --filters Name=image-id,Values=$imageid --query 'Images[*].{ID:Name}' --output text)
-  git tag $ami_name
-  git push --tags
-  #tag image in Frankfurt with commitID
-  aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
-else
-  echo "Image creation/copy failed."
-fi
