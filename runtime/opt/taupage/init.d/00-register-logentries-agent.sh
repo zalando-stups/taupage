@@ -33,6 +33,7 @@ then
     if [ "$?" = "0" ];
     then
         echo -n "DONE"
+        echo ""
     else
         echo -n "ERROR: Register to Logentries account failed";
         exit
@@ -42,6 +43,14 @@ then
     le follow /var/log/syslog
     le follow /var/log/auth.log
     le follow /var/log/application.log
+
+    for log_location in $config_logs; do
+        # wildcard if a dir was specified
+        if [[ ${log_location: -1} == '/' ]]; then
+            log_location="$log_location*"
+        fi
+        le follow /var/log/application$log_location
+    done
 
 echo "
 [syslog]
@@ -60,6 +69,18 @@ echo "
 path = /var/log/application.log
 destination = $APPID-$APPVERSION/application.log
 " >> /etc/le/config
+
+for log_location in $config_logs; do
+    # wildcard if a dir was specified
+    if [[ ${log_location: -1} == '/' ]]; then
+        log_location="$log_location*"
+    fi
+echo "
+[$APPID-$APPVERSION]
+path = /var/log/application$log_location
+destination = $log_location
+" >> /etc/le/config
+done
 
     #restart daemon
     service logentries restart

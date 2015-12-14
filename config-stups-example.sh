@@ -33,7 +33,7 @@ eu-central-1
 # security group with SSH and HTTP open
 security_group="sg-123456"
 
-# subnet to use:
+# subnet to use (must be publicly available):
 subnet="subnet-123456"
 
 # HipChat notification when AMI is built

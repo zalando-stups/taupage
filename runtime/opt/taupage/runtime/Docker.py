@@ -164,6 +164,25 @@ def get_port_options(config: dict):
         yield '{}:{}'.format(host_port, container_port)
 
 
+def get_log_options(config: dict):
+    for val in get_or(config, 'logs', "").split(" "):
+        # check for no key, maybe that can be better handled?
+        if val != "":
+            # if dir is not writeable by all, the docker process cannot write something in it
+            # rsplit for finding the dir, regardless if file or not ...
+            target = val.rsplit("/", 1)
+            logging.info("creating and setting rights for {0}".format(target))
+            subprocess.call(["mkdir", "-p", "/var/log/application{0}".format(target[0])])
+            subprocess.call(["chmod", "777", "/var/log/application{0}".format(target[0])])
+            # if we have files to mount, we need to create them on the host, if not
+            # docker will create dirs instead
+            if val[-1:] != "/":
+                subprocess.call(["touch", "/var/log/application{0}".format(val)])
+                subprocess.call(["chmod", "777", "/var/log/application{0}".format(val)])
+            yield '-v'
+            yield '/var/log/application{0}:{0}'.format(val)
+
+
 def get_other_options(config: dict):
     if not config.get('root'):
         # Docker only accepts UNIX user IDs (not names)
@@ -227,8 +246,8 @@ def run_docker(cmd, dry_run):
                 out = subprocess.check_output(cmd)
                 break
             except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                if i + 1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
@@ -282,7 +301,7 @@ def main(args):
         registry_login(config, registry)
 
     cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--restart=on-failure:10']
-    for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+    for f in get_env_options, get_volume_options, get_port_options, get_log_options, get_other_options:
         cmd += list(f(config))
     cmd += [source]
 
