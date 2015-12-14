@@ -42,6 +42,15 @@ def main():
     try:
         path = os.path.expanduser('~/.dockercfg')
         write_file(path, json.dumps(config.get('dockercfg')))
+
+        directory = os.path.expanduser('~/docker')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        path = os.path.expanduser('~/docker/config.json')
+        write_file(path, json.dumps( {
+            'auths' : config.get('dockercfg', {})
+        }))
+        
         logging.info('Successfully placed dockercfg')
     except Exception as e:
         logging.error('Failed to create dockercfg')
