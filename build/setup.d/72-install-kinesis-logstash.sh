@@ -122,6 +122,7 @@ output {
     # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
     metrics_level => "none"
     aggregation_enabled => false
+    randomized_partition_key => true
   }
 }
 
