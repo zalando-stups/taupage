@@ -8,5 +8,6 @@ if [ "$enhanced_cloudwatch_metrics" = True ] ; then
   if [ ! -f /etc/cron.d/mon-put-instance-data-cloudwatch ]; then
     echo "enhanced_cloudwatch_metrics detected...enabling additional cloudwatch metrics"
     mv /etc/cron.d/mon-put-instance-data-cloudwatch.deactivated /etc/cron.d/mon-put-instance-data-cloudwatch
+    chmod 600 /etc/cron.d/mon-put-instance-data-cloudwatch
   fi
 fi
