@@ -2,6 +2,7 @@ pkgs="
 boto
 boto3
 botocore
+awscli
 "
 
 echo "Installing Python packages..."
