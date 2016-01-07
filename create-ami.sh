@@ -177,6 +177,8 @@ if [ $? -eq 0 ];
 then
 
     # TODO exit if git is dirty
+    rm ./list_of_new_amis
+    echo "$region,$target_imageid" >> ./list_of_new_amis
 
     # share ami
     for account in $accounts; do
@@ -191,24 +193,27 @@ then
 
         state="no state yet"
         while [ true ]; do
-        echo "Waiting for AMI creation in $target_region ... ($state)"
+            echo "Waiting for AMI creation in $target_region ... ($state)"
 
-        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-        state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
+            result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
+            state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
 
-        if [ "$state" = "failed" ]; then
-            echo "Image creation failed."
-            exit 1
-        elif [ "$state" = "available" ]; then
-            break
-        fi
+            if [ "$state" = "failed" ]; then
+                echo "Image creation failed."
+                exit 1
+            elif [ "$state" = "available" ]; then
+                break
+            fi
 
-        sleep 10
+            sleep 10
         done
 
         for account in $accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+
+        #write ami and region to file for later parsing
+        echo "$target_region,$target_imageid" >> ./list_of_new_amis
         done
     done
     #git add new release tag
