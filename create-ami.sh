@@ -177,7 +177,7 @@ if [ $? -eq 0 ];
 then
 
     # TODO exit if git is dirty
-    rm ./list_of_new_amis
+    rm -f ./list_of_new_amis
     echo "$region,$target_imageid" >> ./list_of_new_amis
 
     # share ami
