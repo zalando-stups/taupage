@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 # finally terminate ec2 instance
 function finally() {
@@ -194,7 +195,6 @@ then
         echo "Copying AMI to region $target_region ..."
         result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
         target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
-        echo "!! Target AMI ID in $target_region: $target_imageid"
 
         state="no state yet"
         while [ true ]; do
