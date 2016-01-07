@@ -28,14 +28,7 @@ def get_region():
     return identity['region']
 
 
-def decrypt(val):
-    '''
-    >>> decrypt(True)
-    True
-
-    >>> decrypt('test')
-    'test'
-    '''
+def decrypt(val, config: dict):
     if str(val).startswith(AWS_KMS_PREFIX):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
         ciphertext_blob = base64.b64decode(ciphertext_blob)
@@ -47,7 +40,7 @@ def decrypt(val):
             # workaround: return Base64 as unicode string
             orig = base64.b64encode
             base64.b64encode = lambda x: orig(x).decode('ascii')
-            data = conn.decrypt(ciphertext_blob)
+            data = conn.decrypt(ciphertext_blob, encryption_context = get_or(config, 'encryption_context', None))
             if 'Plaintext' not in data:
                 raise Exception('KMS decrypt failed')
         finally:
@@ -78,7 +71,7 @@ def get_env_options(config: dict):
     '''build Docker environment options'''
     for key, val in get_or(config, 'environment', {}).items():
         yield '-e'
-        yield '{}={}'.format(key, decrypt(val))
+        yield '{}={}'.format(key, decrypt(val, config))
 
     if config.get('etcd_discovery_domain'):
         # TODO: use dynamic IP of docker0
