@@ -151,7 +151,6 @@ result=$(aws ec2 create-image \
 
 imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 echo "Image: $imageid"
-echo "$imageid" >aws-image-id.txt
 
 state="no state yet"
 while [ true ]; do
