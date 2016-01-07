@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env -S bash -x
 set -e
 
 # finally terminate ec2 instance
