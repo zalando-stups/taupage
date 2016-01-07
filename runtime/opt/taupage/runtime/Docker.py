@@ -8,7 +8,6 @@ import base64
 import boto.kms
 import boto.utils
 import logging
-import pierone.api
 import pwd
 import requests
 import sys
@@ -194,19 +193,7 @@ def extract_registry(docker_image: str) -> str:
 
 
 def registry_login(config: dict, registry: str):
-    if 'pierone' not in registry:
-        logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
-        return
-    pierone_url = 'https://{}'.format(registry)
-
-    token = get_token(config, 'pierone', ['uid'])
-
-    if not token or 'access_token' not in token:
-        logging.warning('Missing OAuth token for Pier One login')
-        return
-
-    pierone.api.docker_login_with_token(pierone_url, token['access_token'])
-
+   return
 
 def run_docker(cmd, dry_run):
     logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
