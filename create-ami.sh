@@ -172,78 +172,70 @@ done
 
 # run tests
 ./test.sh $CONFIG_FILE $imageid
+# Early exit if tests failed
+EXITCODE_TESTS=$?
+if [ $EXITCODE_TESTS -ne 0 ]; then
+    echo "!!! AMI $ami_name ($imageid) create failed "
+    exit $EXITCODE_TESTS
+fi
 
-#if test failed then dont share and copy the image to other regions
-if [ $? -eq 0 ];
-then
 
-    # TODO exit if git is dirty
-    rm -f ./list_of_new_amis
-    echo "$region,$imageid" >> ./list_of_new_amis
+# TODO exit if git is dirty
+rm -f ./list_of_new_amis
+echo "$region,$imageid" >> ./list_of_new_amis
+echo "Attaching launch permission to accounts: $accounts"
 
-    echo "Attaching launch permission to accounts: $accounts"
+# get commitID
+commit_id=$( git rev-parse HEAD )
+# Tag AMI with commit id
+aws ec2 create-tags --region $region --resources $imageid --tags Key=CommitID,Value=$commit_id
 
-    # share ami
-    for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+# share ami
+for account in $accounts; do
+    echo "Sharing AMI with account $account ..."
+    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+done
+
+for target_region in $copy_regions; do
+    echo "Copying AMI to region $target_region ..."
+    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
+    target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
+    state="no state yet"
+    while [ true ]; do
+        echo "Waiting for AMI creation in $target_region ... ($state)"
+
+        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
+        state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
+
+        if [ "$state" = "failed" ]; then
+            echo "Image creation failed."
+            exit 1
+        elif [ "$state" = "available" ]; then
+            break
+        fi
+
+        sleep 10
     done
+    # Tag the copied AMI in the target region
+    aws ec2 create-tags --region $target_region --resources $target_imageid --tags Key=CommitID,Value=$commit_id
 
-    echo "Copying AMI to regions: $copy_regions"
-
-    for target_region in $copy_regions; do
-        echo "Copying AMI to region $target_region ..."
-        result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
-        target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
-
-        state="no state yet"
-        while [ true ]; do
-            echo "Waiting for AMI creation in $target_region ... ($state)"
-
-            result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-            state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
-
-            if [ "$state" = "failed" ]; then
-                echo "Image creation failed."
-                exit 1
-            elif [ "$state" = "available" ]; then
-                break
-            fi
-
-            sleep 10
-        done
-
-        for account in $accounts; do
+    for account in $accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
 
         #write ami and region to file for later parsing
         echo "$target_region,$target_imageid" >> ./list_of_new_amis
-        done
     done
-    #git add new release tag
-    # git tag $ami_name
-    # git push --tags
-    # get commitID
-    commit_id=$( git rev-parse HEAD )
-    #tag image in Frankfurt with commitID
-    aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
-    if [[ $target_imageid ]]; then 
-        #tag image in Ireland with commitID
-        aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
-    fi
+done
+#git add new release tag
+# git tag $ami_name
+# git push --tags
 
-    # finished!
-    echo "AMI $ami_name ($imageid) successfully created and shared."
+# finished!
+echo "AMI $ami_name ($imageid) successfully created and shared."
 
-    # HipChat notification
-    if [ "$hipchat_notification_enabled" = true ]; then
-        echo "Sending HipChat notification..."
-        curl -s -S -X POST -H "Content-Type: application/json" -d "{\"message\":\"$hipchat_message\"}" "https://${hipchat_server_address}/v2/room/${hipchat_room_id}/notification?auth_token=${hipchat_auth_token}"
-    fi
-
-else
-
-    echo "AMI $ami_name ($imageid) create failed "
-
+# HipChat notification
+if [ "$hipchat_notification_enabled" = 'true' ]; then
+    echo "Sending HipChat notification..."
+    curl -s -S -X POST -H "Content-Type: application/json" -d "{\"message\":\"$hipchat_message\"}" "https://${hipchat_server_address}/v2/room/${hipchat_room_id}/notification?auth_token=${hipchat_auth_token}"
 fi
