@@ -35,16 +35,16 @@ ssh_ports:
 cloudwatch_logs:
   /var/log/syslog: my-syslog-loggroup
   /var/log/application.log: my-application-loggroup
-  
+
 docker:
   container_name: ubuntu:14.04
 #  log_driver: gelf
 #  log_opt:
 #    gelf-address: udp://localhost:12201
-  
+
 logstash:
   enabled: true
-  kinesis_stream: "the-kinesis-stream"          
+  kinesis_stream: "the-kinesis-stream"
   tags:
     origin: "ooooorigin"
     foo : "bar"
