@@ -1,5 +1,6 @@
-#!/usr/bin/env -S bash -x
+#!/usr/bin/env bash
 set -e
+set -x
 
 # finally terminate ec2 instance
 function finally() {
