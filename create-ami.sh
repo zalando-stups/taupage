@@ -178,13 +178,17 @@ then
 
     # TODO exit if git is dirty
     rm -f ./list_of_new_amis
-    echo "$region,$target_imageid" >> ./list_of_new_amis
+    echo "$region,$imageid" >> ./list_of_new_amis
+
+    echo "Attaching launch permission to accounts: $accounts"
 
     # share ami
     for account in $accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
     done
+
+    echo "Copying AMI to regions: $copy_regions"
 
     for target_region in $copy_regions; do
         echo "Copying AMI to region $target_region ..."
@@ -224,8 +228,10 @@ then
     commit_id=$( git rev-parse HEAD )
     #tag image in Frankfurt with commitID
     aws ec2 create-tags --region eu-central-1 --resources $imageid --tags Key=CommitID,Value=$commit_id
-    #tag image in Ireland with commitID
-    aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
+    if [[ $target_imageid ]]; then 
+        #tag image in Ireland with commitID
+        aws ec2 create-tags --region eu-west-1 --resources $target_imageid --tags Key=CommitID,Value=$commit_id
+    fi
 
     # finished!
     echo "AMI $ami_name ($imageid) successfully created and shared."
