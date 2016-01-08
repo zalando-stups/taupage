@@ -6,18 +6,20 @@ set -x
 function finally() {
 
     if [ $DRY_RUN = true ]; then
-       echo "Dry run requested; skipping server termination"
+        echo "Dry run requested; skipping server termination"
     else
-       # delete instance
-       echo "Terminating server..."
-       aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+        # delete instance
+        echo "Terminating server..."
+        aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+        # Cleanup files
+        rm -f ssh_config $keyfile
     fi
 }
-trap finally EXIT
+trap finally EXIT TERM SEGV ABRT QUIT INT
 
 
 # default description (may be overriden by config file)
-ami_description="STUPS' Taupage AMI with Docker runtime"
+ami_description="STUPS Taupage AMI with Docker runtime"
 
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
@@ -35,10 +37,7 @@ fi
 CONFIG_FILE=./$1
 
 # load configuration file
-. $CONFIG_FILE
-
-# start creation
-set -e
+source $CONFIG_FILE
 
 # reset path
 cd $(dirname $0)
