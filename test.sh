@@ -66,7 +66,7 @@ result=$(aws ec2 run-instances \
     --subnet-id $subnet \
     --output json \
     --region $region \
-    --user-data file://$(pwd)/test-userdata.yaml)
+    --user-data file://$(pwd)/../test-userdata.yaml)
 
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
 echo "Instance: $instanceid"
