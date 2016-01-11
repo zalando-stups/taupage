@@ -281,7 +281,7 @@ def main(args):
     if registry:
         registry_login(config, registry)
 
-    cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--restart=on-failure:10']
+    cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--name=taupage', '--restart=on-failure:10']
     for f in get_env_options, get_volume_options, get_port_options, get_other_options:
         cmd += list(f(config))
     cmd += [source]
