@@ -19,8 +19,8 @@ describe command('docker info') do
   its(:stdout) { should match /Storage Driver: aufs/ }
 end
 
-describe file('/root/.dockercfg') do
-  it { should contain 'https://hub.docker.com' }
-  it { should contain 'foo' }
-  it { should contain 'auth' }
-end
+#describe file('/root/.dockercfg') do
+#  it { should contain 'https://hub.docker.com' }
+#  it { should contain 'foo' }
+#  it { should contain 'auth' }
+#end
