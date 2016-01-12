@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe command('docker images') do
-  its(:stdout) { should contain '"Name": "ice-docker:204"' }
-  its(:stdout) { should contain '"Name": "ice-docker:200"' }
+  its(:stdout) { should contain 'privreg-test-docker' }
+  its(:stdout) { should contain 'ecr-test-docker' }
 end
 
