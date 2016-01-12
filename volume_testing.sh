@@ -31,7 +31,14 @@ cat << EOF > "$PERMISSIONS_POLICY"
         "Action": [
             "ec2:DescribeVolumes",
             "ec2:AttachVolume",
-            "ec2:DetachVolume"
+            "ec2:DetachVolume",
+            "ecr:GetAuthorizationToken",
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:GetRepositoryPolicy",
+            "ecr:DescribeRepositories",
+            "ecr:ListImages",
+            "ecr:BatchGetImage"
         ],
         "Resource": "*"
     }
