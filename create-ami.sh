@@ -223,8 +223,8 @@ for target_region in $copy_regions; do
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
 
         #write ami and region to file for later parsing
-        echo "$target_region,$target_imageid" >> ./list_of_new_amis
     done
+    echo "$target_region,$target_imageid" >> ./list_of_new_amis
 done
 #git add new release tag
 # git tag $ami_name
