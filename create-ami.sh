@@ -3,7 +3,7 @@ set -e
 set -x
 
 # finally terminate ec2 instance
-function finally() {
+function finally {
 
     if [ $DRY_RUN = true ]; then
         echo "Dry run requested; skipping server termination"
