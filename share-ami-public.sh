@@ -33,17 +33,18 @@ for target_region in $copy_regions; do
 
     state="no state yet"
     while [ true ]; do
-    echo "Waiting for AMI creation in $target_region ... ($state)"
+        echo "Waiting for AMI creation in $target_region ... ($state)"
 
-    result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-    state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
+        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
+        state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
 
-    if [ "$state" = "failed" ]; then
-        echo "Image creation failed."
-        exit 1
-    elif [ "$state" = "available" ]; then
-        break
-    fi
+        if [ "$state" = "failed" ]; then
+            echo "Image creation failed."
+            exit 1
+        elif [ "$state" = "available" ]; then
+            break
+        fi
+    done
     sleep 10
 
     #create image tags in target region
