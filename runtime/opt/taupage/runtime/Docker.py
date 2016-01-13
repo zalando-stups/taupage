@@ -264,7 +264,7 @@ def main(args):
             out = subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
-        sys.exit(1)
+
     logging.info(config['pull_private'])
 
     if(config['pull_private']):
@@ -277,7 +277,7 @@ def main(args):
             out = subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
-        sys.exit(1)
+
 
     registry = extract_registry(source)
 
