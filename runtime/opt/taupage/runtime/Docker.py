@@ -253,6 +253,26 @@ def main(args):
 
     source = config['source']
 
+    if(config['pull_ecr']):
+        pull_ecr = config['pull_ecr']
+        pull_cmd = ['docker', 'pull', pull_ecr]
+
+        try:
+            run_docker(pull_cmd, args.dry_run)
+        except Exception as e:
+            logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
+        sys.exit(1)
+
+    if(config['pull_private']):
+        pull_private = config['pull_private']
+        pull_cmd = ['docker', 'pull', pull_private]
+
+        try:
+            run_docker(pull_cmd, args.dry_run)
+        except Exception as e:
+            logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
+        sys.exit(1)
+
     registry = extract_registry(source)
 
     if registry:
