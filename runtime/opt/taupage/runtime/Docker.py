@@ -258,7 +258,7 @@ def main(args):
         pull_cmd = ['docker', 'pull', pull_ecr]
 
         try:
-            run_docker(pull_cmd, args.dry_run)
+            out = subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
@@ -268,7 +268,7 @@ def main(args):
         pull_cmd = ['docker', 'pull', pull_private]
 
         try:
-            run_docker(pull_cmd, args.dry_run)
+            out = subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
         sys.exit(1)
