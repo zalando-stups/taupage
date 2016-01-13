@@ -180,8 +180,9 @@ fi
 
 
 # TODO exit if git is dirty
-rm -f ./list_of_new_amis
+rm -f ./list_of_new_amis ./list_of_accounts
 echo "$region,$imageid" >> ./list_of_new_amis
+echo "$accounts" >./list_of_accounts
 echo "Attaching launch permission to accounts: $accounts"
 
 # get commitID
