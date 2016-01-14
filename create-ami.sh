@@ -19,7 +19,7 @@ trap finally EXIT TERM SEGV ABRT QUIT INT
 
 
 # default description (may be overriden by config file)
-ami_description="STUPS Taupage AMI with Docker runtime"
+ami_description="TEST Taupage AMI with Docker runtime"
 
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
@@ -180,9 +180,8 @@ fi
 
 
 # TODO exit if git is dirty
-rm -f ./list_of_new_amis ./list_of_accounts
+rm -f ./list_of_new_amis
 echo "$region,$imageid" >> ./list_of_new_amis
-echo "$accounts" >./list_of_accounts
 echo "Attaching launch permission to accounts: $accounts"
 
 # get commitID
