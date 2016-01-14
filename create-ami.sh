@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
-set -e
 set -x
+
+function wait_until_instance_properly_terminated {
+    local INSTANCE_ID REGION STATE RESULT_JSON
+    INSTANCE_ID=$1
+    REGION=$2
+    while [ true ]; do
+        RESULT_JSON=$(aws ec2 describe-instances --instance-id i-78ebd8f3 --region $REGION 2>/dev/null)
+        EXITCODE_AWS=$?
+        if [[ $EXITCODE_AWS -ne 0 ]]; then
+            # No such id or other error, exit
+            return
+        fi
+        STATE=$(echo $RESULT_JSON|jq -r '.Reservations[0].Instances[0].State.Name')
+        if [[ $STATE = 'terminated' ]]; then
+            return
+        fi
+        # Wait a bit with retrying
+        sleep 5
+    done
+}
 
 # finally terminate ec2 instance
 function finally {
@@ -13,6 +32,7 @@ function finally {
         aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
         # Cleanup files
         rm -f ssh_config $keyfile
+        wait_until_instance_properly_terminated $instanceid $region
     fi
 }
 trap finally EXIT TERM SEGV ABRT QUIT INT

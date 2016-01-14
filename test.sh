@@ -12,7 +12,6 @@ function finally() {
 	else
 		echo "Skipping termination of server due to dry run. Instance profile and test volumes were also kept intact!"
 	fi
-    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
 }
 trap finally EXIT
 
