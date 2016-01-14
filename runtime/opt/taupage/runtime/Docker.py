@@ -253,7 +253,7 @@ def main(args):
 
     source = config['source']
 
-    if(config['pull_ecr']):
+    if config.get('pull_ecr'):
         pull_ecr = config['pull_ecr']
         pull_cmd = ['docker', 'pull', pull_ecr]
 
@@ -264,7 +264,7 @@ def main(args):
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
 
-    if(config['pull_private']):
+    if config.get('pull_private'):
         logging.info(config['pull_private'])
         pull_private = config['pull_private']
         pull_cmd = ['docker', 'pull', pull_private]
