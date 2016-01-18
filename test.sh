@@ -89,7 +89,7 @@ while [ true ]; do
     echo "Waiting for server, checking private ssh user ..."
 
     set +e
-    ssh $ssh_args_secret $private_ssh_user@$ip echo >/dev/null
+    ssh $secret_ssh_args $private_ssh_user@$ip echo >/dev/null
     alive=$?
     set -e
 
