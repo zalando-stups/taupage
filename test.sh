@@ -84,9 +84,25 @@ done
 
 echo "IP: $ip"
 
+# wait for server - checking ssh-access-granting-service.pub
+while [ true ]; do
+    echo "Waiting for server, checking private ssh user ..."
+
+    set +e
+    ssh $secret_ssh_args $private_ssh_user@$ip echo >/dev/null
+    alive=$?
+    set -e
+
+    if [ $alive -eq 0 ]; then
+        break
+    fi
+
+    sleep 2
+done
+
 # wait for server
 while [ true ]; do
-    echo "Waiting for server..."
+    echo "Logging in with ubuntu user..."
 
     set +e
     ssh $ssh_args ubuntu@$ip echo >/dev/null
