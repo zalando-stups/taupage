@@ -15,6 +15,7 @@ import sys
 import subprocess
 import time
 import yaml
+import os
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
@@ -139,6 +140,15 @@ def get_volume_options(config: dict):
         yield '/var/run/docker.sock:/var/run/docker.sock'
         yield '-v'
         yield '/usr/bin/docker:/usr/bin/docker'
+
+    if config.get('docker_audit'):
+        try:
+            os.mkdir('/var/log/audit')
+            os.chmod('/var/log/audit', 01777)
+        except:
+            pass
+        yield '-v'
+        yield '/var/log/audit:/var/log/audit'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
