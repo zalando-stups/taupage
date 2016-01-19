@@ -6,6 +6,10 @@ describe file('/etc/logstash.conf') do
   it { should contain 'stream_name => "the-kinesis-stream"' }
 end
 
-describe command('docker inspect logstash') do
-  its(:stdout) { should contain '"Name": "/logstash"' }
+describe docker_container('logstash') do
+  it { should be_running }
+end
+
+describe port(12201) do
+  it { should be_listening.with('udp') }
 end

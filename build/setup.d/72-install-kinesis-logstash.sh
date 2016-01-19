@@ -4,7 +4,7 @@ logstashImage="local/logstash:1"
 
 function buildLogstashDockerContainer {
   cat <<__EOF > /tmp/Dockerfile
-FROM logstash:1.5.5
+FROM logstash:2.1.1-1
 RUN /opt/logstash/bin/plugin install logstash-output-kinesis
 __EOF
   cd /tmp/
