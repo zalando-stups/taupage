@@ -84,12 +84,13 @@ done
 
 echo "IP: $ip"
 
-# wait for server - checking ssh-access-granting-service.pub
+
+# wait for server
 while [ true ]; do
-    echo "Waiting for server, checking private ssh user ..."
+    echo "Logging in with ubuntu user..."
 
     set +e
-    ssh $secret_ssh_args $private_ssh_user@$ip echo >/dev/null
+    ssh $ssh_args ubuntu@$ip echo >/dev/null
     alive=$?
     set -e
 
@@ -100,12 +101,12 @@ while [ true ]; do
     sleep 2
 done
 
-# wait for server
+# wait for server - checking ssh-access-granting-service.pub
 while [ true ]; do
-    echo "Logging in with ubuntu user..."
+    echo "Waiting for server, checking private ssh user ..."
 
     set +e
-    ssh $ssh_args ubuntu@$ip echo >/dev/null
+    ssh $secret_ssh_args $private_ssh_user@$ip echo >/dev/null
     alive=$?
     set -e
 
