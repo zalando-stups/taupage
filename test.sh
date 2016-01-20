@@ -111,8 +111,7 @@ while [ true ]; do
     set -e
 
     if [ $alive -eq 0 ]; then
-        #break
-        echo 'raus'
+        break
     fi
 
     sleep 2
