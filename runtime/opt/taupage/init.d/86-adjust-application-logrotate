@@ -10,7 +10,7 @@ application_logrotate="/etc/logrotate.d/application"
 #set custom filesize 
 if [ -n "$config_application_logrotate_size" ]; then
 	echo "INFO: Set filesize to $config_application_logrotate_size for application.log Logrotate"
-        sed -i "s/\#size\b.*$/size $config_application_logrotate_size/g" $application_logrotate 
+        sed -i "s/\bsize\b.*$/size $config_application_logrotate_size/g" $application_logrotate 
 fi
 
 
