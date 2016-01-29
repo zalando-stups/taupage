@@ -53,9 +53,12 @@ script
     fi
     
     instanceId=\$(ec2metadata --instance-id)
-    availabilityZone=\$(ec2metadata --availability-zone)
-    region=\$(echo \${availabilityZone} | rev | cut -c 2- | rev)
+    instanceAvailabilityZone=\$(ec2metadata --availability-zone)
+    instanceRegion=\$(echo \${instanceAvailabilityZone} | rev | cut -c 2- | rev)
+
+    region=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_region" "${instanceRegion}")
     stream=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_stream" "logging")
+
     rm -rf /etc/logstash.conf
     cat <<__EOF > /etc/logstash.conf
 input {
@@ -117,7 +120,7 @@ output {
   # https://github.com/samcday/logstash-output-kinesis
   kinesis {
     stream_name => "\${stream}"
-    region => "eu-west-1"
+    region => "\${region}"
     # for more settings see
     # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
     metrics_level => "none"
