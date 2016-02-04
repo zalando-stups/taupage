@@ -70,6 +70,9 @@ def main():
     while True:
         for fn in glob.glob('/var/log/audit.log.*.gz'):
             push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn)
+        for fn in glob.glob('/var/log/audit/*.log'):
+            if not fn.startswith('/var/log/audit/audit'):
+                push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn)
         if is_shutdown:
             for fn in glob.glob('/var/log/audit.log'):
                 push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=True)
