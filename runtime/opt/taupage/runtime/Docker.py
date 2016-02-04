@@ -83,7 +83,7 @@ def get_env_options(config: dict):
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
 
-     if config.get('appdynamics_application'):
+    if config.get('appdynamics_application'):
         # set appdynamics analytics url
         yield '-e'
         yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
