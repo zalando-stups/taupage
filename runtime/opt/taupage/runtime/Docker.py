@@ -83,10 +83,10 @@ def get_env_options(config: dict):
         yield '-e'
         yield 'ETCD_URL=http://172.17.42.1:2379'
 
-    # if config.get('appdynamics_application'):
+     if config.get('appdynamics_application'):
         # set appdynamics analytics url
-    #    yield '-e'
-    #    yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
+        yield '-e'
+        yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
 
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
     # NOTE: we should not add other environment variables here (even if it sounds tempting),
@@ -128,9 +128,9 @@ def get_volume_options(config: dict):
     # if 'newrelic_account_key' in config:
         # thats deprecated and has to be removed in some
 
-    # if 'appdynamics_application' in config:
-    #    yield '-v'
-    #    yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
+     if 'appdynamics_application' in config:
+        yield '-v'
+        yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
 
     # typically, for continuous integration/delivery systems, you need to be able to builder
     # Docker images and there is no better solution currently.
@@ -293,10 +293,10 @@ def main(args):
         sys.exit(1)
 
     # copy job files from docker container to the machine agent
-    # dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
-    # for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
-    #    print('copy jobfile: ', file)
-    #    shutil.copy(file, dest_dir)
+     dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
+     for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
+        print('copy jobfile: ', file)
+        shutil.copy(file, dest_dir)
 
     wait_for_health_check(config)
 

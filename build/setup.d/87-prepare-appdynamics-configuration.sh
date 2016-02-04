@@ -3,7 +3,7 @@
 set -x
 
 # check if directory exists
-if [ ! -d /opt/proprietary/appdynamics-machine_noinstall ]; then
+if [ ! -d /opt/proprietary/appdynamics-machine ]; then
 	echo "INFO: no AppDynamics agent found, skip configuration"
 else
 
@@ -51,8 +51,8 @@ else
 		# register config for runtime
 		echo $conf >> /opt/proprietary/appdynamics-configs
 	done
-        
-        # setup analytics Agent 
+
+        # setup analytics Agent
 	# check if GLOBAL ID is set in secret_vars
 	if [ -z "$APPDYNAMICS_ACCOUNT_GLOBALNAME" ]; then
 
@@ -62,16 +62,16 @@ else
 	   # enable analytics Agent
 	   monitor_xml="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/monitor.xml"
 	   sed -i "1,$ s/<enabled.*$/<enabled>true<\/enabled>/" $monitor_xml
-           
+
            # check if there is a custom properties_file if not than setup analytics properties file
            properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
            if [ -f /opt/proprietary/appdynamics-conf/analytics-agent.properties ]; then
               # copy file to machine agent
               cp /opt/proprietary/appdynamics-conf/analytics-agent.properties $properties_file
-           else  
+           else
              echo "ERROR: propertie file doesnt exists"
-             exit 1 
-           fi 
+             exit 1
+           fi
 	fi
 
 	# make sure they are writeable by docker users
