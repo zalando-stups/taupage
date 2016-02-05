@@ -128,7 +128,7 @@ def get_volume_options(config: dict):
     # if 'newrelic_account_key' in config:
         # thats deprecated and has to be removed in some
 
-     if 'appdynamics_application' in config:
+    if 'appdynamics_application' in config:
         yield '-v'
         yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
 
