@@ -293,8 +293,8 @@ def main(args):
         sys.exit(1)
 
     # copy job files from docker container to the machine agent
-     dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
-     for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
+    dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
+    for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
         print('copy jobfile: ', file)
         shutil.copy(file, dest_dir)
 
