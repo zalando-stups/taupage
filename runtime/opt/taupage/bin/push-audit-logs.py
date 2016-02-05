@@ -2,7 +2,6 @@
 
 import boto.utils
 import codecs
-import datetime
 import glob
 import gzip
 import json
@@ -30,12 +29,11 @@ def push_audit_log(config: dict, instance_logs_url, account_id, region, instance
             'log_data': codecs.encode(contents, 'base64').decode('utf-8'),
             'log_type': 'AUDIT_LOG'}
     try:
-        now = datetime.datetime.now()
         response = requests.post(instance_logs_url, data=json.dumps(data),
                                  headers={'Content-Type': 'application/json',
                                           'Authorization': 'Bearer {}'.format(token.get('access_token'))})
         if response.status_code == 201:
-            os.rename(fn, fn + '-pushed-{}'.format(now.isoformat('T')))
+            os.remove(fn)
         else:
             logging.warn('Failed to push audit log: server returned HTTP status {}: {}'.format(
                          response.status_code, response.text))
