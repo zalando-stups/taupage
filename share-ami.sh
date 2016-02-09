@@ -16,6 +16,7 @@ commit_id=$(git log | head -n 1 | awk {'print $2'})
 for account in $accounts; do
     echo "Sharing AMI with account $account ..."
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
+done
 
     for target_region in $copy_regions; do
         echo "Copying AMI to region $target_region ..."
@@ -30,7 +31,7 @@ for account in $accounts; do
         state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
 
         if [ "$state" = "failed" ]; then
-            echo "Image creation failed."
+            echo "copying Image failed."
             exit 1
         elif [ "$state" = "available" ]; then
             break
@@ -47,7 +48,6 @@ for account in $accounts; do
         aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=CommitID,Value=$commit_id
         done
     done
-done
 
 #check if image creation/copy was successfull
 if [ "$state" = "available" ]; then

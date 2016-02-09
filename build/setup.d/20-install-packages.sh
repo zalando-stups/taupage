@@ -13,7 +13,6 @@ logentries
 logentries-daemon
 docker-engine=1.8.3-0~trusty
 mdadm
-newrelic-sysmond
 ntp
 openjdk-7-jre-headless
 python3-pip
