@@ -81,6 +81,13 @@ def get_env_options(config: dict):
         yield '-e'
         yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
 
+    # set OAuth2 token info URL
+    # https://github.com/zalando-stups/taupage/issues/177
+    tokeninfo_url = config.get('tokeninfo_url')
+    if tokeninfo_url:
+        yield '-e'
+        yield 'TOKENINFO_URL={}'.format(tokeninfo_url)
+
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
     # NOTE: we should not add other environment variables here (even if it sounds tempting),
     # esp. EC2 metadata should not be passed as env. variables!

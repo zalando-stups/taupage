@@ -11,3 +11,6 @@ fi
 if [ -n "$INSTANCE_LOGS_URL" ]; then
     echo "instance_logs_url: $INSTANCE_LOGS_URL" >> /meta/taupage.yaml
 fi
+if [ -n "$TOKENINFO_URL" ]; then
+    echo "tokeninfo_url: $TOKENINFO_URL" >> /meta/taupage.yaml
+fi
