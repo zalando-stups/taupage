@@ -4,6 +4,7 @@ pkgs="
 boto
 boto3
 botocore
+requests
 "
 
 echo "Installing Python packages..."
