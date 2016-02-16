@@ -33,7 +33,7 @@ done
       sed -i "1,$ s/enabled.*$/enabled: true/" $application_log_job
       sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
       sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
-      sed -i "1,$ s/NODENAME/$node/" $application_log_job
+      sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $application_log_job
    else
       echo "INFO: application_job file doesn't exists, skipping setup"
    fi
@@ -43,7 +43,7 @@ done
       sed -i "1,$ s/enabled.*$/enabled: true/" $syslog_job
       sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
       sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
-      sed -i "1,$ s/NODENAME/$node/" $syslog_job
+      sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
 
    else
       echo "INFO: syslog_job file doesn't exists, skipping setup"

@@ -52,7 +52,7 @@ else
 		echo $conf >> /opt/proprietary/appdynamics-configs
 	done
 
-        # setup analytics Agent
+  # setup analytics Agent
 	# check if GLOBAL ID is set in secret_vars
 	if [ -z "$APPDYNAMICS_ACCOUNT_GLOBALNAME" ]; then
 
