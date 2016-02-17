@@ -74,12 +74,12 @@ def get_env_options(config: dict):
     if config.get('etcd_discovery_domain'):
         # TODO: use dynamic IP of docker0
         yield '-e'
-        yield 'ETCD_URL=http://172.17.42.1:2379'
+        yield 'ETCD_URL=http://172.17.0.1:2379'
 
     if config.get('appdynamics_application'):
         # set appdynamics analytics url
         yield '-e'
-        yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.42.1:9090/v1/sinks/bt'
+        yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.0.1:9090/v1/sinks/bt'
 
     # set OAuth2 token info URL
     # https://github.com/zalando-stups/taupage/issues/177
