@@ -53,3 +53,6 @@ mounts:
 
 mount_certs: true
 mount_var_log: true
+
+# Start etcd in single node mode
+etcd_discovery_domain: disable
