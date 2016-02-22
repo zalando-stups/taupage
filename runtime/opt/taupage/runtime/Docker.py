@@ -124,9 +124,7 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
-    # if NewRelic Agent exisits than mount the agent to the docker container
-    # if 'newrelic_account_key' in config:
-        # thats deprecated and has to be removed in some
+    # if AppDynamics applicationname is in the config mount the agent to the container
 
     if 'appdynamics_application' in config:
         yield '-v'
