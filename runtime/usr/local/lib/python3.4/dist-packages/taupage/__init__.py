@@ -83,6 +83,7 @@ def get_default_port(config: dict):
 
 
 def configure_logging(level=logging.INFO):
+    logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
 
 
