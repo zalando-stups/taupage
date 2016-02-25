@@ -116,6 +116,13 @@ cat <<__EOF >> /etc/logstash.conf
   }
 }
 
+# force field 'level' to be a string
+filter {
+  mutate {
+    convert => { "level" => "string" }
+  }
+}
+
 output {
   # https://github.com/samcday/logstash-output-kinesis
   kinesis {
