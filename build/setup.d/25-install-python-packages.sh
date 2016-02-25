@@ -3,6 +3,8 @@ boto
 boto3
 botocore
 awscli
+requests
+pyyaml
 "
 
 echo "Installing Python packages..."
