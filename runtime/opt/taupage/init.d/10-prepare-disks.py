@@ -124,11 +124,20 @@ def iterate_mounts(config):
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
         options = data.get('options')
+        writable = data.get('writable')
+        exists = dir_exists(mountpoint)
         already_mounted = is_mounted(mountpoint)
 
         if partition:
             format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-            mount_partition(partition, mountpoint, options, filesystem, dir_exists(mountpoint), already_mounted)
+            mount_partition(partition, mountpoint, options, filesystem, exists, already_mounted)
+        else:
+            if not exists:
+                os.makedirs(mountpoint)
+
+                if writable and not config.get('root'):
+                    entry = pwd.getpwnam('application')
+                    os.chown(mountpoint, entry.pw_uid, entry.pw_gid)
 
 
 def handle_ebs_volumes(args, ebs_volumes):
