@@ -136,11 +136,11 @@ output {
   }
 }
 
-#output { 
-#  stdout {
-#    codec => rubydebug
-#  } 
-#}
+output { 
+  stdout {
+    codec => rubydebug
+  } 
+}
 __EOF
 
     docker run \
