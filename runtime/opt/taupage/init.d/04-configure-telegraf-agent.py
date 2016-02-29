@@ -61,7 +61,7 @@ CONFIG_TEMPLATE = textwrap.dedent("""
     urls = ["http://{{host}}:8086"] # required
     # The target database for metrics (telegraf will create it if not exists)
     database = "{{database}}"
-    # Precision of writes, valid values are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    # Precision of writes, valid values are "ns", "us", "ms", "s", "m", "h".
     # note: using second precision greatly helps InfluxDB compression
     precision = "{{precision}}"
 
