@@ -2,12 +2,35 @@
 
 
 import time
-
-import boto3
 import datetime
-import requests
+
 import yaml
+import requests
+from requests.auth import HTTPBasicAuth
 from requests.exceptions import Timeout
+
+
+class InfluxDbWriter(object):
+    def __init__(self, config):
+        self.db_name = config.get("influx_db_name")
+        self.url = config.get("influx_url")
+        self.user = config.get("influx_user")
+        self.password = config.get("influx_password")
+
+    def write_datapoint(self, name, value, timestamp, tags_dict):
+        unix_timestamp = int(round(time.mktime(timestamp.timetuple()) * 1000000000))
+        tags = ""
+
+        for k, v in tags_dict.items():
+            tags = tags + ",{0}={1}".format(k, v)
+
+        payload = "{0}{1} value={2} {3}\n".format(name, tags, value, unix_timestamp)
+
+        parameters = {'db': self.db_name}
+        auth = HTTPBasicAuth(self.user, self.password)
+
+        response = requests.post(self.url, data=payload, params=parameters, auth=auth)
+        response.raise_for_status()
 
 
 def measure_response_time(url, timeout):
@@ -18,26 +41,6 @@ def measure_response_time(url, timeout):
         print("timeout")
 
 
-def report_response_time(time, duration, region, namespace, metric_name, instance_id):
-    client = boto3.client("cloudwatch", region_name=region)
-    client.put_metric_data(
-            Namespace=namespace,
-            MetricData=[
-                {
-                    'MetricName': metric_name,
-                    'Dimensions': [
-                        {
-                            'Name': 'instance',
-                            'Value': instance_id
-                        },
-                    ],
-                    'Timestamp': time,
-                    'Value': duration,
-                    'Unit': 'Seconds'
-                }
-            ]
-    )
-
 with open("/meta/taupage.yaml", "r") as config_file:
     config = yaml.safe_load(config_file).get("local_monitor", None)
 
@@ -46,20 +49,26 @@ if config:
     interval = config.get("interval")
     timeout = config.get("timeout")
     metric_name = config.get("metric_name", "localResponseTime")
-    namespace = config.get("namespace")
 
     instance_id = requests.get("http://169.254.169.254/latest/meta-data/instance-id").text
     # instance_id = "dev"
 
-    region = requests.get("http://169.254.169.254/latest/meta-data/placement/availability-zone").text[:-1]
-    # region = "eu-west-1"
+    az = requests.get("http://169.254.169.254/latest/meta-data/placement/availability-zone").text
+    # region = "eu-west-1a"
+
+    metric_writer = InfluxDbWriter(config)
+    tags_dict = {
+        "unit": "s",
+        "instance": instance_id,
+        "az": az
+    }
 
     while True:
         try:
-            probeTime = datetime.datetime.utcnow()
-            print(probeTime)
+            probe_time = datetime.datetime.utcnow()
             duration = measure_response_time(url, timeout)
-            report_response_time(probeTime, duration, region, namespace, metric_name, instance_id)
+            metric_writer.write_datapoint(metric_name, duration, probe_time, tags_dict)
+
         except BaseException as e:
             print(e)
         time.sleep(interval)

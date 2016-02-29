@@ -32,18 +32,9 @@ def decrypt(val, config: dict):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
         ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())
-        try:
-            # TODO: fix ugly hack to fix boto Python 3 compat
-            # "decrypt" expects bytes, but "json.dumps" uses bytes, too
-            # which throws "TypeError: .. is not JSON serializable"
-            # workaround: return Base64 as unicode string
-            orig = base64.b64encode
-            base64.b64encode = lambda x: orig(x).decode('ascii')
-            data = conn.decrypt(ciphertext_blob, encryption_context = get_or(config, 'encryption_context', None))
-            if 'Plaintext' not in data:
-                raise Exception('KMS decrypt failed')
-        finally:
-            base64.b64encode = orig
+        data = conn.decrypt(ciphertext_blob, encryption_context=get_or(config, 'encryption_context', None))
+        if 'Plaintext' not in data:
+            raise Exception('KMS decrypt failed')
         return data['Plaintext'].decode('utf-8')
     else:
         return val
@@ -167,13 +158,13 @@ def get_other_options(config: dict):
     if config.get('read_only'):
         yield '--read-only'
 
-    yield '--log-driver={}'.format(config.get('docker',{}).get('log_driver', 'syslog'))
+    yield '--log-driver={}'.format(config.get('docker', {}).get('log_driver', 'syslog'))
 
-    if config.get('docker',{}).get('container_name'):
-        yield '--name={}'.format(config.get('docker',{}).get('container_name'))
+    if config.get('docker', {}).get('container_name'):
+        yield '--name={}'.format(config.get('docker', {}).get('container_name'))
 
-    if config.get('docker',{}).get('log_opt'):
-        for key, value in config.get('docker').get('log_opt').items(): 
+    if config.get('docker', {}).get('log_opt'):
+        for key, value in config.get('docker').get('log_opt').items():
             yield '--log-opt'
             yield '{}={}'.format(key, value)
 
@@ -193,7 +184,8 @@ def extract_registry(docker_image: str) -> str:
 
 
 def registry_login(config: dict, registry: str):
-   return
+    return
+
 
 def run_docker(cmd, dry_run):
     logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
@@ -204,8 +196,8 @@ def run_docker(cmd, dry_run):
                 out = subprocess.check_output(cmd)
                 break
             except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                if i + 1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
@@ -242,12 +234,11 @@ def wait_for_health_check(config: dict):
         time.sleep(2)
 
     logging.error('Timeout of {}s expired for health check :{}{}'.format(
-                  health_check_timeout_seconds, health_check_port, health_check_path))
+        health_check_timeout_seconds, health_check_port, health_check_path))
     sys.exit(2)
 
 
 def main(args):
-
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
@@ -263,19 +254,16 @@ def main(args):
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
-
     if config.get('pull_private'):
         logging.info(config['pull_private'])
         pull_private = config['pull_private']
         pull_cmd = ['docker', 'pull', pull_private]
-
 
         try:
             logging.info('pull private')
             out = subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
-
 
     registry = extract_registry(source)
 
