@@ -4,7 +4,7 @@ logstashImage="local/logstash:1"
 
 function buildLogstashDockerContainer {
   cat <<__EOF > /tmp/Dockerfile
-FROM logstash:2.1.1-1
+FROM logstash:2.2
 RUN /opt/logstash/bin/plugin install logstash-output-kinesis
 __EOF
   cd /tmp/
@@ -67,6 +67,11 @@ input {
   gelf {
     # listen to udp://0.0.0.0:12201
   }
+  
+  heartbeat {
+    interval => 10
+    type => "heartbeat"
+  }
 }
 
 filter {
@@ -127,16 +132,21 @@ output {
   stdout {
     codec => rubydebug
   } 
-  
-  # https://github.com/samcday/logstash-output-kinesis
-  kinesis {
-    stream_name => "\${stream}"
-    region => "\${region}"
-    # for more settings see
-    # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
-    metrics_level => "none"
-    aggregation_enabled => false
-    randomized_partition_key => true
+  if [type] == "heartbeat" {
+    stdout {
+      codec => rubydebug
+    } 
+  } else {
+    # https://github.com/samcday/logstash-output-kinesis
+    kinesis {
+      stream_name => "\${stream}"
+      region => "\${region}"
+      # for more settings see
+      # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
+      metrics_level => "none"
+      aggregation_enabled => false
+      randomized_partition_key => true
+    }
   }
 }
 __EOF
@@ -149,7 +159,7 @@ __EOF
       -v /etc/logstash.conf:/logstash.conf \
       ${logstashImage} \
       logstash -f /logstash.conf
-    sleep 30
+    sleep 5
     docker run --rm --log-driver=gelf --log-opt gelf-address=udp://localhost:12201 busybox echo "create log-stream"
   fi
 end script
