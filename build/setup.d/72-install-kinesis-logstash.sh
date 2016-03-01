@@ -149,7 +149,7 @@ __EOF
       -v /etc/logstash.conf:/logstash.conf \
       ${logstashImage} \
       logstash -f /logstash.conf
-    sleep 5
+    sleep 30
     docker run --rm --log-driver=gelf --log-opt gelf-address=udp://localhost:12201 busybox echo "create log-stream"
   fi
 end script
