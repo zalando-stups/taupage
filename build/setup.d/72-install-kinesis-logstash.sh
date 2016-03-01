@@ -34,7 +34,7 @@ __EOF
 function createLogstashUpstartService {
   cat <<EOF > /etc/init/logstash.conf
 description "logstash"
-
+task
 start on filesystem and started docker and stopped cloud-init-local
 stop on runlevel [!2345]
 
@@ -161,7 +161,7 @@ __EOF
       logstash -f /logstash.conf
     
     # wait for first heartbeat in logs
-    until docker logs logstash | grep -m 1 "heartbeat"; do echo "."; sleep 1; done
+    until docker logs logstash | grep -m 1 "heartbeat"; do echo -n "."; sleep 1; done
   fi
 end script
 EOF
