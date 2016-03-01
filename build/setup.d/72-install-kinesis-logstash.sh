@@ -160,8 +160,7 @@ __EOF
       ${logstashImage} \
       logstash -f /logstash.conf
     
-    sleep 5
-    
+    # sleep 5
     # wait for first heartbeat in logs
     # until docker logs logstash | grep -m 1 "heartbeat"; do: sleep 1; done
   fi
