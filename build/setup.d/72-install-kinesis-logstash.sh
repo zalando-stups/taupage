@@ -161,7 +161,7 @@ __EOF
       logstash -f /logstash.conf
     
     # wait for first heartbeat in logs
-    until docker logs logstash | grep -m 1 "heartbeat"; do: echo "."; sleep 1; done
+    until docker logs logstash | grep -m 1 "heartbeat"; do echo "."; sleep 1; done
   fi
 end script
 EOF
