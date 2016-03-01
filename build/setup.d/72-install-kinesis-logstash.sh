@@ -124,6 +124,10 @@ filter {
 }
 
 output {
+  stdout {
+    codec => rubydebug
+  } 
+  
   # https://github.com/samcday/logstash-output-kinesis
   kinesis {
     stream_name => "\${stream}"
@@ -135,16 +139,9 @@ output {
     randomized_partition_key => true
   }
 }
-
-output { 
-  stdout {
-    codec => rubydebug
-  } 
-}
 __EOF
 
     docker run \
-      --log-driver=syslog \
       -d \
       --restart=always \
       --name logstash \
