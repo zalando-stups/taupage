@@ -49,6 +49,7 @@ if config:
     interval = config.get("interval")
     timeout = config.get("timeout")
     metric_name = config.get("metric_name", "localResponseTime")
+    asg = config.get("asg", "none")
 
     instance_id = requests.get("http://169.254.169.254/latest/meta-data/instance-id").text
     # instance_id = "dev"
@@ -59,8 +60,9 @@ if config:
     metric_writer = InfluxDbWriter(config)
     tags_dict = {
         "unit": "s",
-        "instance": instance_id,
-        "az": az
+        "instance_id": instance_id,
+        "az": az,
+        "asg": asg
     }
 
     while True:
