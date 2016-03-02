@@ -150,20 +150,14 @@ while [ true ]; do
     sleep 10
 done
 
+# run ServerSpec tests
+ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
+ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
+
 if [ $TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
-    
-    # run ServerSpec tests
-    ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
-    ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
-    
     exit 0
 else
     echo "TEST FAILED: http did not come up properly"
-    
-    # run ServerSpec tests
-    ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
-    ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
-    
     exit 1
 fi
