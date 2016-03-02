@@ -150,6 +150,13 @@ while [ true ]; do
     sleep 10
 done
 
+
+echo "### TAUPAGE.YAML DEBUG OUTPUT ###"
+cat /meta/taupage.yaml
+
+echo "### SYSLOG DEBUG OUTPUT ###"
+cat /var/log/syslog
+
 # run ServerSpec tests
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
