@@ -25,6 +25,8 @@ class ElbHealthChecker(object):
         return state
 
     def is_in_service_from_elb_perspective(self, instance_id: str, elb_name: str):
+        self.logger.info("Waiting for instance {0} to become healthy in elb {1}".format(instance_id, elb_name))
+
         for i in range(0, max(int(self.TIMEOUT / self.INTERVAL), 1)):
             state = self._get_elb_instance_state(instance_id, elb_name)
             if state == 'InService':
