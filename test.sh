@@ -127,10 +127,6 @@ ssh $ssh_args ubuntu@$ip sudo mkdir -p /tmp/{tests,scripts}
 tar c -C tests . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner --no-overwrite-dir -C /tmp/tests/
 tar c -C scripts . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner --no-overwrite-dir -C /tmp/scripts/
 
-# run ServerSpec tests
-ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
-ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
-
 # now wait until HTTP works
 set +e
 TEST_OK=false
@@ -156,8 +152,18 @@ done
 
 if [ $TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
+    
+    # run ServerSpec tests
+    ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
+    ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
+    
     exit 0
 else
     echo "TEST FAILED: http did not come up properly"
+    
+    # run ServerSpec tests
+    ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
+    ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
+    
     exit 1
 fi
