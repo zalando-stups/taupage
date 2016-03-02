@@ -12,6 +12,7 @@ from taupage import configure_logging, get_config
 
 CONFIG_TEMPLATE = textwrap.dedent("""
     [global_tags]
+    asg = {{asg}}
     region = "{{region}}"
     instance_id = "{{instance_id}}"
     application_id = "{{application_id}}"
