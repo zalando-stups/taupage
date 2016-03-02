@@ -108,7 +108,7 @@ filter {
   mutate {
     add_field => { "instance_id" => "\${instanceId}" }
     add_field => { "availability_zone" => "\${instanceAvailabilityZone}" }
-    add_field => { "region" => "\${instanceRegion}" }
+    add_field => { "region" => "\${region}" }
 __EOF
 
   /bin/tags-to-logstash.sh >> /etc/logstash.conf
@@ -128,7 +128,7 @@ output {
   # https://github.com/samcday/logstash-output-kinesis
   kinesis {
     stream_name => "\${stream}"
-    region => "\${instanceRegion}"
+    region => "\${region}"
     # for more settings see
     # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
     metrics_level => "none"
