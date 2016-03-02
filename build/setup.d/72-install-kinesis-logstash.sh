@@ -57,7 +57,7 @@ script
     instanceAvailabilityZone=\$(ec2metadata --availability-zone)
     instanceRegion=\$(echo \${instanceAvailabilityZone} | rev | cut -c 2- | rev)
 
-    region=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_region" "${instanceRegion}")
+    region=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_region" "\${instanceRegion}")
     stream=\$(cat /meta/taupage.yaml | shyaml get-value "logstash.kinesis_stream" "logging")
 
     rm -rf /etc/logstash.conf
