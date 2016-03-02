@@ -128,7 +128,7 @@ output {
   # https://github.com/samcday/logstash-output-kinesis
   kinesis {
     stream_name => "\${stream}"
-    region => "\${region}"
+    region => "\${instanceRegion}"
     # for more settings see
     # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
     metrics_level => "none"
@@ -148,7 +148,7 @@ __EOF
       logstash -f /logstash.conf
     
     echo "wait for amazon-kinesis-producer-native-binaries to be started"
-    until ps fuxa | grep -m 1 "amz-aws-kpl-in-pipe"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
+    until docker logs logstash | grep -m 1 "${stream}"; do echo -n "." | logger -t "kinesis-logstash"; docker run --rm --log-driver=gelf --log-opt gelf-address=udp://localhost:12201 busybox echo "dummy"; sleep 1; done
   fi
   echo "finished"  | logger -t "kinesis-logstash"
 end script
