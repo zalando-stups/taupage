@@ -35,7 +35,7 @@ function createLogstashUpstartService {
   cat <<EOF > /etc/init/logstash.conf
 description "logstash"
 task
-start on filesystem and started docker and stopped cloud-init-local
+start on filesystem and started docker
 stop on runlevel [!2345]
 
 script
@@ -44,11 +44,12 @@ script
   if [ \$? = 0 ]; then
     true
   else
-    echo "/meta/taupage.yaml"
+    echo "/meta/taupage.yaml" | logger -t "kinesis-logstash"
     cat /meta/taupage.yaml
     
     if [ "\$(cat /meta/taupage.yaml | shyaml get-value 'logstash.enabled' 'false')" = "false" ]; then
-      echo "logstash not enabled."
+      echo "logstash not enabled." | logger -t "kinesis-logstash"
+      echo "finished"  | logger -t "kinesis-logstash"
       exit 0
     fi
     
@@ -161,8 +162,9 @@ __EOF
       logstash -f /logstash.conf
     
     # wait for first heartbeat in logs
-    until docker logs logstash | grep -m 1 "heartbeat"; do echo -n "."; sleep 1; done
+    until docker logs logstash | grep -m 1 "heartbeat"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
   fi
+  echo "finished"  | logger -t "kinesis-logstash"
 end script
 EOF
 }
