@@ -68,11 +68,6 @@ input {
   gelf {
     # listen to udp://0.0.0.0:12201
   }
-  
-  heartbeat {
-    interval => 10
-    type => "heartbeat"
-  }
 }
 
 filter {
@@ -112,8 +107,8 @@ filter {
   # add instanceId, availabilityZone, region
   mutate {
     add_field => { "instance_id" => "\${instanceId}" }
-    add_field => { "availability_zone" => "\${availabilityZone}" }
-    add_field => { "region" => "\${region}" }
+    add_field => { "availability_zone" => "\${instanceAvailabilityZone}" }
+    add_field => { "region" => "\${instanceRegion}" }
 __EOF
 
   /bin/tags-to-logstash.sh >> /etc/logstash.conf
@@ -130,24 +125,15 @@ filter {
 }
 
 output {
-  stdout {
-    codec => rubydebug
-  } 
-  if [type] == "heartbeat" {
-    stdout {
-      codec => rubydebug
-    } 
-  } else {
-    # https://github.com/samcday/logstash-output-kinesis
-    kinesis {
-      stream_name => "\${stream}"
-      region => "\${region}"
-      # for more settings see
-      # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
-      metrics_level => "none"
-      aggregation_enabled => false
-      randomized_partition_key => true
-    }
+  # https://github.com/samcday/logstash-output-kinesis
+  kinesis {
+    stream_name => "\${stream}"
+    region => "\${region}"
+    # for more settings see
+    # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
+    metrics_level => "none"
+    aggregation_enabled => false
+    randomized_partition_key => true
   }
 }
 __EOF
@@ -161,8 +147,8 @@ __EOF
       ${logstashImage} \
       logstash -f /logstash.conf
     
-    # wait for first heartbeat in logs
-    until docker logs logstash | grep -m 1 "heartbeat"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
+    echo "wait for amazon-kinesis-producer-native-binaries to be started"
+    until ps fuxa | grep -m 1 "amz-aws-kpl-in-pipe"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
   fi
   echo "finished"  | logger -t "kinesis-logstash"
 end script
