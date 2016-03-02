@@ -68,11 +68,6 @@ input {
   gelf {
     # listen to udp://0.0.0.0:12201
   }
-  
-  heartbeat {
-    interval => 10
-    type => "heartbeat"
-  }
 }
 
 filter {
@@ -130,24 +125,15 @@ filter {
 }
 
 output {
-  stdout {
-    codec => rubydebug
-  } 
-  if [type] == "heartbeat" {
-    stdout {
-      codec => rubydebug
-    } 
-  } else {
-    # https://github.com/samcday/logstash-output-kinesis
-    kinesis {
-      stream_name => "\${stream}"
-      region => "\${region}"
-      # for more settings see
-      # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
-      metrics_level => "none"
-      aggregation_enabled => false
-      randomized_partition_key => true
-    }
+  # https://github.com/samcday/logstash-output-kinesis
+  kinesis {
+    stream_name => "\${stream}"
+    region => "\${region}"
+    # for more settings see
+    # https://github.com/awslabs/amazon-kinesis-producer/blob/v0.10.0/java/amazon-kinesis-producer/src/main/java/com/amazonaws/services/kinesis/producer/KinesisProducerConfiguration.java#L230
+    metrics_level => "none"
+    aggregation_enabled => false
+    randomized_partition_key => true
   }
 }
 __EOF
@@ -161,8 +147,8 @@ __EOF
       ${logstashImage} \
       logstash -f /logstash.conf
     
-    # wait for first heartbeat in logs
-    until docker logs logstash | grep -m 1 "heartbeat"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
+    # wait for first 'Created pipeline for stream' in logs
+    until docker logs logstash | grep -m 1 "Created pipeline for stream"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
   fi
   echo "finished"  | logger -t "kinesis-logstash"
 end script
