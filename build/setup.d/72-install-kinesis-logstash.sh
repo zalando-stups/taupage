@@ -107,8 +107,8 @@ filter {
   # add instanceId, availabilityZone, region
   mutate {
     add_field => { "instance_id" => "\${instanceId}" }
-    add_field => { "availability_zone" => "\${availabilityZone}" }
-    add_field => { "region" => "\${region}" }
+    add_field => { "availability_zone" => "\${instanceAvailabilityZone}" }
+    add_field => { "region" => "\${instanceRegion}" }
 __EOF
 
   /bin/tags-to-logstash.sh >> /etc/logstash.conf
