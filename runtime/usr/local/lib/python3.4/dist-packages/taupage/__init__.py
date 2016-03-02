@@ -78,7 +78,7 @@ def get_default_port(config: dict):
 
 
 def configure_logging(level=logging.INFO):
-    logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
+    logging.basicConfig(level=level, format='%(asctime)s %(levelname)s: %(message)s')
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
 
 
