@@ -147,8 +147,8 @@ __EOF
       ${logstashImage} \
       logstash -f /logstash.conf
     
-    # wait for first 'Created pipeline for stream' in logs
-    until docker logs logstash | grep -m 1 "Created pipeline for stream"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
+    echo "wait for amazon-kinesis-producer-native-binaries to be started"
+    until ps fuxwa | grep -m 1 "amazon-kinesis-producer-native-binaries"; do echo -n "." | logger -t "kinesis-logstash"; sleep 1; done
   fi
   echo "finished"  | logger -t "kinesis-logstash"
 end script
