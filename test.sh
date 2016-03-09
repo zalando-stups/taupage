@@ -161,6 +161,13 @@ cat /var/log/syslog
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
+$result_test=$?
+
+if [[ $result_test != 0 ]]; then
+    echo "Tests failed with error code $result_test"
+    exit $result_test
+fi
+
 if [ $TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
     exit 0
