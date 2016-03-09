@@ -1,6 +1,7 @@
 /var/log/application.log {
         rotate 1
         daily
+        #size 10M
         missingok
         notifempty
         copytruncate
