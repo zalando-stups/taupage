@@ -20,8 +20,9 @@ START_TIME=$(date +"%s")
 cd $(dirname $0)
 
 # general preparation
+mkdir /tmp/startup-logs/
 for script in $(ls init.d); do
-    ./init.d/$script
+    ./init.d/$script >/tmp/startup-logs/$script.log 2>&1
     if [ "$?" -ne 0 ]; then
         echo "ERROR: Failed to start $script" >&2
         exit 1
