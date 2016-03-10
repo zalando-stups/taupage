@@ -3,16 +3,15 @@ set -x
 
 # finally terminate ec2 instance
 function finally {
-echo 'stuff'
-#    if [ $DRY_RUN = true ]; then
-#        echo "Dry run requested; skipping server termination"
-#    else
-#        # delete instance
-#        echo "Terminating server..."
-#        aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
-#        # Cleanup files
-#        rm -f ssh_config $keyfile
-#    fi
+    if [ $DRY_RUN = true ]; then
+        echo "Dry run requested; skipping server termination"
+    else
+        # delete instance
+        echo "Terminating server..."
+        aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+        # Cleanup files
+        rm -f ssh_config $keyfile
+    fi
 }
 trap finally EXIT TERM SEGV ABRT QUIT INT
 
