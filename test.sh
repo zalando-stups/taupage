@@ -161,7 +161,7 @@ cat /var/log/syslog
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
-$result_test=$?
+result_test=$?
 
 if [[ $result_test != 0 ]]; then
     echo "Tests failed with error code $result_test"
