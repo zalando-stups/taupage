@@ -7,8 +7,8 @@ function finally {
         echo "Dry run requested; skipping server termination"
     else
         # delete instance
-        echo "Terminating server..."
-        aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+        echo "Not Terminating server for debugging purposes..."
+#       aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
         # Cleanup files
         rm -f ssh_config $keyfile
     fi
