@@ -61,25 +61,23 @@ syslog_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/j
 
 #enable application.log job
 if [ -f $application_log_job ]; then
-  sed -i "1,$ s/enabled.*$/enabled: true/" $application_log_job
-  sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
-  sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
-  sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $application_log_job
+    sed -i "1,$ s/enabled.*$/enabled: true/" $application_log_job
+    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
+    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
+    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $application_log_job
 else
-  echo "INFO: application_job file doesn't exists, skipping setup"
+    echo "INFO: application_job file doesn't exists, skipping setup"
 fi
 
 # enable syslogjob
 if [ -f $syslog_job ]; then
-  sed -i "1,$ s/enabled.*$/enabled: true/" $syslog_job
-  sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
-  sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
-  sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
-
+    sed -i "1,$ s/enabled.*$/enabled: true/" $syslog_job
+    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
+    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
+    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
 else
   echo "INFO: syslog_job file doesn't exists, skipping setup"
 fi
-
 
 # start machine agent
 service appdynamics start
