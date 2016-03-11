@@ -159,8 +159,8 @@ cat /var/log/syslog
 
 # run ServerSpec tests
 echo "Will not attempt to run the serverspec tests"
-ssh $secret_ssh_args $private_ssh_user@$ip sudo chmod +x /tmp/scripts/serverspec.sh
-ssh $secret_ssh_args $private_ssh_user@$ip sudo /tmp/scripts/serverspec.sh
+ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
+ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
 result_test=$?
 
