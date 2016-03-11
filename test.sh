@@ -158,6 +158,7 @@ echo "### SYSLOG DEBUG OUTPUT ###"
 cat /var/log/syslog
 
 # run ServerSpec tests
+echo "Will not attempt to run the serverspec tests"
 ssh $ssh_args ubuntu@$ip sudo chmod +x /tmp/scripts/serverspec.sh
 ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
