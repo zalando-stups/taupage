@@ -30,7 +30,7 @@ libswitch-perl
 
 echo "Installing packages..."
 
-apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
+apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" --force-yes $pkgs >>install.log
 
 # ATTENTION: We had to force-install this, since the PGP certificate with
 # the id 'C43C79AD' is invalid as of 2016-03-10
