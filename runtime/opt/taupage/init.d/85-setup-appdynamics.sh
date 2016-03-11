@@ -14,6 +14,11 @@ node="${config_application_id}_${config_application_version}_$(hostname)"
 # replace app specific configurations in all appdynamics configs
 cat /opt/proprietary/appdynamics-configs | while read conf; do
 	echo "INFO: configuring AppDynamics agent $conf for $config_appdynamics_application / $config_application_id / $node"
+	# multi-tenant support:
+	# if we got an appdynamics account name provided by taupage.yaml then overwrite the default one
+	if [ -n "$config_appdynamics_account_name" ]; then
+	    sed -i "1,$ s/<account-name.*$/<account-name>$config_appdynamics_account_name<\/account-name>/" $conf
+    fi
 	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$config_appdynamics_application/" $conf
 	sed -i "1,$ s/APPDYNAMICS_TIER/$config_application_id/" $conf
 	sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $conf
