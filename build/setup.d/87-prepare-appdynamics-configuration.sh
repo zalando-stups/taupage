@@ -63,13 +63,13 @@ else
 	   monitor_xml="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/monitor.xml"
 	   sed -i "1,$ s/<enabled.*$/<enabled>true<\/enabled>/" $monitor_xml
 
-           # check if there is a custom properties_file if not than setup analytics properties file
+           # check if there is a custom properties_file if not then setup analytics properties file
            properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
            if [ -f /opt/proprietary/appdynamics-conf/analytics-agent.properties ]; then
               # copy file to machine agent
               cp /opt/proprietary/appdynamics-conf/analytics-agent.properties $properties_file
            else
-             echo "ERROR: propertie file doesnt exists"
+             echo "ERROR: property file doesn't exist"
              exit 1
            fi
 	fi
