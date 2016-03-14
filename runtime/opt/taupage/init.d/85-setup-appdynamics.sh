@@ -31,7 +31,7 @@ if [ -n "$config_appdynamics_account_name" ]; then
 fi
 
 # node name has to be unique across the whole ecosystem
-node="${config_application_id}_${config_application_version}_$(hostname)"
+node="${config_notify_cfn_stack}_$(hostname)_`ec2metadata --availability-zone`"
 
 # replace app specific configurations in all appdynamics configs
 cat /opt/proprietary/appdynamics-configs | while read conf; do
