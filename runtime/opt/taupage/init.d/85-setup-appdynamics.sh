@@ -16,8 +16,8 @@ if [ -n "$config_appdynamics_account_name" ]; then
         if [ -n "$config_appdynamics_account_globalname" ]; then
             # we have to overwrite the default account settings in the analytics agent props file
             properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
-            sed -i "1,$ s/http.event.accountName/http.event.accountName=$config_appdynamics_account_globalname/" $properties_file
-            sed -i "1,$ s/http.event.accessKey/http.event.accessKey=$config_appdynamics_account_access_key/" $properties_file
+            sed -i "1,$ s/http.event.accountName.*$/http.event.accountName=$config_appdynamics_account_globalname/" $properties_file
+            sed -i "1,$ s/http.event.accessKey.*$/http.event.accessKey=$config_appdynamics_account_access_key/" $properties_file
         else
             echo "ERROR: AppDynamics Multi Tenancy for account $config_appdynamics_account_name was detected \n
                 but appdynamics_account_globalname wasn't set. Please provide the proper appdynamics_account_globalname!"
