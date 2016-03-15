@@ -40,9 +40,9 @@ else
 
 		# runtime config
 		sed -i "1,$ s/<application-name.*$/<application-name>APPDYNAMICS_APPLICATION<\/application-name>/" $conf
-		
+
 		#only add tier and nodename to the app agent not to the machine agent
-		if[[ $conf != *"machine"* ]]
+		if [[ $conf != *"machine"* ]]
 		then
 			sed -i "1,$ s/<tier-name.*$/<tier-name>APPDYNAMICS_TIER<\/tier-name>/" $conf
 			sed -i "1,$ s/<node-name.*$/<node-name>APPDYNAMICS_NODE<\/node-name>/" $conf
