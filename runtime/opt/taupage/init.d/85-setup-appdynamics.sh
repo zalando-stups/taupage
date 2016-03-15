@@ -46,8 +46,14 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
     fi
 
 	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$config_appdynamics_application/" $conf
-	sed -i "1,$ s/APPDYNAMICS_TIER/$config_application_id/" $conf
-	sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $conf
+	
+	#only add tier and nodename to the app agent not to the machine agent
+	if[[ $conf != *"machine"* ]]
+	then
+		sed -i "1,$ s/APPDYNAMICS_TIER/$config_application_id/" $conf
+		sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $conf
+	fi
+
 
 	# provide unique ID information
 	agent_dir=$(dirname $(dirname $conf))
