@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # read global taupage config
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
