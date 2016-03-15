@@ -58,6 +58,8 @@ done
 # first "hack" this should be configurable over the taupage.yaml file.
 application_log_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/application-log.job"
 syslog_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/syslog.job"
+appdynamics_machineagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-machineagent-log.job"
+appdynamics_jvmagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-jvmagent-log.job"
 
 #enable application.log job
 if [ -f $application_log_job ]; then
@@ -77,6 +79,26 @@ if [ -f $syslog_job ]; then
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
 else
   echo "INFO: syslog_job file doesn't exists, skipping setup"
+fi
+
+# enable appdynamics machineagent job
+if [ -f $appdynamics_machineagent_job ]; then
+    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
+    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
+    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
+    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
+else
+  echo "INFO: appdynamics-machineagent-log job file doesn't exists, skipping setup"
+fi
+
+# enable appdynamics jvmagent job
+if [ -f $appdynamics_jvmagent_job ]; then
+    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
+    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
+    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
+    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
+else
+  echo "INFO: appdynamics-jvmagent-log job file doesn't exists, skipping setup"
 fi
 
 # start machine agent
