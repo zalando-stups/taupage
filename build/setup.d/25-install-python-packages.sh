@@ -5,6 +5,10 @@ boto
 boto3
 botocore
 requests
+stups-berry
+stups-tokens
+stups-zign
+stups-pierone
 "
 
 echo "Installing Python packages..."
