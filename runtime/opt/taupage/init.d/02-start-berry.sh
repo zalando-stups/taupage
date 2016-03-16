@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # only start berry service if "mint_bucket" was defined
-grep 'mint_bucket' /meta/taupage.yaml && service berry start
-
+grep 'mint_bucket' /meta/taupage.yaml
+if [ $? -eq 0 ]; then
+    # start berry once to make sure to have valid credentials for the rest of taupage init
+    berry --once
+    # then we are fine to move it to the background
+    service berry start
+else
+    echo "No mint_bucket entry in taupage.yaml"
+    exit 1
+fi
 exit 0
