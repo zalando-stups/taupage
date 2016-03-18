@@ -49,11 +49,6 @@ result=$?
 
 # run healthcheck if runtime returns successfully
 if [ "$result" -eq 0 ]; then
-    # run the AppDynamics Machine Agent if it is activated
-    if [ -n "$config_appdynamics_application" ]; then
-    	echo "INFO: start AppDynamics Machine Agent"
-      service appdynamics start
-    fi
     # run healthcheck if configured
     if [ -n "$config_healthcheck_type" ]; then
 
@@ -90,6 +85,11 @@ ELAPSED_SECONDS=$(($END_TIME-$START_TIME))
 
 if [ "$result" -eq 0 ]; then
     echo "SUCCESS: Initialization completed successfully in $ELAPSED_SECONDS seconds"
+    # run the AppDynamics Machine Agent if it is activated
+    if [ -n "$config_appdynamics_application" ]; then
+      echo "INFO: start AppDynamics Machine Agent"
+      service appdynamics start
+    fi
 else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
 fi
