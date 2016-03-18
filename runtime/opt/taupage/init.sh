@@ -49,6 +49,11 @@ result=$?
 
 # run healthcheck if runtime returns successfully
 if [ "$result" -eq 0 ]; then
+    # run the AppDynamics Machine Agent if it is activated
+    if [ -n "$config_appdynamics_application" ]; then
+    	echo "INFO: start AppDynamics Machine Agent"
+      service appdynamics start
+    fi
     # run healthcheck if configured
     if [ -n "$config_healthcheck_type" ]; then
 

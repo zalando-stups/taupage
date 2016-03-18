@@ -107,5 +107,5 @@ else
   echo "INFO: appdynamics-jvmagent-log job file doesn't exists, skipping setup"
 fi
 
-# start machine agent
-service appdynamics start
+# start machine agent we will move the start after the AppAgent.
+# service appdynamics start
