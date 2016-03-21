@@ -9,10 +9,16 @@ function finally() {
 		aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
 		delete_test_volumes
 		delete_profile_for_volume_attachment
+		if [ -n "$MINT_BUCKET" ]; then
+			taupageyamlfile="$(pwd)/test-userdata.yaml"
+			echo "change mint-bucket to a example again"
+			sed -i "1,$ s/mint_bucket.*$/mint_bucket:\ S3-MINT-BUCKET/" $taupageyamlfile
+		fi
+
 	else
 		echo "Skipping termination of server due to dry run. Instance profile and test volumes were also kept intact!"
 	fi
-    aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
+    #aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
 }
 trap finally EXIT
 
@@ -29,11 +35,13 @@ else
 fi
 
 if [ -z "$2" ]; then
-    echo "Usage:  $0 <config-file> <taupage-version>" >&2
+    echo "Usage:  $0 <config-file> <taupage-version> <mint-bucket>" >&2
     exit 1
 fi
+
 CONFIG_FILE=$1
 TAUPAGE_VERSION=$2
+MINT_BUCKET=$3
 
 # start!
 set -e
@@ -43,6 +51,11 @@ set -e
 
 # load volume testing definitions
 . volume_testing.sh
+
+if [ -n "$MINT_BUCKET" ]; then
+	taupageyamlfile="$(pwd)/test-userdata.yaml"
+	sed -i "1,$ s/mint_bucket.*$/mint_bucket:\ $MINT_BUCKET/" $taupageyamlfile
+fi
 
 AMI_ID=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 

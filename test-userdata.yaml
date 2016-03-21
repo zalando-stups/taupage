@@ -5,6 +5,7 @@ application_version: "0.1"
 
 runtime: Docker
 source: registry.opensource.zalan.do/stups/tiny-docker-http-test:1.0
+mint_bucket: S3-MINT-BUCKET
 
 environment:
   STAGE: ami-test
