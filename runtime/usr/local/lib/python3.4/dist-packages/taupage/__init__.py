@@ -75,10 +75,12 @@ def get_default_port(config: dict):
     8080
     >>> get_default_port({'ports': {80: 80, '8080/udp': 8080}})
     80
+    >>> get_default_port({'ports': {8080: 8080, 7979: 7979}})
+    8080
     '''
     tcp_ports = filter(is_tcp_port, get_or(config, 'ports', {}).keys())
     tcp_ports = map(integer_port, tcp_ports)
-    default_port = get_first(sorted(tcp_ports))
+    default_port = get_first(tcp_ports)
     return default_port
 
 
