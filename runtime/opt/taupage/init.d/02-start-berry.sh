@@ -9,6 +9,5 @@ if [ $? -eq 0 ]; then
     service berry start
 else
     echo "ERROR: No mint_bucket entry in taupage.yaml"
-    exit 1
+    exit 0
 fi
-exit 0

@@ -9,7 +9,7 @@ function finally() {
 		aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
 		delete_test_volumes
 		delete_profile_for_volume_attachment
-		if [ -n "$MINT_BUCKET" ]; then
+		if [ -n "$mint_bucket" ]; then
 			taupageyamlfile="$(pwd)/test-userdata.yaml"
 			echo "change mint-bucket to a example again"
 			sed -i "1,$ s/mint_bucket.*$/mint_bucket:\ S3-MINT-BUCKET/" $taupageyamlfile
@@ -35,13 +35,12 @@ else
 fi
 
 if [ -z "$2" ]; then
-    echo "Usage:  $0 <config-file> <taupage-version> <mint-bucket>" >&2
+    echo "Usage:  $0 <config-file> <taupage-version> " >&2
     exit 1
 fi
 
 CONFIG_FILE=$1
 TAUPAGE_VERSION=$2
-MINT_BUCKET=$3
 
 # start!
 set -e
@@ -52,7 +51,8 @@ set -e
 # load volume testing definitions
 . volume_testing.sh
 
-if [ -n "$MINT_BUCKET" ]; then
+# this is set in the config-stups.sh file
+if [ -n "$mint_bucket" ]; then
 	taupageyamlfile="$(pwd)/test-userdata.yaml"
 	sed -i "1,$ s/mint_bucket.*$/mint_bucket:\ $MINT_BUCKET/" $taupageyamlfile
 fi
