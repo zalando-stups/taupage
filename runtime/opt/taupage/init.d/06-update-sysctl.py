@@ -6,8 +6,8 @@ import subprocess
 
 from taupage import configure_logging, get_config
 
-SYSCTL_WHITELIST = ['vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory', 'vm_overcommit_ratio',
-                    'vm.swappiness']
+SYSCTL_WHITELIST = ['fs.file-max', 'vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory',
+                    'vm_overcommit_ratio', 'vm.swappiness']
 CUSTOM_SYSCTL_CONF = '/etc/sysctl.d/99-custom.conf'
 
 
