@@ -277,21 +277,40 @@ def main(args):
 
     source = config['source']
 
-    registry = extract_registry(source)
-
-    if registry:
-        registry_login(config, registry)
-
-    cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
-    for f in get_env_options, get_volume_options, get_port_options, get_other_options:
-        cmd += list(f(config))
-    cmd += [source]
-
+    already_exists = False
     try:
-        run_docker(cmd, args.dry_run)
+        cmd = ['docker', 'ps', '-a', '-q', '-f', 'name=taupageapp']
+        if subprocess.check_output(cmd):
+            already_exists = True
     except Exception as e:
-        logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
-        sys.exit(1)
+        logging.error("Failed to list existing docker containers: %s", str(e))
+        # not a fatal error, continue
+
+    if already_exists:
+        try:
+            cmd = ['docker', 'start', 'taupageapp']
+            logging.info('Starting existing Docker container: {}'.format(cmd))
+            if not args.dry_run:
+                subprocess.check_output(cmd)
+        except Exception as e:
+            logging.error('Docker start of existing container failed: %s', str(e))
+            sys.exit(1)
+    else:
+        registry = extract_registry(source)
+
+        if registry:
+            registry_login(config, registry)
+
+        cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
+        for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+            cmd += list(f(config))
+        cmd += [source]
+
+        try:
+            run_docker(cmd, args.dry_run)
+        except Exception as e:
+            logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
+            sys.exit(1)
 
     # copy job files from docker container to the machine agent
     dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
