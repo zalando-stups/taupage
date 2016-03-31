@@ -6,8 +6,8 @@ import subprocess
 
 from taupage import configure_logging, get_config
 
-SYSCTL_WHITELIST = ['vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory', 'vm_swappiness'
-                    , 'vm.overcommit_ratio']
+SYSCTL_WHITELIST = ['vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory', 'vm_swappiness',
+                    'vm.overcommit_ratio']
 SENZA_SYSCTL_CONF = '/etc/sysctl.d/99-senza.conf'
 
 
