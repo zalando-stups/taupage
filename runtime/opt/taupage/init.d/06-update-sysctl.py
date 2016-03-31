@@ -29,7 +29,6 @@ def main():
     disallowed_keys = set(sysctl.keys()) - set(SYSCTL_WHITELIST)
     if disallowed_keys:
         logging.error('You are not allowed to configure the sysctl parameters {}'.format(list(disallowed_keys)))
-        sys.exit(1)
 
     try:
         sysctl_entries = ['{} = {}'.format(key, value) for key, value in sysctl.items()]
