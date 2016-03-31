@@ -119,9 +119,23 @@ def iterate_mounts(config):
         dir_exists = os.path.isdir(mountpoint)
         already_mounted = os.path.ismount(mountpoint)
 
-        if partition:
+        def format():
             format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
+
+        def mount():
             mount_partition(partition, mountpoint, options, filesystem, dir_exists, already_mounted)
+
+        if partition and not already_mounted:
+            if initialize:
+                format()
+            try:
+                mount()
+            except Exception as e:
+                logging.error("Could not mount partition %s: %s", partition, str(e))
+
+                if not initialize:
+                    format()
+                    mount()
 
 
 def handle_ebs_volumes(args, ebs_volumes):
