@@ -32,7 +32,7 @@ def main():
         logging.error('You are not allowed to configure the sysctl parameters {}'.format(list(disallowed_keys)))
 
     try:
-        sysctl_entries = ['{} = {}'.format(key, value) for key, value in sysctl.items()]
+        sysctl_entries = ['{} = {}'.format(key, value) for key, value in sysctl.items() if key in SYSCTL_WHITELIST]
         with open(CUSTOM_SYSCTL_CONF, 'w') as file:
             file.write('\n'.join(sysctl_entries)+'\n')
         logging.info('Successfully written sysctl parameters')
