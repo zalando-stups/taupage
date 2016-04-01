@@ -57,6 +57,14 @@ def attach_volume(ec2, volume_id, attach_as):
         sys.exit(3)
 
 
+def dir_exists(mountpoint):
+    return os.path.isdir(mountpoint)
+
+
+def is_mounted(mountpoint):
+    return os.path.ismount(mountpoint)
+
+
 def wait_for_device(device, max_tries=3, wait_time=5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
@@ -116,26 +124,11 @@ def iterate_mounts(config):
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
         options = data.get('options')
-        dir_exists = os.path.isdir(mountpoint)
-        already_mounted = os.path.ismount(mountpoint)
+        already_mounted = is_mounted(mountpoint)
 
-        def format():
+        if partition:
             format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-
-        def mount():
-            mount_partition(partition, mountpoint, options, filesystem, dir_exists, already_mounted)
-
-        if partition and not already_mounted:
-            if initialize:
-                format()
-            try:
-                mount()
-            except Exception as e:
-                logging.error("Could not mount partition %s: %s", partition, str(e))
-
-                if not initialize:
-                    format()
-                    mount()
+            mount_partition(partition, mountpoint, options, filesystem, dir_exists(mountpoint), already_mounted)
 
 
 def handle_ebs_volumes(args, ebs_volumes):
