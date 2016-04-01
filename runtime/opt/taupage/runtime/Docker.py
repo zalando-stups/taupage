@@ -286,16 +286,7 @@ def main(args):
         logging.error("Failed to list existing docker containers: %s", str(e))
         # not a fatal error, continue
 
-    if already_exists:
-        try:
-            cmd = ['docker', 'start', 'taupageapp']
-            logging.info('Starting existing Docker container: {}'.format(cmd))
-            if not args.dry_run:
-                subprocess.check_output(cmd)
-        except Exception as e:
-            logging.error('Docker start of existing container failed: %s', str(e))
-            sys.exit(1)
-    else:
+    if not already_exists:
         registry = extract_registry(source)
 
         if registry:
