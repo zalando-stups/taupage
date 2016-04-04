@@ -135,7 +135,7 @@ max_tries=30  # ~3 minutes
 while [ true ]; do
     echo "Waiting for HTTP server..."
 
-    result=$(curl http://$ip/ 2>/dev/null)
+    result=$(curl --fail http://$ip/ 2>/dev/null)
     if [ $? -eq 0 ]; then
 
         TEST_OK=true
