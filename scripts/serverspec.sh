@@ -5,7 +5,7 @@ echo "Preparing Serverspec and running system tests..."
 # Install ruby
 add-apt-repository ppa:brightbox/ruby-ng-experimental
 apt-get update
-apt-get install -y ruby2.1
+apt-get install -y ruby2.1 ruby-dev
 gem install bundler rake serverspec --no-ri --no-rdoc
 chmod +x /tmp/scripts/serverspec.sh
 cd /tmp/tests
