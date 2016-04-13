@@ -110,12 +110,14 @@ def get_volume_options(config: dict):
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
-    # mount newrelic agent into docker
-    print('DEPRECATED WARNING: /data/newrelic will be removed please use /agents/newrelic instead ')
-    yield '-v'
-    yield '/opt/proprietary/newrelic:/data/newrelic:rw'
-    yield '-v'
-    yield '/opt/proprietary/newrelic:/agents/newrelic:rw'
+
+    if config.get('newrelic_account_key'):
+        # mount newrelic agent into docker
+        print('DEPRECATED WARNING: /data/newrelic will be removed please use /agents/newrelic instead ')
+        yield '-v'
+        yield '/opt/proprietary/newrelic:/data/newrelic:rw'
+        yield '-v'
+        yield '/opt/proprietary/newrelic:/agents/newrelic:rw'
 
     # mount logdirectory as read-only
     if config.get('mount_var_log'):
