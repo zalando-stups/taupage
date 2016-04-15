@@ -57,5 +57,6 @@ mount_var_log: true
 # Start etcd in single node mode
 etcd_discovery_domain: disable
 
-# Set custom sysctl keys
-sysctl_entries: fs.file-max = 8192
+# Set custom sysctl settings
+sysctl:
+  fs.file-max: 8192
