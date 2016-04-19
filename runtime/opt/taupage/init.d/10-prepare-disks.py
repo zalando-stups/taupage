@@ -133,6 +133,7 @@ def iterate_mounts(config):
                 logging.error("Could not mount partition %s: %s", partition, str(e))
 
                 if not initialize:
+                    initialize = True
                     format()
                     mount()
 
