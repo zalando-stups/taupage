@@ -116,14 +116,13 @@ def iterate_mounts(config):
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
         options = data.get('options')
-        dir_exists = os.path.isdir(mountpoint)
         already_mounted = os.path.ismount(mountpoint)
 
         def format():
             format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
 
         def mount():
-            mount_partition(partition, mountpoint, options, filesystem, dir_exists, already_mounted)
+            mount_partition(partition, mountpoint, options, filesystem, os.path.isdir(mountpoint), already_mounted)
 
         if partition and not already_mounted:
             if initialize:
