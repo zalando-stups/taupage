@@ -96,6 +96,7 @@ def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=
         if options:
             mount_command.extend(['-o', options.replace(' ', '')])
         mount_command.extend([partition, mountpoint])
+        wait_for_device(partition)
         subprocess.check_call(mount_command)
     elif is_mounted is True and dir_exists is True:
         logging.warning("Directory %s already exists and device is already mounted.", mountpoint)
