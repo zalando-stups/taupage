@@ -143,8 +143,11 @@ def handle_ebs_volumes(args, ebs_volumes):
     current_region = args.region if args.region else region()
     ec2 = boto.ec2.connect_to_region(current_region)
     for device, name in ebs_volumes.items():
-        attach_volume(ec2, find_volume(ec2, name), device)
-        logging.info("Attached EBS volume '%s' as '%s'", name, device)
+        if os.path.exists(device):
+            logging.info("Device already exists %s", device)
+        else:
+            attach_volume(ec2, find_volume(ec2, name), device)
+            logging.info("Attached EBS volume '%s' as '%s'", name, device)
 
 
 def raid_device_exists(raid_device):
