@@ -155,7 +155,7 @@ if [ $AVAILABILITY_TEST_OK = true ]; then
     while [ true ]; do
         echo "Testing docker..."
 
-        result=$(curl -s -o /dev/null -w "%{http_code}" http://$ip/docker-test)
+        result=$(curl -s -o /dev/null -w "%{http_code}" http://$ip/)
         if [ $result = 200 ]; then
             echo "DOCKER TEST SUCCESS: docker seems to work"
             break
