@@ -135,13 +135,25 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
 
-    # typically, for continuous integration/delivery systems, you need to be able to builder
+    # typically, for continuous integration/delivery systems, you need to be able to build
     # Docker images and there is no better solution currently.
     if config.get('docker_daemon_access'):
         yield '-v'
         yield '/var/run/docker.sock:/var/run/docker.sock'
         yield '-v'
         yield '/usr/bin/docker:/usr/bin/docker'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libsystemd-journal.so.0:/lib/x86_64-linux-gnu/libsystemd-journal.so.0'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libcgmanager.so.0:/lib/x86_64-linux-gnu/libcgmanager.so.0'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libnih.so.1:/lib/x86_64-linux-gnu/libnih.so.1'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libnih-dbus.so.1:/lib/x86_64-linux-gnu/libnih-dbus.so.1'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libdbus-1.so.3:/lib/x86_64-linux-gnu/libdbus-1.so.3'
+        yield '-v'
+        yield '/lib/x86_64-linux-gnu/libgcrypt.so.11:/lib/x86_64-linux-gnu/libgcrypt.so.11'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)

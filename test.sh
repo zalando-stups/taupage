@@ -129,7 +129,7 @@ ssh $ssh_args ubuntu@$ip sudo /tmp/scripts/serverspec.sh
 
 # now wait until HTTP works
 set +e
-TEST_OK=false
+AVAILABILITY_TEST_OK=false
 
 max_tries=30  # ~3 minutes
 while [ true ]; do
@@ -138,7 +138,7 @@ while [ true ]; do
     result=$(curl --fail http://$ip/ 2>/dev/null)
     if [ $? -eq 0 ]; then
 
-        TEST_OK=true
+        AVAILABILITY_TEST_OK=true
         break
     fi
 
@@ -150,8 +150,27 @@ while [ true ]; do
     sleep 10
 done
 
-if [ $TEST_OK = true ]; then
+if [ $AVAILABILITY_TEST_OK = true ]; then
     echo "TEST SUCCESS: got good response from http"
+    while [ true ]; do
+        echo "Testing docker..."
+
+        result=$(curl -s -o /dev/null -w "%{http_code}" http://$ip/)
+        if [ $result = 200 ]; then
+            echo "DOCKER TEST SUCCESS: docker seems to work"
+            break
+        fi
+        if [ $result = 404 ]; then
+            echo "DOCKER TEST FAILED: docker does not seem to work properly"
+            exit 1
+        fi
+        max_tries=$(($max_tries - 1))
+        if [ $max_tries -lt 1 ]; then
+            break
+        fi
+
+        sleep 10
+    done
     exit 0
 else
     echo "TEST FAILED: http did not come up properly"
