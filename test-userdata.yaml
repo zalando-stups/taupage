@@ -1,10 +1,10 @@
 #taupage-ami-config
 
-application_id: my-http-test-app-ami
-application_version: "1.1"
+application_id: plankton
+application_version: "cd14"
 
 runtime: Docker
-source: registry.opensource.zalan.do/stups/plankton:cd13
+source: registry.opensource.zalan.do/stups/plankton:cd14
 
 environment:
   STAGE: ami-test
