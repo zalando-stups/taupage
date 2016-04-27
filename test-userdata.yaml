@@ -27,7 +27,7 @@ healthcheck:
   type: elb
   loadbalancer_name: foo-elb
 
-health_check_path: /
+health_check_path: /health
 
 ssh_ports:
   - 22
