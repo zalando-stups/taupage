@@ -21,7 +21,7 @@ dockercfg:
     email: mail@example.org
 
 ports:
-  80: 8080
+  8080: 8080
 
 healthcheck:
   type: elb
