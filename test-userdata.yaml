@@ -10,8 +10,8 @@ environment:
   STAGE: ami-test
   SOME_BOOLEAN_ENV_VAR: false
 
-root: false
-read_only: true
+root: true
+read_only: false
 keep_instance_users: true
 
 docker_daemon_access: true
