@@ -1,17 +1,17 @@
 #taupage-ami-config
 
-application_id: plankton
-application_version: "cd14"
+application_id: my-http-test-app-ami
+application_version: "1.1"
 
 runtime: Docker
-source: registry.opensource.zalan.do/stups/plankton:cd14
+source: registry.opensource.zalan.do/stups/tiny-docker-http-test:1.1
 
 environment:
   STAGE: ami-test
   SOME_BOOLEAN_ENV_VAR: false
 
-root: true
-read_only: false
+root: false
+read_only: true
 keep_instance_users: true
 
 docker_daemon_access: true
@@ -21,13 +21,13 @@ dockercfg:
     email: mail@example.org
 
 ports:
-  8080: 8080
+  80: 8080
 
 healthcheck:
   type: elb
   loadbalancer_name: foo-elb
 
-health_check_path: /health
+health_check_path: /
 
 ssh_ports:
   - 22
