@@ -1,17 +1,17 @@
 #taupage-ami-config
 
 application_id: my-http-test-app-ami
-application_version: "1.1"
+application_version: "1.2"
 
 runtime: Docker
-source: registry.opensource.zalan.do/stups/tiny-docker-http-test:1.1
+source: registry.opensource.zalan.do/stups/tiny-docker-http-test:1.2
 
 environment:
   STAGE: ami-test
   SOME_BOOLEAN_ENV_VAR: false
 
 root: false
-read_only: true
+read_only: false
 keep_instance_users: true
 
 docker_daemon_access: true
