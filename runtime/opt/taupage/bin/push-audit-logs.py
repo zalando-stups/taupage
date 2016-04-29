@@ -33,7 +33,7 @@ def push_audit_log(config: dict, instance_logs_url, account_id, region, instance
     try:
         response = requests.post(instance_logs_url, data=json.dumps(data),
                                  headers={'Content-Type': 'application/json',
-                                          'Authorization' : 'Basic %s' % userAndPass})
+                                          'Authorization': 'Basic %s' % userAndPass})
         if response.status_code == 201:
             os.remove(fn)
         else:
