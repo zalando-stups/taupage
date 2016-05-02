@@ -14,6 +14,7 @@ import time
 from taupage import configure_logging, get_config, get_boot_time
 from base64 import b64encode
 
+
 def push_audit_log(config: dict, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=False):
     userAndPass = b64encode(bytes('{}:{}'.format(
             config.get('logsink_username'),
