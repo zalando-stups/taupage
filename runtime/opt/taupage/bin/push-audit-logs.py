@@ -11,11 +11,15 @@ import requests
 import sys
 import time
 
-from taupage import configure_logging, get_config, get_token, get_boot_time
+from taupage import configure_logging, get_config, get_boot_time
+from base64 import b64encode
 
 
 def push_audit_log(config: dict, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=False):
-    token = get_token(config, 'taupage', ['uid']) or {}
+    userAndPass = b64encode(bytes('{}:{}'.format(
+            config.get('logsink_username'),
+            config.get('logsink_password')),
+            encoding='ascii')).decode("ascii") or ''
 
     with open(fn, 'rb') as fd:
         contents = fd.read()
@@ -31,7 +35,7 @@ def push_audit_log(config: dict, instance_logs_url, account_id, region, instance
     try:
         response = requests.post(instance_logs_url, data=json.dumps(data),
                                  headers={'Content-Type': 'application/json',
-                                          'Authorization': 'Bearer {}'.format(token.get('access_token'))})
+                                          'Authorization': 'Basic {}'.format(userAndPass)})
         if response.status_code == 201:
             os.remove(fn)
         else:
