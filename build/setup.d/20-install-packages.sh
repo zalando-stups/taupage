@@ -11,7 +11,7 @@ libyaml-0-2
 linux-image-extra-$(uname -r)
 logentries
 logentries-daemon
-docker-engine=1.11.0-0~trusty
+docker-engine=1.11.1-0~trusty
 mdadm
 ntp
 openjdk-7-jre-headless
