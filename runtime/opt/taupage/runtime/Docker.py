@@ -154,6 +154,10 @@ def get_volume_options(config: dict):
         yield '/lib/x86_64-linux-gnu/libdbus-1.so.3:/lib/x86_64-linux-gnu/libdbus-1.so.3'
         yield '-v'
         yield '/lib/x86_64-linux-gnu/libgcrypt.so.11:/lib/x86_64-linux-gnu/libgcrypt.so.11'
+        yield '-v'
+        yield '/usr/lib/x86_64-linux-gnu/libapparmor.so.1:/usr/lib/x86_64-linux-gnu/libapparmor.so.1'
+        yield '-v'
+        yield '/usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7'
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
