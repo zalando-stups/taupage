@@ -9,6 +9,8 @@ NEWRELIC_LICENSE_KEY=NOT_SET
 OAUTH_ACCESS_TOKEN_URL=
 TOKEN_SERVICE_URL=
 INSTANCE_LOGS_URL=
+LOGSINK_USERNAME=
+LOGSINK_PASSWORD=
 
 # for appdynamics support uncomment the following lines and modify the values.
 # you also need the agents in proprietary/appdynamics-machine & appdynamics-jvm
