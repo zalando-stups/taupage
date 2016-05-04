@@ -15,8 +15,7 @@ import sys
 import subprocess
 import time
 import yaml
-import glob
-import shutil
+import os
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
@@ -130,10 +129,14 @@ def get_volume_options(config: dict):
         yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
     # if AppDynamics applicationname is in the config mount the agent to the container
-
+    # TODO: we should also check if the directory really exists.
     if 'appdynamics_application' in config:
-        yield '-v'
-        yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
+        if os.path.isdir('/opt/proprietary/appdynamics-jvm'):
+            yield '-v'
+            yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
+        if os.path.isdir('/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job'):
+            yield '-v'
+            yield '/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job:/agents/jobfiles:rw'
 
     # typically, for continuous integration/delivery systems, you need to be able to build
     # Docker images and there is no better solution currently.
@@ -320,12 +323,6 @@ def main(args):
         except Exception as e:
             logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
             sys.exit(1)
-
-    # copy job files from docker container to the machine agent
-    dest_dir = "/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/"
-    for file in glob.glob(r'/var/lib/docker/aufs/mnt/*/appdynmacis/jobs/*.job'):
-        print('copy jobfile: ', file)
-        shutil.copy(file, dest_dir)
 
     wait_for_health_check(config)
 
