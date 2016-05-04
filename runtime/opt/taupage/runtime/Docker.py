@@ -128,8 +128,7 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
-    # if AppDynamics applicationname is in the config mount the agent to the container
-    # TODO: we should also check if the directory really exists.
+    # if AppDynamics applicationname is in the config and directory exists mount the agent & jobfiles to the container
     if 'appdynamics_application' in config:
         if os.path.isdir('/opt/proprietary/appdynamics-jvm'):
             yield '-v'
