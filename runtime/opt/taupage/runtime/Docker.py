@@ -130,10 +130,12 @@ def get_volume_options(config: dict):
         yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
     # if AppDynamics applicationname is in the config mount the agent to the container
-
+    # TODO: we should also check if the directory really exists.
     if 'appdynamics_application' in config:
         yield '-v'
         yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
+        yield '-v'
+        yield '/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job:/agents/jobfiles:rw'
 
     # typically, for continuous integration/delivery systems, you need to be able to build
     # Docker images and there is no better solution currently.
