@@ -16,7 +16,7 @@ def main():
     on a whitelist are allowed to be specified.
     """
     SYSCTL_WHITELIST = ['fs.file-max', 'vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory',
-                        'vm_overcommit_ratio', 'vm.swappiness']
+                        'vm.overcommit_ratio', 'vm.swappiness']
     CUSTOM_SYSCTL_CONF = '/etc/sysctl.d/99-custom.conf'
 
     configure_logging()
