@@ -1,5 +1,8 @@
 # vi: ts=4 expandtab
 
+import shutil
+import subprocess
+
 from cloudinit import handlers
 from cloudinit import log as logging
 from cloudinit import util
@@ -12,6 +15,7 @@ TAUPAGE_AMI_CONFIG_PREFIX = "#taupage-ami-config"
 TAUPAGE_AMI_CONFIG_MIME_TYPE = handlers.type_from_starts_with(TAUPAGE_AMI_CONFIG_PREFIX)
 
 TAUPAGE_CONFIG = "/meta/taupage.yaml"
+TMP_TAUPAGE_CONFIG = "/tmp/taupage.yaml"
 
 
 class ZalandoAMIConfigPartHandler(handlers.Handler):
@@ -37,4 +41,10 @@ class ZalandoAMIConfigPartHandler(handlers.Handler):
 
             LOG.debug("Storing merged configuration...")
             config_yaml = util.yaml_dumps(config_merged)
-            util.write_file(TAUPAGE_CONFIG, config_yaml, 0o444)
+            util.write_file(TMP_TAUPAGE_CONFIG, config_yaml, 0o444)
+
+            LOG.debug("Comparing current configuration with the old one...")
+            subprocess.call(['diff', '-u0', TAUPAGE_CONFIG, TMP_TAUPAGE_CONFIG])
+
+            LOG.debug("Moving the new configuration into place...")
+            shutil.move(TMP_TAUPAGE_CONFIG, TAUPAGE_CONFIG)
