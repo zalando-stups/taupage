@@ -118,10 +118,10 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/opt/proprietary/newrelic:/agents/newrelic:rw'
 
-    # mount logdirectory as read-write in order to write custom log files
+    # mount logdirectory as read-only
     if config.get('mount_var_log'):
         yield '-v'
-        yield '/var/log:/var/log'
+        yield '/var/log:/var/log:ro'
 
     # mount certs dir as read-only. 'private' is currently empty on Taupage
     if config.get('mount_certs'):
