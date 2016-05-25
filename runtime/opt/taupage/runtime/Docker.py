@@ -125,7 +125,7 @@ def get_volume_options(config: dict):
     # mount custom log dir as read-write
     if config.get('mount_custom_log'):
         yield '-v'
-        yield '/var/log/custom:/var/log-host/custom:rw'
+        yield '/var/log-custom:/var/log:rw'
 
     # mount certs dir as read-only. 'private' is currently empty on Taupage
     if config.get('mount_certs'):
