@@ -17,11 +17,3 @@ wget -P /tmp http://us.download.nvidia.com/XFree86/Linux-x86_64/361.42/NVIDIA-Li
 
 # Run the driver installation
 sh /tmp/NVIDIA-Linux-x86_64-361.42.run --no-questions --accept-license --ui=none
-
-# Load the UVM module
-nvidia-modprobe nvidia-uvm
-if [ "$?" -eq 0 ]; then
-  # Find out the major device number used by the nvidia-uvm driver
-  D=`grep nvidia-uvm /proc/devices | awk '{print $1}'`
-  mknod -m 666 /dev/nvidia-uvm c $D 0
-fi
