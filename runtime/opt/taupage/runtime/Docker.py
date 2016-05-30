@@ -172,8 +172,6 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7'
 
-    get_gpu_volume_options()
-
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
@@ -241,9 +239,6 @@ def get_other_options(config: dict):
     # Mount the container's root filesystem as read only
     if config.get('read_only'):
         yield '--read-only'
-
-    # Return the GPU device options.
-    get_gpu_device_options()
 
 
 def extract_registry(docker_image: str) -> str:
@@ -367,7 +362,8 @@ def main(args):
 
         cmd = ['docker', 'run', '-d', '--log-driver=syslog',
                '--name=taupageapp', '--restart=on-failure:10']
-        for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+        for f in get_env_options, get_volume_options, get_port_options,
+        get_other_options, get_gpu_volume_options, get_gpu_device_options:
             cmd += list(f(config))
         cmd += [source]
 
