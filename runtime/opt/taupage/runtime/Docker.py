@@ -176,7 +176,7 @@ def get_volume_options(config: dict):
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
 
-def get_gpu_options():
+def get_gpu_options(config: dict):
     '''
     Add the GPU drivers as volumes to the docker container.
     '''
