@@ -176,7 +176,7 @@ def get_volume_options(config: dict):
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
 
 
-def get_gpu_volume_options():
+def get_gpu_options():
     '''
     Add the GPU drivers as volumes to the docker container.
     '''
@@ -185,11 +185,7 @@ def get_gpu_volume_options():
         yield '-v'
         yield '{}:{}'.format(f, f)
 
-
-def get_gpu_device_options():
-    '''
-    Map the NVIDIA devices to the docker container.
-    '''
+    # Map the NVIDIA devices to the docker container.
     cuda_device_files = glob.glob('/dev/nvidia*')
     for d in cuda_device_files:
         yield '--device'
@@ -362,7 +358,7 @@ def main(args):
 
         cmd = ['docker', 'run', '-d', '--log-driver=syslog',
                '--name=taupageapp', '--restart=on-failure:10']
-        for f in get_env_options, get_volume_options, get_port_options, get_other_options, get_gpu_volume_options, get_gpu_device_options:
+        for f in get_env_options, get_volume_options, get_port_options, get_other_options, get_gpu_options:
             cmd += list(f(config))
         cmd += [source]
 
