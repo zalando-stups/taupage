@@ -4,16 +4,17 @@
 
 echo "Installing NVIDIA driver"
 
-# The following packages are required for the driver to install
+# Use the CUDA repo instead of the run file.
+wget -P /tmp http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.5-18_amd64.deb
+dpkg -i /tmp/cuda-repo-ubuntu1404_7.5-18_amd64.deb
+
+apt-get update
+
 pkgs="
-gcc
-make
-libc-dev
+nvidia-352-dev
+nvidia-352-uvm
+nvidia-352
+libcuda1-352
+nvidia-modprobe
 "
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
-
-# Download the driver package.
-wget -P /tmp http://us.download.nvidia.com/XFree86/Linux-x86_64/361.42/NVIDIA-Linux-x86_64-361.42.run
-
-# Run the driver installation
-sh /tmp/NVIDIA-Linux-x86_64-361.42.run --no-questions --accept-license --ui=none
