@@ -1,0 +1,11 @@
+/var/log/custom/*.log
+{
+        rotate 5
+        daily
+        missingok
+        notifempty
+        copytruncate
+        compress
+        delaycompress
+        sharedscripts
+}
