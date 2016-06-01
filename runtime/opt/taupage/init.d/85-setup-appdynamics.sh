@@ -108,11 +108,10 @@ else
 fi
 
 #add TIER_NAME to the machine agent if the TIER_NAME was provided over the TAUPAGE_CONFIG
-if [ -f $config_appdynamics_machineagent_tiername ];
-then
+if [ -f $config_appdynamics_machineagent_tiername ]; then
 	machineagentconf="/opt/proprietary/appdynamics-machine/conf/controller-info.xml"
-	sed -i "1,$ s/<tier-name.*$/<tier-name>$config_application_id<\/tier-name>/" $conf
-	sed -i "1,$ s/<node-name.*$/<node-name>$node<\/node-name>/" $conf
+	sed -i "1,$ s/<tier-name.*$/<tier-name>$config_application_id<\/tier-name>/" $machineagentconf
+	sed -i "1,$ s/<node-name.*$/<node-name>$node<\/node-name>/" $machineagentconf
 fi
 
 # start machine agent we will move the start after the AppAgent.
