@@ -122,8 +122,5 @@ if [ "$config_appdynamics_include_scala_classes" == "true" ]; then
 	sed -i "/play.core.server/d" $jvmagentconf
 	sed -i "/play.api.libs.concurrent/d" $jvmagentconf
 fi
-
-
-
 # start machine agent we will move the start after the AppAgent.
 # service appdynamics start
