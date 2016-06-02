@@ -1,0 +1,7 @@
+approvals:
+  minimum: 1
+  pattern: "^(:\\+1:|👍|LGTM|lgtm)$"
+  from:
+    orgs:
+      - stups
+    collaborators: true
