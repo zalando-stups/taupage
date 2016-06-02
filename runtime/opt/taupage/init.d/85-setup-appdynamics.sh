@@ -114,7 +114,7 @@ if [ -n "$config_appdynamics_machineagent_tiername" ]; then
 	sed -i "1,$ s/<node-name.*$/<node-name>$node<\/node-name>/" $machineagentconf
 fi
 
-#include necsessary scala/play/akka classes if it was set in taupage.yaml
+#include necsessary scala/play/akka classes if this was set in taupage.yaml
 if [ "$config_appdynamics_include_scala_classes" == "true" ]; then
 	jvmagentconf="/opt/proprietary/appdynamics-jvm/latest_version/app-agent-config.xml"
 	sed -i "/scala.concurrent/d" $jvmagentconf
