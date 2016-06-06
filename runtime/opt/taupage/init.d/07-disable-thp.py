@@ -16,7 +16,7 @@ def main():
 
     thp = config.get('disable_thp')
 
-    if thp != True:
+    if thp is not True:
         sys.exit(0)
 
     logging.info('Disabling THP')
