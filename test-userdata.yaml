@@ -61,3 +61,7 @@ etcd_discovery_domain: disable
 # Set custom sysctl settings
 sysctl:
   fs.file-max: 8192
+
+
+# Disable THP
+disable_thp: true
