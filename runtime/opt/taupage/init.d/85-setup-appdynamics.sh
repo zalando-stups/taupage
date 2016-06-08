@@ -108,11 +108,19 @@ else
 fi
 
 #add TIER_NAME to the machine agent if the TIER_NAME was provided over the TAUPAGE_CONFIG
-if [ -f $config_appdynamics_machineagent_tiername ]; then
+if [ -n "$config_appdynamics_machineagent_tiername" ]; then
 	machineagentconf="/opt/proprietary/appdynamics-machine/conf/controller-info.xml"
 	sed -i "1,$ s/<tier-name.*$/<tier-name>$config_application_id<\/tier-name>/" $machineagentconf
 	sed -i "1,$ s/<node-name.*$/<node-name>$node<\/node-name>/" $machineagentconf
 fi
 
+#include necsessary scala/play/akka classes if this was set in taupage.yaml
+if [ "$config_appdynamics_include_scala_classes" == "true" ]; then
+	jvmagentconf="/opt/proprietary/appdynamics-jvm/latest_version/app-agent-config.xml"
+	sed -i "/scala.concurrent/d" $jvmagentconf
+	sed -i "/akka/d" $jvmagentconf
+	sed -i "/play.core.server/d" $jvmagentconf
+	sed -i "/play.api.libs.concurrent/d" $jvmagentconf
+fi
 # start machine agent we will move the start after the AppAgent.
 # service appdynamics start
