@@ -8,7 +8,7 @@ from taupage import configure_logging, get_config
 
 def main():
     """Configure values for white-listed sysfs paths"""
-    SYSFS_WHITELIST = ['/sys/kernel/mm/transparent_hugepage/enabled','/home/vagrant/testsysfs']
+    SYSFS_WHITELIST = ['/sys/kernel/mm/transparent_hugepage/enabled']
 
     configure_logging()
     config = get_config()
@@ -23,8 +23,8 @@ def main():
         logging.error('You are not allowed to edit the sysfs path(s) {}'.format(list(disallowed_paths)))
 
     # Sanitize our dict first
-    clean_sysfs = {key: value for (key, value) in sysfs.items() \
-                                    if key not in disallowed_paths}
+    clean_sysfs = {key: value for (key, value) in sysfs.items()
+                   if key not in disallowed_paths}
 
     try:
         for key, value in clean_sysfs.items():
