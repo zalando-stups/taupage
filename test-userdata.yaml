@@ -61,3 +61,7 @@ etcd_discovery_domain: disable
 # Set custom sysctl settings
 sysctl:
   fs.file-max: 8192
+
+# Edit sysfs paths
+sysfs:
+  /sys/kernel/mm/transparent_hugepage/enabled: never
