@@ -18,6 +18,7 @@ def main():
     SYSCTL_WHITELIST = ['fs.file-max',
                         'vm.dirty_background_ratio',
                         'vm.dirty_ratio',
+                        'vm.max_map_count',
                         'vm.overcommit_memory',
                         'vm.overcommit_ratio',
                         'vm.swappiness',
