@@ -89,7 +89,8 @@ fi
 
 # enable appdynamics machineagent job
 if [ -f $appdynamics_machineagent_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
+	  # leave it disabled per default
+    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
@@ -99,7 +100,8 @@ fi
 
 # enable appdynamics jvmagent job
 if [ -f $appdynamics_jvmagent_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
+	  # leave it disabled per default
+    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
