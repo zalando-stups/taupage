@@ -15,8 +15,8 @@ if [[ $ACCESSKEY == "aws:kms:"* ]]; then
 	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCESSKEY`
 fi
 if [[ $ACCOUNT_GLOBALNAME == "aws:kms:"* ]]; then
-	ACCOUNTKEY=${ACCOUNT_GLOBALNAME##aws:kms:}
-	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNT_GLOBALNAME`
+	ACCOUNT_GLOBALNAME=${ACCOUNT_GLOBALNAME##aws:kms:}
+	ACCOUNT_GLOBALNAME=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNT_GLOBALNAME`
 fi
 
 if [ -z "$APPLICATIONNAME" ]; then
