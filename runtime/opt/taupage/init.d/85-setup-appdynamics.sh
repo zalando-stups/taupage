@@ -3,7 +3,23 @@
 # read global taupage config
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
-if [ -z "$config_appdynamics_application" ]; then
+#set more readable variables
+$APPLICATIONNAME = $config_appdynamics_application
+$ACCOUNT_NAME = $config_appdynamics_account_name
+$ACCESSKEY = $config_appdynamics_account_access_key
+$ACCOUNT_GLOBALNAME = $config_appdynamics_account_globalname
+
+# If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
+if [[ $ACCESSKEY == "aws:kms:"* ]]; then
+	ACCOUNTKEY=${ACCESSKEY##aws:kms:}
+	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCESSKEY`
+fi
+if [[ $ACCOUNT_GLOBALNAME == "aws:kms:"* ]]; then
+	ACCOUNT_GLOBALNAME=${ACCOUNT_GLOBALNAME##aws:kms:}
+	ACCOUNT_GLOBALNAME=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNT_GLOBALNAME`
+fi
+
+if [ -z "$APPLICATIONNAME" ]; then
 	echo "INFO: no AppDynamics application configured; skipping AppDynamics setup"
 	exit 0
 fi
@@ -11,20 +27,20 @@ fi
 # checking for multi-tenant support.
 # All 3 properties (appdynamics_account_name, appdynamics_account_globalname, appdynamics_account_globalname)
 # must be set for multi-tenancy in taupage.yaml
-if [ -n "$config_appdynamics_account_name" ]; then
-    if [ -n "$config_appdynamics_account_access_key" ]; then
-        if [ -n "$config_appdynamics_account_globalname" ]; then
+if [ -n "$ACCOUNT_NAME" ]; then
+    if [ -n "$ACCESSKEY" ]; then
+        if [ -n "$ACCOUNT_GLOBALNAME" ]; then
             # we have to overwrite the default account settings in the analytics agent props file
             properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
-            sed -i "1,$ s/http.event.accountName.*$/http.event.accountName=$config_appdynamics_account_globalname/" $properties_file
-            sed -i "1,$ s/http.event.accessKey.*$/http.event.accessKey=$config_appdynamics_account_access_key/" $properties_file
+            sed -i "1,$ s/http.event.accountName.*$/http.event.accountName=$ACCOUNT_GLOBALNAME/" $properties_file
+            sed -i "1,$ s/http.event.accessKey.*$/http.event.accessKey=$ACCESSKEY/" $properties_file
         else
-            echo "ERROR: AppDynamics Multi Tenancy for account $config_appdynamics_account_name was detected \n
+            echo "ERROR: AppDynamics Multi Tenancy for account $ACCOUNT_NAME was detected \n
                 but appdynamics_account_globalname wasn't set. Please provide the proper appdynamics_account_globalname!"
             exit 1
         fi
     else
-        echo "ERROR: AppDynamics Multi Tenancy for account $config_appdynamics_account_name was detected \n
+        echo "ERROR: AppDynamics Multi Tenancy for account $ACCOUNT_NAME was detected \n
             but appdynamics_account_access_key wasn't set. Please provide the proper account_access_key!"
         exit 1
     fi
@@ -35,17 +51,17 @@ node="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_
 
 # replace app specific configurations in all appdynamics configs
 cat /opt/proprietary/appdynamics-configs | while read conf; do
-	echo "INFO: configuring AppDynamics agent $conf for $config_appdynamics_application / $config_application_id / $node"
+	echo "INFO: configuring AppDynamics agent $conf for $APPLICATIONNAME / $config_application_id / $node"
 	# multi-tenant support:
 	# if we got an appdynamics account name provided by taupage.yaml then overwrite the default one
-	if [ -n "$config_appdynamics_account_name" ]; then
-	    sed -i "1,$ s/<account-name.*$/<account-name>$config_appdynamics_account_name<\/account-name>/" $conf
+	if [ -n "$ACCOUNT_NAME" ]; then
+	    sed -i "1,$ s/<account-name.*$/<account-name>$ACCOUNT_NAME<\/account-name>/" $conf
     fi
-    if [ -n "$config_appdynamics_account_access_key" ]; then
-	    sed -i "1,$ s/<account-access-key.*$/<account-access-key>$config_appdynamics_account_access_key<\/account-access-key>/" $conf
+    if [ -n "$ACCESSKEY" ]; then
+	    sed -i "1,$ s/<account-access-key.*$/<account-access-key>$ACCESSKEY<\/account-access-key>/" $conf
     fi
 
-	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$config_appdynamics_application/" $conf
+	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $conf
 
 	#only add tier and nodename to the app agent not to the machine agent
 	if [[ $conf != *"machine"* ]]
@@ -89,7 +105,8 @@ fi
 
 # enable appdynamics machineagent job
 if [ -f $appdynamics_machineagent_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
+	  # leave it disabled per default
+    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
@@ -99,7 +116,8 @@ fi
 
 # enable appdynamics jvmagent job
 if [ -f $appdynamics_jvmagent_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
+	  # leave it disabled per default
+    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
