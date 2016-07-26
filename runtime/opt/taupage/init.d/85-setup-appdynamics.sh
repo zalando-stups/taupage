@@ -51,7 +51,7 @@ node="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_
 
 # write values in node.js snippet for agent integration
 nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
-# check if node.js snippet exists
+# check if node.js snippet exists and add values
 if [ -f "$nodejsSnippet" ]; then
 	sed -i "1,$ s/CONTROLLERHOST/$APPDYNAMICS_CONTROLLER_HOST/" $nodejsSnippet
 	sed -i "1,$ s/CONTROLLERPORT/$APPDYNAMICS_CONTROLLER_PORT/" $nodejsSnippet
