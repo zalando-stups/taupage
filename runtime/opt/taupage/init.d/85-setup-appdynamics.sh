@@ -4,10 +4,10 @@
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
-$APPLICATIONNAME = $config_appdynamics_application
-$ACCOUNT_NAME = $config_appdynamics_account_name
-$ACCESSKEY = $config_appdynamics_account_access_key
-$ACCOUNT_GLOBALNAME = $config_appdynamics_account_globalname
+APPLICATIONNAME=$config_appdynamics_application
+ACCOUNT_NAME=$config_appdynamics_account_name
+ACCESSKEY=$config_appdynamics_account_access_key
+ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
