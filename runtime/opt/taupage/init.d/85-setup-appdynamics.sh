@@ -13,6 +13,8 @@ ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
 	ACCOUNTKEY=${ACCESSKEY##aws:kms:}
 	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCESSKEY`
+	#overwrite ACCESSKEY with decrypted value
+	ACCESSKEY=$ACCOUNTKEY
 fi
 if [[ $ACCOUNT_GLOBALNAME == "aws:kms:"* ]]; then
 	ACCOUNT_GLOBALNAME=${ACCOUNT_GLOBALNAME##aws:kms:}
