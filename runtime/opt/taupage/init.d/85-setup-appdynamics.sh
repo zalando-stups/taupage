@@ -154,6 +154,7 @@ if [ -n "$config_appdynamics_machineagent_tiername" ]; then
 	machineagentconf="/opt/proprietary/appdynamics-machine/conf/controller-info.xml"
 	sed -i "1,$ s/<tier-name.*$/<tier-name>$config_application_id<\/tier-name>/" $machineagentconf
 	sed -i "1,$ s/<node-name.*$/<node-name>$node<\/node-name>/" $machineagentconf
+	sed -i "1,$ s/<application-name.*$/<application-name>$config_application_id/<\/application-name>/" $machineagentconf
 fi
 
 #include necsessary scala/play/akka classes if this was set in taupage.yaml
