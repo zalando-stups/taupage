@@ -55,20 +55,14 @@ node="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_
 nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
 # check if node.js snippet exists and add values
 if [ -f "$nodejsSnippet" ]; then
-	sed -i "1,$ s/CONTROLLERHOST/$APPDYNAMICS_CONTROLLER_HOST/" $nodejsSnippet
-	sed -i "1,$ s/CONTROLLERPORT/$APPDYNAMICS_CONTROLLER_PORT/" $nodejsSnippet
 	sed -i "1,$ s/APPLICATIONNAME/$APPLICATIONNAME/" $nodejsSnippet
 	sed -i "1,$ s/TIERNAME/$config_application_id/" $nodejsSnippet
 	sed -i "1,$ s/NODENAME/$node/" $nodejsSnippet
 	if [ -n "$ACCOUNT_NAME" ]; then
 		sed -i "1,$ s/ACCOUNTNAME/$ACCOUNT_NAME/" $nodejsSnippet
-	else
-		sed -i "1,$ s/ACCOUNTNAME/$APPDYNAMICS_ACCOUNT_NAME/" $nodejsSnippet
-	fi
+  fi
 	if [ -n "$ACCESSKEY" ]; then
 		sed -i "1,$ s/ACCESSKEY/$ACCESSKEY/" $nodejsSnippet
-	else
-		sed -i "1,$ s/ACCESSKEY/$APPDYNAMICS_KEY/" $nodejsSnippet
 	fi
 fi
 
