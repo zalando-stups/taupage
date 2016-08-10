@@ -59,10 +59,10 @@ if [ -f "$nodejsSnippet" ]; then
 	sed -i "1,$ s/TIERNAME/$config_application_id/" $nodejsSnippet
 	sed -i "1,$ s/NODENAME/$node/" $nodejsSnippet
 	if [ -n "$ACCOUNT_NAME" ]; then
-		sed -i "1,$ s/ACCOUNTNAME/$ACCOUNT_NAME/" $nodejsSnippet
+		sed -i "1,$ s/customer1/$ACCOUNT_NAME/" $nodejsSnippet
   fi
 	if [ -n "$ACCESSKEY" ]; then
-		sed -i "1,$ s/ACCESSKEY/$ACCESSKEY/" $nodejsSnippet
+		sed -i "1,$ s/accountAccessKey.*$/accountAccessKey:\ \'$ACCESSKEY\'\,/" $nodejsSnippet
 	fi
 fi
 
