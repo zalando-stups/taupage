@@ -35,6 +35,7 @@ ruby
 scalyr-agent-2
 unhide.rb
 unzip
+xfsprogs
 "
 
 echo "Installing packages..."
