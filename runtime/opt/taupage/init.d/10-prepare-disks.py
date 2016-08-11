@@ -125,6 +125,9 @@ def iterate_mounts(config):
         def mount():
             mount_partition(partition, mountpoint, options, filesystem, os.path.isdir(mountpoint), already_mounted)
 
+        def resize():
+            subprocess.check_call(['resize2fs', partition])
+
         if partition and not already_mounted:
             if initialize:
                 format()
@@ -137,6 +140,11 @@ def iterate_mounts(config):
                     initialize = True
                     format()
                     mount()
+
+            try:
+                resize()
+            except Exception as e:
+                logging.warning("Could not resize partition %s: %s", partition, str(e))
 
 
 def handle_ebs_volumes(args, ebs_volumes):
