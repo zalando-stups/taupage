@@ -1,4 +1,4 @@
-/var/log/custom/*.log
+/var/log-custom/*.log
 {
         rotate 5
         daily
