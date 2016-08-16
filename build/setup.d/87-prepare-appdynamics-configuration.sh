@@ -31,7 +31,7 @@ else
 		sed -i "1,$ s/CONTROLLERHOST/$APPDYNAMICS_CONTROLLER_HOST/" $nodejsSnippet
 		sed -i "1,$ s/CONTROLLERPORT/$APPDYNAMICS_CONTROLLER_PORT/" $nodejsSnippet
 		sed -i "1,$ s/ACCOUNTNAME/$APPDYNAMICS_ACCOUNT_NAME/" $nodejsSnippet
-		sed -i "1,$ s/ACCESSKEY/$APPDYNAMICS_KEY/" $nodejsSnippet
+		sed -i "1,$ s/ACCESSKEY/$APPDYNAMICS_ACCOUNT_KEY/" $nodejsSnippet
 	fi
 
 	# setup all configs
