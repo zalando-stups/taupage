@@ -39,18 +39,19 @@ cloudwatch_logs:
 
 volumes:
   ebs:
+    # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
     # attach EBS volume with "Name" tag "taupage-ami-test-vol1"
-    /dev/zaldisk1: taupage-ami-test-vol1
+    /dev/sdf: taupage-ami-test-vol1
     # attach EBS volume with "Name" tag "taupage-ami-test-vol2"
-    /dev/zaldisk2: taupage-ami-test-vol2
+    /dev/sdg: taupage-ami-test-vol2
 
   raid:
     # Defines RAID0 volume with the attached devices above (note the different device names)
     /dev/md/sampleraid0:
       level: 1
       devices:
-        - /dev/zaldisk1
-        - /dev/zaldisk2
+        - /dev/sdf
+        - /dev/sdg
 
 mounts:
     /some_volume:
