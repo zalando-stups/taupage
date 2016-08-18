@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You may not 
 # use this file except in compliance with the License. A copy of the License 
@@ -41,7 +41,6 @@ USAGE
 
 use strict;
 use warnings;
-use Switch;
 use File::Basename;
 use Getopt::Long;
 use Sys::Hostname;
@@ -54,9 +53,14 @@ BEGIN
   push @INC, $script_dir;
 }
 
+use constant
+{
+  NOW => 0,
+};
+
 use CloudWatchClient;
 
-my $version = '1.1.0';
+my $version = '1.2.1';
 my $client_name = 'CloudWatch-GetInstanceStats';
 
 my $verify;
@@ -145,7 +149,7 @@ elsif (defined($aws_iam_role) && defined($aws_secret_key)) {
 
 
 my $now = time();
-my $timestamp = CloudWatchClient::get_timestamp($now);
+my $timestamp = CloudWatchClient::get_offset_time(NOW);
 my $instance_id = CloudWatchClient::get_instance_id();
 
 if (!defined($instance_id) || length($instance_id) == 0) {
@@ -157,31 +161,31 @@ if (!defined($instance_id) || length($instance_id) == 0) {
 #
 sub call_cloud_watch
 {
+  my $operation = shift;
   my $params = shift;
 
   my %call_opts = ();
   $call_opts{'aws-credential-file'} = $aws_credential_file;
   $call_opts{'aws-access-key-id'} = $aws_access_key_id;
   $call_opts{'aws-secret-key'} = $aws_secret_key;
-  $call_opts{'short-response'} = 0;
   $call_opts{'retries'} = 1;
   $call_opts{'verbose'} = $verbose;
   $call_opts{'verify'} = $verify;
   $call_opts{'user-agent'} = "$client_name/$version";
   $call_opts{'aws-iam-role'} = $aws_iam_role;
   
-  my ($response_code, $response_content) = CloudWatchClient::call($params, \%call_opts);
+  my $response = CloudWatchClient::call_json($operation, $params, \%call_opts);
+  my $code = $response->code;
+  my $message = $response->message;
   
-  if ($response_code < 100) {
-    exit_with_error("Failed to initialize: $response_content");
+  if ($response->code < 100) {
+    exit_with_error("Failed to initialize: $message");
   }
-  elsif ($response_code != 200) {
-    $response_content =~ /<Message>(.*?)<\/Message>/s;
-    $response_content = $1 if $1;
-    exit_with_error("Failed to call CloudWatch service with HTTP status code $response_code. Message: $response_content");
+  elsif ($response->code != 200) {
+    exit_with_error("Failed to call CloudWatch service with HTTP status code $code. Message: $message");
   }
-  
-  return $response_content;
+
+  return $response;
 }
 
 #
@@ -191,52 +195,72 @@ sub call_cloud_watch
 sub print_metric_stats
 {
   my $namespace = shift;
-  my $metric = shift;
+  my $metric_name = shift;
   my $title = shift;
   my $extra_dims = shift;
 
-  my $start_time = CloudWatchClient::get_timestamp($now - $recent_hours * 3600);
-  my $end_time = CloudWatchClient::get_timestamp($now);
+  my $start_time = CloudWatchClient::get_offset_time($recent_hours);
+  my $end_time = CloudWatchClient::get_offset_time(NOW);
   
   my %params = ();
-  $params{'Action'} = 'GetMetricStatistics';
-  $params{'Namespace'} = $namespace;
-  $params{"MetricName"} = $metric;
-  $params{"Period"} = '300';
-  $params{"Statistics.member.1"} = 'Average';
-  $params{"Statistics.member.2"} = 'Maximum';
-  $params{"Statistics.member.3"} = 'Minimum';
-  $params{"StartTime"} = $start_time;
-  $params{"EndTime"} = $end_time;
-  $params{"Dimensions.member.1.Name"} = 'InstanceId';
-  $params{"Dimensions.member.1.Value"} = $instance_id;
+  $params{'Input'} = {};
+  
+  # Add basic metric options
+  my $metric = $params{'Input'};
+  $metric->{'Namespace'} = $namespace;
+  $metric->{'MetricName'} = $metric_name;
+  $metric->{'Period'} = '300';
+  $metric->{'StartTime'} = $start_time;
+  $metric->{'EndTime'} = $end_time;
+  
+  # Add stats to metric
+  my $stats = [];
+  push(@{$stats}, 'Average');
+  push(@{$stats}, 'Maximum');
+  push(@{$stats}, 'Minimum');
+  $metric->{'Statistics'} = $stats;
 
-  if (defined $extra_dims) {
-    my %all_params = (%params, %$extra_dims);
-    %params = %all_params;
+  # Add dimension(s) to metric
+  my $dimensions = [];
+  my $dimension = {};
+  $dimension->{'Name'} = 'InstanceId';
+  $dimension->{'Value'} = $instance_id;
+  push(@$dimensions, $dimension);
+  
+  if (defined $extra_dims) 
+  {
+    while (my ($key, $value) = each(%$extra_dims)) 
+    {
+      $dimension = {};
+      $dimension->{'Name'} = $key;
+      $dimension->{'Value'} = $value;
+      push(@$dimensions, $dimension);
+    }
   }
+  $metric->{"Dimensions"} = $dimensions;
   
-  my $reply = call_cloud_watch(\%params);
+  my $response = call_cloud_watch('GetMetricStatistics', \%params);
   
+  my $content = $response->content;
   my $min;
   my $max;
   my $avg;
   my $count = 0;
   
-  while ($reply =~ /<Average>(.*?)<\/Average>/g) {
+  while ($content =~ /\"Average\":(.*?)[,}]/g) {
     ++$count;
     $avg = 0 if !defined $avg;
     $avg += $1;
   }
   $avg /= $count if $count > 0;
   
-  while ($reply =~ /<Minimum>(.*?)<\/Minimum>/g) {
+  while ($content =~ /\"Minimum\":(.*?)[,}]/g) {
     if (!defined($min) || $min > $1) {
       $min = $1;
     }
   }  
   
-  while ($reply =~ /<Maximum>(.*?)<\/Maximum>/g) {
+  while ($content =~ /\"Maximum\":(.*?)[,}]/g) {
     if (!defined($max) || $max < $1) {
       $max = $1;
     }
@@ -274,23 +298,31 @@ sub print_filesystem_stats
   my $metric_name = 'DiskSpaceUtilization';
 
   my %params = ();
-  $params{'Action'} = 'ListMetrics';
-  $params{'Namespace'} = $namespace;
-  $params{"MetricName"} = $metric_name;
-  $params{"Dimensions.member.1.Name"} = 'InstanceId';
-  $params{"Dimensions.member.1.Value"} = $instance_id;
-  $params{"Dimensions.member.2.Name"} = 'MountPath';
-  $params{"Dimensions.member.2.Value"} = '/';
+  $params{'Input'} = {};
   
-  my $reply = call_cloud_watch(\%params);
+  my $metric = $params{'Input'};
+  $metric->{'Namespace'} = $namespace;
+  $metric->{'MetricName'} = $metric_name;
   
-  if ($reply =~ /<Value>\/dev\/(.*?)<\/Value>/) {
+  my $dimensions = [];
+  my $dimension = {};
+  $dimension->{'Name'} = 'InstanceId';
+  $dimension->{'Value'} = $instance_id;
+  push(@{$dimensions}, $dimension);
+  
+  $dimension = {};
+  $dimension->{'Name'} = 'MountPath';
+  $dimension->{'Value'} = '/';
+  push(@{$dimensions}, $dimension);
+  $metric->{'Dimensions'} = $dimensions;
+  
+  my $response = call_cloud_watch('ListMetrics', \%params);
+  
+  if ($response->content =~ /"Value":"\/dev\/(.*?)"/) {
     my $filesystem = "/dev/$1";
     my %extra_dims = ();
-    $extra_dims{"Dimensions.member.2.Name"} = 'MountPath';
-    $extra_dims{"Dimensions.member.2.Value"} = '/';
-    $extra_dims{"Dimensions.member.3.Name"} = 'Filesystem';
-    $extra_dims{"Dimensions.member.3.Value"} = $filesystem;
+    $extra_dims{"MountPath"} = '/';
+    $extra_dims{"Filesystem"} = $filesystem;
     print_metric_stats($namespace, $metric_name,
       "Disk Space Utilization for $filesystem mounted on /", \%extra_dims);
   }
@@ -306,7 +338,7 @@ print_filesystem_stats();
 
 if ($verify) {
   print "\nVerification completed successfully. No actual calls were made to CloudWatch.\n";
-}
+} 
 
 print "\n";
 exit 0;

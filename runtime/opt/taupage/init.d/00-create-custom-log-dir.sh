@@ -7,4 +7,4 @@ then
 fi
 
 #make writeable for application user that are docker is able to write custom logs
-chown application.application /var/log-custom
+chown -Rf application:application /var/log-custom
