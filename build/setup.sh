@@ -8,7 +8,7 @@ export LANG="en_US.UTF-8"
 export DEBIAN_FRONTEND=noninteractive
 
 # start installation
-set -x
+set -xe
 
 cd $(dirname $0)
 export BUILD_DIR=$(pwd)
