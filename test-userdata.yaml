@@ -38,6 +38,12 @@ cloudwatch_logs:
   /var/log/application.log: my-application-loggroup
 
 volumes:
+  ebs:
+    # attach EBS volume with "Name" tag "taupage-ami-test-vol1"
+    /dev/zaldisk1: taupage-ami-test-vol1
+    # attach EBS volume with "Name" tag "taupage-ami-test-vol2"
+    /dev/zaldisk2: taupage-ami-test-vol2
+
   raid:
     # Defines RAID0 volume with the attached devices above (note the different device names)
     /dev/md/sampleraid0:
