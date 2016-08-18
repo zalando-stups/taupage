@@ -71,7 +71,7 @@ result=$(aws ec2 run-instances \
     --iam-instance-profile Name=${INSTANCE_PROFILE} \
     --image-id $AMI_ID \
     --count 1 \
-    --instance-type c3.large \
+    --instance-type $instance_type \
     --associate-public-ip-address \
     --key-name $keypair \
     --security-group-ids $security_group \
