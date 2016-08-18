@@ -1,4 +1,8 @@
 #!/bin/bash
+
+echo "Display Disk configuration..."
+fdisk -l
+
 echo "Preparing Serverspec and running system tests..."
 # sudo apt-get update &&
 # apt-get install -y ruby1.9.1
