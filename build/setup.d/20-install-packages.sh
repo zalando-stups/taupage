@@ -15,6 +15,7 @@ docker-engine=1.11.1-0~trusty
 mdadm
 ntp
 openjdk-7-jre-headless
+python3-dev
 python3-pip
 python3-yaml
 python3-jinja2
