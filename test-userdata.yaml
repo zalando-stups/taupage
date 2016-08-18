@@ -43,8 +43,8 @@ volumes:
     /dev/md/sampleraid0:
       level: 1
       devices:
-        - /dev/xvdb
-        - /dev/xvdc
+        - /dev/zaldisk1
+        - /dev/zaldisk2
 
 mounts:
     /some_volume:
