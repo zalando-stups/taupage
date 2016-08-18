@@ -122,9 +122,12 @@ ssh $ssh_args ubuntu@$ip find /tmp/build
 
 # execute setup script
 echo "Executing setup script..."
+set +e
 ssh $ssh_args ubuntu@$ip sudo /tmp/build/setup.sh
+build_status=$?
+set -e
 
-if [ $? -ne 0 ]; then
+if [ $build_status -ne 0 ]; then
     echo "Build failed"
     exit 1
 fi
