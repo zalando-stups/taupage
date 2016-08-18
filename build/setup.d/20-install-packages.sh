@@ -11,7 +11,9 @@ gcc
 iproute
 jq
 libdatetime-perl
+libffi-dev
 libruby1.9.1
+libssl-dev
 libswitch-perl
 libwww-perl
 libyaml-0-2
@@ -24,6 +26,7 @@ openjdk-7-jre-headless
 python3-dev
 python3-jinja2
 python3-pip
+python3-wheel
 python3-yaml
 python-setuptools
 rkhunter
