@@ -21,6 +21,7 @@ logentries-daemon
 mdadm
 ntp
 openjdk-7-jre-headless
+python3-dev
 python3-jinja2
 python3-pip
 python3-yaml
