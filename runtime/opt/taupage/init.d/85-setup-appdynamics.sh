@@ -119,7 +119,7 @@ if [ -f $syslog_job ]; then
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
-    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
+    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $syslog_job
 else
   echo "INFO: syslog_job file doesn't exists, skipping setup"
 fi
