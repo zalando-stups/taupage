@@ -8,6 +8,7 @@ APPLICATIONNAME=$config_appdynamics_application
 ACCOUNT_NAME=$config_appdynamics_account_name
 ACCESSKEY=$config_appdynamics_account_access_key
 ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
+STACK_NAME=$config_notify_cfn_stack
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
@@ -107,6 +108,7 @@ if [ -f $application_log_job ]; then
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $application_log_job
+    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
 else
     echo "INFO: application_job file doesn't exists, skipping setup"
 fi
@@ -117,6 +119,7 @@ if [ -f $syslog_job ]; then
     sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
     sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
     sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
+    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
 else
   echo "INFO: syslog_job file doesn't exists, skipping setup"
 fi
