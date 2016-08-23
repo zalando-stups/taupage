@@ -65,6 +65,9 @@ mount_var_log: true
 # Start etcd in single node mode
 etcd_discovery_domain: disable
 
+# start local planb-tokeninfo
+local_planb_tokeninfo: true
+
 # Set custom sysctl settings
 sysctl:
   fs.file-max: 8192
