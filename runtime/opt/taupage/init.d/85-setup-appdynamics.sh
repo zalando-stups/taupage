@@ -35,8 +35,8 @@ if [ -n "$ACCOUNT_NAME" ]; then
         if [ -n "$ACCOUNT_GLOBALNAME" ]; then
             # we have to overwrite the default account settings in the analytics agent props file
             properties_file="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/analytics-agent.properties"
-            sed -i "1,$ s/http.event.accountName.*$/http.event.accountName=$ACCOUNT_GLOBALNAME/" $properties_file
-            sed -i "1,$ s/http.event.accessKey.*$/http.event.accessKey=$ACCESSKEY/" $properties_file
+            sed -i "s/http.event.accountName.*$/http.event.accountName=$ACCOUNT_GLOBALNAME/" $properties_file
+            sed -i "s/http.event.accessKey.*$/http.event.accessKey=$ACCESSKEY/" $properties_file
         else
             echo "ERROR: AppDynamics Multi Tenancy for account $ACCOUNT_NAME was detected \n
                 but appdynamics_account_globalname wasn't set. Please provide the proper appdynamics_account_globalname!"
@@ -56,14 +56,14 @@ node="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_
 nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
 # check if node.js snippet exists and add values
 if [ -f "$nodejsSnippet" ]; then
-	sed -i "1,$ s/APPLICATIONNAME/$APPLICATIONNAME/" $nodejsSnippet
-	sed -i "1,$ s/TIERNAME/$config_application_id/" $nodejsSnippet
-	sed -i "1,$ s/NODENAME/$node/" $nodejsSnippet
+	sed -i "s/APPLICATIONNAME/$APPLICATIONNAME/" $nodejsSnippet
+	sed -i "s/TIERNAME/$config_application_id/" $nodejsSnippet
+	sed -i "s/NODENAME/$node/" $nodejsSnippet
 	if [ -n "$ACCOUNT_NAME" ]; then
-		sed -i "1,$ s/customer1/$ACCOUNT_NAME/" $nodejsSnippet
+		sed -i "s/customer1/$ACCOUNT_NAME/" $nodejsSnippet
   fi
 	if [ -n "$ACCESSKEY" ]; then
-		sed -i "1,$ s/accountAccessKey.*$/accountAccessKey:\ \'$ACCESSKEY\'\,/" $nodejsSnippet
+		sed -i "s/accountAccessKey.*$/accountAccessKey:\ \'$ACCESSKEY\'\,/" $nodejsSnippet
 	fi
 fi
 
@@ -74,19 +74,19 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 	# multi-tenant support:
 	# if we got an appdynamics account name provided by taupage.yaml then overwrite the default one
 	if [ -n "$ACCOUNT_NAME" ]; then
-	    sed -i "1,$ s/<account-name.*$/<account-name>$ACCOUNT_NAME<\/account-name>/" $conf
+	    sed -i "s/<account-name.*$/<account-name>$ACCOUNT_NAME<\/account-name>/" $conf
     fi
     if [ -n "$ACCESSKEY" ]; then
-	    sed -i "1,$ s/<account-access-key.*$/<account-access-key>$ACCESSKEY<\/account-access-key>/" $conf
+	    sed -i "s/<account-access-key.*$/<account-access-key>$ACCESSKEY<\/account-access-key>/" $conf
     fi
 
-	sed -i "1,$ s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $conf
+	sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $conf
 
 	#only add tier and nodename to the app agent not to the machine agent
 	if [[ $conf != *"machine"* ]]
 	then
-		sed -i "1,$ s/APPDYNAMICS_TIER/$config_application_id/" $conf
-		sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $conf
+		sed -i "s/APPDYNAMICS_TIER/$config_application_id/" $conf
+		sed -i "s/APPDYNAMICS_NODE/$node/" $conf
 	fi
 
 
@@ -104,26 +104,26 @@ appdynamics_jvmagent_job="/opt/proprietary/appdynamics-machine/monitors/analytic
 
 #enable application.log job
 if [ -f $application_log_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $application_log_job
-    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $application_log_job
-    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $application_log_job
-    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $application_log_job
-    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
-    sed -i "1,$ s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $application_log_job
-    sed -i "1,$ s/APPDYNAMICS_TIERNAME/$config_application_id/" $application_log_job
+    sed -i "s/enabled.*$/enabled: true/" $application_log_job
+    sed -i "s/APPLICATION_ID/$config_application_id/" $application_log_job
+    sed -i "s/APPLICATION_VERSION/$config_application_version/" $application_log_job
+    sed -i "s/APPDYNAMICS_NODE/$node/" $application_log_job
+    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
+    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $application_log_job
+    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $application_log_job
 else
     echo "INFO: application_job file doesn't exists, skipping setup"
 fi
 
 # enable syslogjob
 if [ -f $syslog_job ]; then
-    sed -i "1,$ s/enabled.*$/enabled: true/" $syslog_job
-    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $syslog_job
-    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $syslog_job
-    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $syslog_job
-    sed -i "1,$ s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $syslog_job
-    sed -i "1,$ s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $syslog_job
-    sed -i "1,$ s/APPDYNAMICS_TIERNAME/$config_application_id/" $syslog_job
+    sed -i "s/enabled.*$/enabled: true/" $syslog_job
+    sed -i "s/APPLICATION_ID/$config_application_id/" $syslog_job
+    sed -i "s/APPLICATION_VERSION/$config_application_version/" $syslog_job
+    sed -i "s/APPDYNAMICS_NODE/$node/" $syslog_job
+    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $syslog_job
+    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $syslog_job
+    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $syslog_job
 else
   echo "INFO: syslog_job file doesn't exists, skipping setup"
 fi
@@ -132,9 +132,9 @@ fi
 if [ -f $appdynamics_machineagent_job ]; then
 	  # leave it disabled per default
     #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
-    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
-    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
-    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
+    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
+    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
+    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
 else
   echo "INFO: appdynamics-machineagent-log job file doesn't exists, skipping setup"
 fi
@@ -143,9 +143,9 @@ fi
 if [ -f $appdynamics_jvmagent_job ]; then
 	  # leave it disabled per default
     #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
-    sed -i "1,$ s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
-    sed -i "1,$ s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
-    sed -i "1,$ s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
+    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
+    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
+    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
 else
   echo "INFO: appdynamics-jvmagent-log job file doesn't exists, skipping setup"
 fi
