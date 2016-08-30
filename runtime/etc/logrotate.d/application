@@ -2,7 +2,7 @@
 {
         rotate 4
         weekly
-        size 256M
+        maxsize 256M
         missingok
         notifempty
         copytruncate
@@ -11,7 +11,7 @@
         sharedscripts
         postrotate
                 reload rsyslog >/dev/null 2>&1 || true
-                /usr/sbin/scalyr-agent-2 stop 
+                /usr/sbin/scalyr-agent-2 stop
                 /usr/sbin/scalyr-agent-2 start
         endscript
 }
