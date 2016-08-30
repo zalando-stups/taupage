@@ -89,6 +89,13 @@ def resize_partition(partition, mountpoint, filesystem):
     try:
         if filesystem.startswith('ext'):
             resize_command = ['resize2fs', partition]
+            resize = subprocess.Popen(resize_command, stderr=subprocess.PIPE)
+            stdout, stderr = resize.communicate()
+            if 'e2fsck -f' in stderr:
+                subprocess.check_call(['e2fsck', '-f', partition])
+            else:
+                # skip calling resize_command the second time
+                return
         elif filesystem == 'xfs':
             resize_command = ['xfs_growfs', mountpoint]
         else:
