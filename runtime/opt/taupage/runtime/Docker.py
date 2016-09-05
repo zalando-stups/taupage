@@ -65,14 +65,18 @@ def mask_command(cmd: list):
 
 
 def wait_for_local_planb_tokeninfo():
-    '''wait for startup of Plan B Token Info'''
+    '''
+    Wait for startup of local Plan B Token Info
+
+    See https://github.com/zalando/planb-tokeninfo
+    '''
     base_url = 'http://localhost:9021/'
     health_url = base_url + '/health'
     tokeninfo_url = base_url + '/oauth2/tokeninfo'
     timeout_seconds = 30
 
     start = time.time()
-    while time.time() < start + 30:
+    while time.time() < start + timeout_seconds:
         logging.info('Waiting for local Plan B Token Info..')
         try:
             response = requests.get(health_url, timeout=5)
