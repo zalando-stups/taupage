@@ -64,6 +64,37 @@ def mask_command(cmd: list):
     return ' '.join(masked_cmd)
 
 
+def wait_for_local_planb_tokeninfo():
+    '''
+    Wait for startup of local Plan B Token Info
+
+    See https://github.com/zalando/planb-tokeninfo
+    '''
+    base_url = 'http://localhost:9021/'
+    health_url = base_url + '/health'
+    tokeninfo_url = base_url + '/oauth2/tokeninfo'
+    timeout_seconds = 30
+
+    start = time.time()
+    while time.time() < start + timeout_seconds:
+        logging.info('Waiting for local Plan B Token Info..')
+        try:
+            response = requests.get(health_url, timeout=5)
+            if response.status_code == 200:
+                logging.info('Local Plan B Token Info returned OK')
+                return tokeninfo_url
+        except:
+            pass
+
+        time.sleep(2)
+
+    logging.error('Timeout of {}s expired for local Plan B Token Info'.format(
+                  timeout_seconds))
+    # failed to start local Token Info
+    # => use global one
+    return None
+
+
 def get_env_options(config: dict):
     '''build Docker environment options'''
 
@@ -71,7 +102,11 @@ def get_env_options(config: dict):
     # https://github.com/zalando-stups/taupage/issues/177
     # NOTE: do this before processing "environment"
     # so users can overwrite TOKENINFO_URL
-    tokeninfo_url = config.get('tokeninfo_url')
+    if config.get('local_planb_tokeninfo'):
+        # Plan B Token Info is started locally
+        tokeninfo_url = wait_for_local_planb_tokeninfo()
+    else:
+        tokeninfo_url = config.get('tokeninfo_url')
     if tokeninfo_url:
         yield '-e'
         yield 'TOKENINFO_URL={}'.format(tokeninfo_url)
