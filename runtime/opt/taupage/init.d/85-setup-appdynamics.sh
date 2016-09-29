@@ -13,7 +13,7 @@ STACK_NAME=$config_notify_cfn_stack
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
 	ACCOUNTKEY=${ACCESSKEY##aws:kms:}
-	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCESSKEY`
+	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
 	#overwrite ACCESSKEY with decrypted value
 	ACCESSKEY=$ACCOUNTKEY
 fi
