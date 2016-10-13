@@ -172,6 +172,9 @@ def get_volume_options(config: dict):
         if os.path.isdir('/opt/proprietary/appdynamics-jvm'):
             yield '-v'
             yield '/opt/proprietary/appdynamics-jvm:/agents/appdynamics-jvm:rw'
+        if os.path.isdir('/opt/proprietary/appdynamics-nodejs'):
+            yield '-v'
+            yield '/opt/proprietary/appdynamics-nodejs:/agents/appdynamics-nodejs:rw'            
         if os.path.isdir('/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job'):
             yield '-v'
             yield '/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job:/agents/jobfiles:rw'
