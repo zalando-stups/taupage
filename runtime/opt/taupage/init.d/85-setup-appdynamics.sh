@@ -50,7 +50,9 @@ if [ -n "$ACCOUNT_NAME" ]; then
 fi
 
 # node name has to be unique across the whole ecosystem
-node="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_$(ec2metadata --instance-id)"
+generated_nodename="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --availability-zone)_$(ec2metadata --instance-id)"
+#truncate the nodename if it has more than 100 chars
+node=$(echo $generated_nodename | cut -c 1-99)
 
 # write values in node.js snippet for agent integration
 nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
