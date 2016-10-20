@@ -10,3 +10,6 @@ gem install bundler rake serverspec --no-ri --no-rdoc
 chmod +x /tmp/scripts/serverspec.sh
 cd /tmp/tests
 rake
+
+echo "Display Disk configuration..."
+fdisk -l

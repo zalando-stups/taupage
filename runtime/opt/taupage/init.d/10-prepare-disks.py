@@ -85,6 +85,27 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
         logging.info("Nothing to do for disk %s", partition)
 
 
+def resize_partition(partition, mountpoint, filesystem):
+    try:
+        if filesystem.startswith('ext'):
+            resize_command = ['resize2fs', partition]
+            resize = subprocess.Popen(resize_command, stderr=subprocess.PIPE)
+            stdout, stderr = resize.communicate()
+            if 'e2fsck -f' in stderr:
+                subprocess.check_call(['e2fsck', '-f', partition])
+            else:
+                # skip calling resize_command the second time
+                return
+        elif filesystem == 'xfs':
+            resize_command = ['xfs_growfs', mountpoint]
+        else:
+            logging.warning('Unable to extend filesystem %s', filesystem)
+            return
+        subprocess.check_call(resize_command)
+    except Exception as e:
+        logging.warning("Could not resize partition %s: %s", partition, str(e))
+
+
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
     """Mounts formatted disks provided by /meta/taupage.yaml"""
     if is_mounted is False:
@@ -125,11 +146,16 @@ def iterate_mounts(config):
         def mount():
             mount_partition(partition, mountpoint, options, filesystem, os.path.isdir(mountpoint), already_mounted)
 
+        def resize():
+            resize_partition(partition, mountpoint, filesystem)
+
         if partition and not already_mounted:
             if initialize:
                 format()
             try:
                 mount()
+                if not initialize:
+                    resize()
             except Exception as e:
                 logging.error("Could not mount partition %s: %s", partition, str(e))
 

@@ -7,6 +7,7 @@ import gzip
 import json
 import logging
 import os
+import random
 import requests
 import sys
 import time
@@ -76,7 +77,8 @@ def main():
             for fn in glob.glob('/var/log/audit.log'):
                 push_audit_log(config, instance_logs_url, account_id, region, instance_id, boot_time, fn, compress=True)
             return
-        time.sleep(60)
+        rtime = random.randrange(60, 3000)
+        time.sleep(rtime)
 
 
 if __name__ == '__main__':

@@ -20,3 +20,15 @@ fi
 if [ -n "$TOKENINFO_URL" ]; then
     echo "tokeninfo_url: $TOKENINFO_URL" >> /meta/taupage.yaml
 fi
+if [ -n "$UPSTREAM_TOKENINFO_URL" ]; then
+    echo "upstream_tokeninfo_url: $UPSTREAM_TOKENINFO_URL" >> /meta/taupage.yaml
+fi
+if [ -n "$ACCESS_TOKEN_URL" ]; then
+    echo "access_token_url: $ACCESS_TOKEN_URL" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENID_PROVIDER_CONFIGURATION_URL" ]; then
+    echo "openid_provider_configuration_url: $OPENID_PROVIDER_CONFIGURATION_URL" >> /meta/taupage.yaml
+fi
+if [ -n "$REVOCATION_PROVIDER_URL" ]; then
+    echo "revocation_provider_url: $REVOCATION_PROVIDER_URL" >> /meta/taupage.yaml
+fi

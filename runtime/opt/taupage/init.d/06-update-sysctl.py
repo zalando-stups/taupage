@@ -11,12 +11,7 @@ def main():
     """Configure custom sysctl parameters
 
     If a sysctl section is present, add the valid parameters to sysctl and reloads.
-
-    As some kernel parameters may not be allowed to be tuned, only parameters
-    on a whitelist are allowed to be specified.
     """
-    SYSCTL_WHITELIST = ['fs.file-max', 'vm.dirty_background_ratio', 'vm.dirty_ratio', 'vm.overcommit_memory',
-                        'vm.overcommit_ratio', 'vm.swappiness']
     CUSTOM_SYSCTL_CONF = '/etc/sysctl.d/99-custom.conf'
 
     configure_logging()
@@ -27,12 +22,8 @@ def main():
     if sysctl is None:
         sys.exit(0)
 
-    disallowed_keys = set(sysctl.keys()) - set(SYSCTL_WHITELIST)
-    if disallowed_keys:
-        logging.error('You are not allowed to configure the sysctl parameters {}'.format(list(disallowed_keys)))
-
     try:
-        sysctl_entries = ['{} = {}'.format(key, value) for key, value in sysctl.items() if key in SYSCTL_WHITELIST]
+        sysctl_entries = ['{} = {}'.format(key, value) for key, value in sysctl.items()]
         with open(CUSTOM_SYSCTL_CONF, 'w') as file:
             file.write('\n'.join(sysctl_entries)+'\n')
         logging.info('Successfully written sysctl parameters')
