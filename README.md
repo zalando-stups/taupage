@@ -4,7 +4,7 @@
 
 ## NOTE
 
-While we do not consider Taupage to have reached its end of life, we are currently not planning to add new features or extend its funcionalities. We will consider any pull request, but we do not plan to directly work on enhancements. 
+While we do not consider Taupage to have reached its end of life, we are currently not planning to add new features or extend its functionalities. We will consider any pull request, but we do not plan to directly work on enhancements. 
 
 ## Prerequisites
 
