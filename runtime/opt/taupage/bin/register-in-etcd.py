@@ -90,5 +90,6 @@ def main():
     logging.getLogger("urllib3.connectionpool").setLevel(logging.WARN)
     run_heartbeat(args)
 
+
 if __name__ == '__main__':
     main()
