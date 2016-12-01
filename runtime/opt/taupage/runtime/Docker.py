@@ -70,7 +70,7 @@ def wait_for_local_planb_tokeninfo():
 
     See https://github.com/zalando/planb-tokeninfo
     '''
-    base_url = 'http://localhost:9021/'
+    base_url = 'http://localhost:9021'
     health_url = base_url + '/health'
     tokeninfo_url = base_url + '/oauth2/tokeninfo'
     timeout_seconds = 30

@@ -57,13 +57,18 @@ def attach_volume(ec2, volume_id, attach_as):
         sys.exit(3)
 
 
-def wait_for_device(device, max_tries=3, wait_time=5):
+def wait_for_device(device, max_tries=12, wait_time=5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
-    while tries < max_tries and not os.path.exists(device):
+    while tries < max_tries:
+        if os.path.exists(device):
+            return
         logging.info("Waiting for %s to stabilize..", device)
         tries += 1
         sleep(wait_time)
+    logging.error("Failed to wait for %s device to become available after %s seconds",
+                  device, max_tries * wait_time)
+    sys.exit(2)
 
 
 def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
@@ -137,6 +142,9 @@ def iterate_mounts(config):
         partition = data.get("partition")
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
+        if not isinstance(initialize, bool):
+            logging.error('"erase_on_boot" must be boolean')
+            sys.exit(2)
         options = data.get('options')
         already_mounted = os.path.ismount(mountpoint)
 
