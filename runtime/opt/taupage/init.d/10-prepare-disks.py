@@ -142,6 +142,9 @@ def iterate_mounts(config):
         partition = data.get("partition")
         filesystem = data.get("filesystem", "ext4")
         initialize = data.get("erase_on_boot", False)
+        if not isinstance(initialize, bool):
+            logging.error('"erase_on_boot" must be boolean')
+            sys.exit(2)
         options = data.get('options')
         already_mounted = os.path.ismount(mountpoint)
 
