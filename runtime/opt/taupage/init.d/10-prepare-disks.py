@@ -62,7 +62,11 @@ def wait_for_device(device, max_tries=12, wait_time=5):
     tries = 0
     while tries < max_tries:
         if os.path.exists(device):
-            return
+            try:
+                with open(device, 'rb'):
+                    return
+            except Exception as e:
+                logging.error("Device %s not yet ready: %s", device, str(e))
         logging.info("Waiting for %s to stabilize..", device)
         tries += 1
         sleep(wait_time)
