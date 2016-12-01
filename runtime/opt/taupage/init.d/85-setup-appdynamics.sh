@@ -161,8 +161,8 @@ if [ -n "$config_appdynamics_machineagent_tiername" ]; then
 fi
 
 #include necsessary scala/play/akka classes if this was set in taupage.yaml
-if [ "$config_appdynamics_include_scala_classes" == "true" ]; then
-	jvmagentconf="/opt/proprietary/appdynamics-jvm/latest_version/app-agent-config.xml"
+if [ "$config_appdynamics_include_scala_classes" == "True" ]; then
+	jvmagentconf="/opt/proprietary/appdynamics-jvm/latest_version/conf/app-agent-config.xml"
 	sed -i "/scala.concurrent/d" $jvmagentconf
 	sed -i "/akka/d" $jvmagentconf
 	sed -i "/play.core.server/d" $jvmagentconf
