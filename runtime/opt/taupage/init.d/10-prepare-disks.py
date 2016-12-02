@@ -103,11 +103,12 @@ def resize_partition(partition, mountpoint, filesystem):
             if resize.returncode != 0:
                 errmsg = stderr.decode('utf-8')
                 if 'e2fsck -f' in errmsg:
-                    log.warning("Forcing check of filesystem on %s before extending: %s",
-                                partition, errmsg)
+                    logging.warning("Forcing e2fsck on %s before extending: %s",
+                                    partition, errmsg)
                     subprocess.check_call(['e2fsck', '-f', partition])
                 else:
-                    log.warning("Could not extend filesystem on %s: %s", partition, errmsg)
+                    logging.warning("Could not extend filesystem on %s: %s",
+                                    partition, errmsg)
                     return
             else:
                 # skip calling resize_command the second time
