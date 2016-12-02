@@ -66,7 +66,7 @@ def wait_for_device(device, max_tries=12, wait_time=5):
                 with open(device, 'rb'):
                     return
             except Exception as e:
-                logging.error("Device %s not yet ready: %s", device, str(e))
+                logging.warning("Device %s not yet ready: %s", device, str(e))
         logging.info("Waiting for %s to stabilize..", device)
         tries += 1
         sleep(wait_time)
@@ -196,7 +196,7 @@ def raid_device_exists(raid_device):
         return False
 
 
-def create_raid_device(raid_device, raid_config):
+def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
     devices = raid_config.get("devices", [])
     num_devices = len(devices)
     if num_devices < 2:
@@ -211,11 +211,27 @@ def create_raid_device(raid_device, raid_config):
                 "--raid-devices=" + str(num_devices)]
         # Give devices some time to be available in case they were recently attached
         for device in devices:
-            wait_for_device(device, wait_time=5)
+            wait_for_device(device)
             call.append(device)
 
-        subprocess.check_call(call)
-        logging.info("Created RAID%d device '%s'", raid_level, raid_device)
+        tries = 0
+        while tries < max_tries:
+            mdadm = subprocess.Popen(call, stderr=subprocess.PIPE)
+            stdout, stderr = mdadm.communicate()
+            if mdadm.returncode != 0:
+                if 'Device or resource busy' in stderr:
+                    logging.warning("Device not yet ready for mdadm: %s", stderr)
+                    tries += 1
+                    sleep(wait_time)
+                else:
+                    logging.error("Could not create RAID device '%s': %s",
+                                  raid_device, stderr)
+                    break
+            else:
+                logging.info("Created RAID%d device '%s'", raid_level, raid_device)
+                return
+        # a non-retryable error occurred or we ran out of tries
+        sys.exit(2)
 
 
 def handle_raid_volumes(raid_volumes):
