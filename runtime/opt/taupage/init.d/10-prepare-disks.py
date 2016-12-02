@@ -100,19 +100,27 @@ def resize_partition(partition, mountpoint, filesystem):
             resize_command = ['resize2fs', partition]
             resize = subprocess.Popen(resize_command, stderr=subprocess.PIPE)
             stdout, stderr = resize.communicate()
-            if 'e2fsck -f' in stderr.decode('utf-8'):
-                subprocess.check_call(['e2fsck', '-f', partition])
+            if resize.returncode != 0:
+                errmsg = stderr.decode('utf-8')
+                if 'e2fsck -f' in errmsg:
+                    log.warning("Forcing check of filesystem on %s before extending: %s",
+                                partition, errmsg)
+                    subprocess.check_call(['e2fsck', '-f', partition])
+                else:
+                    log.warning("Could not extend filesystem on %s: %s", partition, errmsg)
+                    return
             else:
                 # skip calling resize_command the second time
                 return
         elif filesystem == 'xfs':
             resize_command = ['xfs_growfs', mountpoint]
         else:
-            logging.warning('Unable to extend filesystem %s', filesystem)
+            logging.warning('Unable to extend filesystem on %s: %s is not supported',
+                            partition, filesystem)
             return
         subprocess.check_call(resize_command)
     except Exception as e:
-        logging.warning("Could not resize partition %s: %s", partition, str(e))
+        logging.warning("Could not extend filesystem on %s: %s", partition, str(e))
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
@@ -219,8 +227,9 @@ def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
             mdadm = subprocess.Popen(call, stderr=subprocess.PIPE)
             stdout, stderr = mdadm.communicate()
             if mdadm.returncode != 0:
-                if 'Device or resource busy' in stderr.decode('utf-8'):
-                    logging.warning("Device not yet ready for mdadm: %s", stderr)
+                errmsg = stderr.decode('utf-8')
+                if 'Device or resource busy' in errmsg:
+                    logging.warning("Device not yet ready: %s", errmsg)
                     tries += 1
                     sleep(wait_time)
                 else:
