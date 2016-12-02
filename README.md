@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/zalando-stups/taupage.svg)](https://travis-ci.org/zalando-stups/taupage) [![Join the chat at https://gitter.im/zalando-stups/taupage](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zalando-stups/taupage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+## NOTE
+
+While we do not consider Taupage to have reached its end of life, we are currently not planning to add new features or extend its functionalities. We will consider any pull request, but we do not plan to directly work on enhancements. 
+
 ## Prerequisites
 
 You need to have [jq](http://stedolan.github.io/jq/) and [AWS CLI](http://aws.amazon.com/cli/) preinstalled.
