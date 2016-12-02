@@ -100,7 +100,7 @@ def resize_partition(partition, mountpoint, filesystem):
             resize_command = ['resize2fs', partition]
             resize = subprocess.Popen(resize_command, stderr=subprocess.PIPE)
             stdout, stderr = resize.communicate()
-            if 'e2fsck -f' in stderr:
+            if 'e2fsck -f' in stderr.decode('utf-8'):
                 subprocess.check_call(['e2fsck', '-f', partition])
             else:
                 # skip calling resize_command the second time
@@ -219,7 +219,7 @@ def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
             mdadm = subprocess.Popen(call, stderr=subprocess.PIPE)
             stdout, stderr = mdadm.communicate()
             if mdadm.returncode != 0:
-                if 'Device or resource busy' in stderr:
+                if 'Device or resource busy' in stderr.decode('utf-8'):
                     logging.warning("Device not yet ready for mdadm: %s", stderr)
                     tries += 1
                     sleep(wait_time)
