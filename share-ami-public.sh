@@ -14,7 +14,7 @@ imageid=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values
 #share AMI in default region
 for account in $all_accounts; do
     echo "Sharing AMI in $region with account $account ..."
-    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId:$account}]"
+    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId=$account}]"
 done
 
 #copy ami to target regions
@@ -22,6 +22,6 @@ for target_region in $copy_regions; do
     # share image in target region
     for account in $all_accounts; do
         echo "Sharing AMI in $target_region with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId:$account}]"
+        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId=$account}]"
     done
 done
