@@ -15,10 +15,9 @@ ami_name=$(echo $result | jq -r '.Name')
 commit_id=$(git rev-parse HEAD)
 
 #share AMI in default region
-for account in $accounts; do
-    echo "Sharing AMI with account $account ..."
-    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId=$account}]"
-done
+echo "Share AMI $imageid for $accounts"
+echo $accounts | xargs aws ec2 modify-image-attribute --region $region --image-id $imageid --attribute launchPermission --operation-type add --user-ids
+aws ec2 create-tags --region $region --resources $imageid --tags "Key=Shared,Value=Internal"
 
 for target_region in $copy_regions; do
     echo "Copying AMI to region $target_region ..."
@@ -42,13 +41,11 @@ for target_region in $copy_regions; do
         sleep 10
     done
 
-    for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId=$account}]"
-    done
-
     # set tags in other account
-    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id"
+    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id" "Key=Shared,Value=Internal"
+
+    echo "Share AMI $target_imageid for $accounts"
+    echo $accounts | xargs aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --attribute launchPermission --operation-type add --user-ids
 done
 
 #check if image creation/copy was successfull
