@@ -118,6 +118,11 @@ if [ ! -z "$proprietary_dir" ]; then
     tar c -C $proprietary_dir . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner -C /opt/proprietary
 fi
 
+if [ ! -z "$overlay_dir" ]; then
+    echo "Uploading overlaying files to server..."
+    tar c -C $overlay_dir --exclude=__pycache__ . | ssh $ssh_args ubuntu@$ip sudo tar x --no-same-owner --no-overwrite-dir -C /
+fi
+
 ssh $ssh_args ubuntu@$ip find /tmp/build
 
 # execute setup script
