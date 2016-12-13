@@ -42,13 +42,13 @@ for target_region in $copy_regions; do
         sleep 10
     done
 
-    for account in $accounts; do
-        echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId=$account}]"
-    done
-
     # set tags in other account
     aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id"
+
+    for account in $accounts; do
+        echo "Sharing AMI $target_region with account $account ..."
+        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId=$account}]"
+    done
 done
 
 #check if image creation/copy was successfull
