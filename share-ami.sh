@@ -48,7 +48,7 @@ for target_region in $copy_regions; do
     done
 
     # set tags in other account
-    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION Key=CommitID,Value=$commit_id"
+    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id"
 done
 
 #check if image creation/copy was successfull
