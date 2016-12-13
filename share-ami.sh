@@ -20,29 +20,33 @@ echo $accounts | xargs aws ec2 modify-image-attribute --region $region --image-i
 aws ec2 create-tags --region $region --resources $imageid --tags "Key=Shared,Value=Internal"
 
 for target_region in $copy_regions; do
-    echo "Copying AMI to region $target_region ..."
-    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
-    target_imageid=$(echo $result | jq -r '.ImageId')
+    target_imageid=$(aws ec2 describe-images --region $target_region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+    if [ -z "$target_imageid" ]; then
+        echo "Copying AMI to region $target_region ..."
+        target_imageid=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output text)
 
-    state="no state yet"
-    while [ true ]; do
-        echo "Waiting for AMI creation in $target_region ... ($state)"
+        state="no state yet"
+        while [ true ]; do
+            echo "Waiting for AMI creation in $target_region ... ($state)"
 
-        result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
-        state=$(echo $result | jq -r '.Images[0].State')
+            state=$(aws ec2 describe-images --region $target_region --query 'Images[0].State' --output text --image-id $target_imageid)
 
-        if [ "$state" = "failed" ]; then
-            echo "copying Image failed."
-            exit 1
-        elif [ "$state" = "available" ]; then
-            break
-        fi
+            if [ "$state" = "failed" ]; then
+                echo "copying Image failed."
+                exit 1
+            elif [ "$state" = "available" ]; then
+                break
+            fi
 
-        sleep 10
-    done
+            sleep 10
+        done
 
-    # set tags in other account
-    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id" "Key=Shared,Value=Internal"
+        # set tags in other account
+        aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id" "Key=Shared,Value=Internal"
+    else
+        echo "Image still exist ($target_imageid). Skip copy."
+        state="available"
+    fi
 
     echo "Share AMI $target_imageid for $accounts"
     echo $accounts | xargs aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --attribute launchPermission --operation-type add --user-ids
