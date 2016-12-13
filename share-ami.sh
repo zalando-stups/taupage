@@ -18,13 +18,13 @@ for account in $accounts; do
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
 done
 
-    for target_region in $copy_regions; do
-        echo "Copying AMI to region $target_region ..."
-        result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
-        target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
+for target_region in $copy_regions; do
+    echo "Copying AMI to region $target_region ..."
+    result=$(aws ec2 copy-image --source-region $region --source-image-id $imageid --region $target_region --name $ami_name --description "$ami_description" --output json)
+    target_imageid=$(echo $result | jq .ImageId | sed 's/"//g')
 
-        state="no state yet"
-        while [ true ]; do
+    state="no state yet"
+    while [ true ]; do
         echo "Waiting for AMI creation in $target_region ... ($state)"
 
         result=$(aws ec2 describe-images --region $target_region --output json --image-id $target_imageid)
@@ -38,16 +38,17 @@ done
         fi
 
         sleep 10
-        done
+    done
 
-        for account in $accounts; do
+    for account in $accounts; do
         echo "Sharing AMI with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "{\"Add\":[{\"UserId\":\"$account\"}]}"
-        # set tags in other account
-        aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=Version,Value=$TAUPAGE_VERSION
-        aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=CommitID,Value=$commit_id
-        done
     done
+
+    # set tags in other account
+    aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=Version,Value=$TAUPAGE_VERSION
+    aws ec2 create-tags --region $target_$region --resources $target_$imageid --tags Key=CommitID,Value=$commit_id
+done
 
 #check if image creation/copy was successfull
 if [ "$state" = "available" ]; then
