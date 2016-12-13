@@ -19,6 +19,7 @@ for account in $accounts; do
     echo "Sharing AMI with account $account ..."
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId=$account}]"
 done
+aws ec2 create-tags --region $region --resources $imageid --tags "Key=Shared,Value=Internal"
 
 for target_region in $copy_regions; do
     echo "Copying AMI to region $target_region ..."
@@ -43,7 +44,7 @@ for target_region in $copy_regions; do
     done
 
     # set tags in other account
-    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id"
+    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Version,Value=$TAUPAGE_VERSION" "Key=CommitID,Value=$commit_id" "Key=Shared,Value=Internal"
 
     for account in $accounts; do
         echo "Sharing AMI $target_region with account $account ..."

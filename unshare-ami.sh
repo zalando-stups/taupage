@@ -16,6 +16,7 @@ for account in $(aws ec2 describe-image-attribute --region $region --image-id $i
     echo "Unsharing AMI in $region with account $account ..."
     aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Remove=[{UserId=$account}]"
 done
+aws ec2 create-tags --region $region --resources $imageid --tags "Key=Shared,Value=None"
 
 #copy ami to target regions
 for target_region in $copy_regions; do
@@ -24,4 +25,5 @@ for target_region in $copy_regions; do
         echo "Unsharing AMI in $target_region with account $account ..."
         aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Remove=[{UserId=$account}]"
     done
+    aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Shared,Value=None"
 done
