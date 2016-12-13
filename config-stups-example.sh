@@ -20,10 +20,13 @@ secret_dir="$config_dir/secret"
 # proprietary_dir="$config_dir/proprietary"
 
 # AWS accounts to share the AMI with
+# first internal for testing
 accounts="
 123456789
 123456788
 "
+# after successfull tests for all other
+all_accounts=$(tool/to/get/all/accounts)
 
 # AWS regions to copy the AMI to
 copy_regions="
