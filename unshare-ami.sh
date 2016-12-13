@@ -8,22 +8,21 @@ cd $(dirname $0)
 # load configuration file
 . $CONFIG_FILE
 
-# get ami_id, ami_name and commitID
+# get ami_id
 imageid=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+shared_accounts=$(aws ec2 describe-image-attribute --region $region --image-id $imageid --attribute launchPermission --query 'LaunchPermissions[]' --output text)
 
-#share AMI in default region
-for account in $(aws ec2 describe-image-attribute --region $region --image-id $imageid --attribute launchPermission --query 'LaunchPermissions[]' --output text); do
-    echo "Unsharing AMI in $region with account $account ..."
-    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Remove=[{UserId=$account}]"
-done
+# unshare AMI in default region
+echo "Share AMI $imageid for $shared_accounts"
+echo $shared_accounts | xargs aws ec2 modify-image-attribute --region $region --image-id $imageid --attribute launchPermission --operation-type remove --user-ids
 aws ec2 create-tags --region $region --resources $imageid --tags "Key=Shared,Value=None"
 
-#copy ami to target regions
+# target regions
 for target_region in $copy_regions; do
-    # share image in target region
-    for account in $all_accounts; do
-        echo "Unsharing AMI in $target_region with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Remove=[{UserId=$account}]"
-    done
+    # get ami_id
+    target_imageid=$(aws ec2 describe-images --region $target_region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+    shared_accounts=$(aws ec2 describe-image-attribute --region $target_region --image-id $target_imageid --attribute launchPermission --query 'LaunchPermissions[]' --output text)
+    echo "Share AMI $target_imageid for $shared_accounts"
+    echo $shared_accounts | xargs aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --attribute launchPermission --operation-type remove --user-ids
     aws ec2 create-tags --region $target_region --resources $target_imageid --tags "Key=Shared,Value=None"
 done
