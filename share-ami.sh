@@ -17,7 +17,7 @@ commit_id=$(git rev-parse HEAD)
 #share AMI in default region
 for account in $accounts; do
     echo "Sharing AMI with account $account ..."
-    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId:$account}]"
+    aws ec2 modify-image-attribute --region $region --image-id $imageid --launch-permission "Add=[{UserId=$account}]"
 done
 
 for target_region in $copy_regions; do
@@ -44,7 +44,7 @@ for target_region in $copy_regions; do
 
     for account in $accounts; do
         echo "Sharing AMI with account $account ..."
-        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId:$account}]"
+        aws ec2 modify-image-attribute --region $target_region --image-id $target_imageid --launch-permission "Add=[{UserId=$account}]"
     done
 
     # set tags in other account
