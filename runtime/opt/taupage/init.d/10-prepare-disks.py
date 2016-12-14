@@ -60,7 +60,7 @@ def attach_volume(ec2, volume_id, attach_as):
 def wait_for_device(device, max_tries=12, wait_time=5):
     """Gives device some time to be available in case it was recently attached"""
     tries = 0
-    while tries < max_tries:
+    while True:
         if os.path.exists(device):
             try:
                 with open(device, 'rb'):
@@ -69,10 +69,19 @@ def wait_for_device(device, max_tries=12, wait_time=5):
                 logging.warning("Device %s not yet ready: %s", device, str(e))
         logging.info("Waiting for %s to stabilize..", device)
         tries += 1
+        if tries >= max_tries:
+            logging.error("Failed to wait for %s device to become available after %s seconds",
+                          device, max_tries * wait_time)
+            sys.exit(2)
         sleep(wait_time)
-    logging.error("Failed to wait for %s device to become available after %s seconds",
-                  device, max_tries * wait_time)
-    sys.exit(2)
+
+
+def call_command(call):
+    proc = subprocess.Popen(call, stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    if proc.returncode != 0:
+        errmsg = stderr.decode('utf-8')
+        raise Exception("Command {} returned non-zero exit status {}:\n{}".format(call, proc.returncode, errmsg))
 
 
 def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
@@ -86,7 +95,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
             call.append("root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
         call.append(partition)
         wait_for_device(partition)
-        subprocess.check_call(call)
+        call_command(call)
     elif is_already_mounted:
         logging.warning("%s is already mounted.", partition)
     else:
@@ -105,7 +114,7 @@ def check_partition(partition, filesystem):
         return
     call.append(partition)
     wait_for_device(partition)
-    subprocess.check_call(call)
+    call_command(call)
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
@@ -113,14 +122,14 @@ def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=
     if is_mounted is False:
         if dir_exists is False:
             os.makedirs(mountpoint)
-        mount_command = ['mount']
+        call = ['mount']
         if filesystem == 'tmpfs':
-            mount_command.extend(['-t', 'tmpfs'])
+            call.extend(['-t', 'tmpfs'])
         if options:
-            mount_command.extend(['-o', options.replace(' ', '')])
-        mount_command.extend([partition, mountpoint])
+            call.extend(['-o', options.replace(' ', '')])
+        call.extend([partition, mountpoint])
         wait_for_device(partition)
-        subprocess.check_call(mount_command)
+        call_command(call)
     elif is_mounted is True and dir_exists is True:
         logging.warning("Directory %s already exists and device is already mounted.", mountpoint)
     else:
@@ -139,12 +148,12 @@ def extend_partition(partition, mountpoint, filesystem):
             logging.warning('Unable to extend filesystem on %s: %s is not supported',
                             partition, filesystem)
             return
-        subprocess.check_call(call)
+        call_command(call)
     except Exception as e:
         logging.warning("Could not extend filesystem on %s: %s", partition, str(e))
 
 
-def iterate_mounts(config):
+def iterate_mounts(config, max_tries=12, wait_time=5):
     """Iterates over mount points file to provide disk device paths"""
     for mountpoint, data in config.get("mounts", {}).items():
         # mount path below /mounts on the host system
@@ -161,6 +170,7 @@ def iterate_mounts(config):
         already_mounted = os.path.ismount(mountpoint)
 
         if partition and not already_mounted:
+            tries = 0
             while True:
                 if initialize:
                     format_partition(partition, filesystem, initialize,
@@ -179,13 +189,24 @@ def iterate_mounts(config):
                     # no exception occurred, so we are fine
                     break
                 except Exception as e:
+                    message = str(e)
+                    if "Device or resource busy" in message:
+                        logging.warning("Device not yet ready: %s", message)
+                        tries += 1
+                        if tries >= max_tries:
+                            logging.error("Could not mount partition %s after %s attempts",
+                                          partition, max_tries)
+                            sys.exit(2)
+                        sleep(wait_time)
+                        continue
+
                     if initialize:
                         logging.error("Could not mount freshly formatted partition %s: %s",
-                                      partition, str(e))
+                                      partition, message)
                         sys.exit(2)
 
                     logging.warning("Could not check+mount partition %s: %s; assuming empty volume!",
-                                    partition, str(e))
+                                    partition, message)
 
                     #
                     # Assume empty volume and try again.  If that still fails,
@@ -233,24 +254,26 @@ def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
             call.append(device)
 
         tries = 0
-        while tries < max_tries:
-            mdadm = subprocess.Popen(call, stderr=subprocess.PIPE)
-            stdout, stderr = mdadm.communicate()
-            if mdadm.returncode != 0:
-                errmsg = stderr.decode('utf-8')
-                if 'Device or resource busy' in errmsg:
-                    logging.warning("Device not yet ready: %s", errmsg)
+        while True:
+            try:
+                call_command(call)
+            except Exception as e:
+                message = str(e)
+                if "Device or resource busy" in message:
+                    logging.warning("Device not yet ready: %s", message)
                     tries += 1
+                    if tries >= max_tries:
+                        logging.error("Could not create RAID device %s after %s attempts",
+                                      raid_device, max_tries)
+                        sys.exit(2)
                     sleep(wait_time)
                 else:
-                    logging.error("Could not create RAID device '%s': %s",
-                                  raid_device, stderr)
-                    break
+                    logging.error("Could not create RAID device %s: %s",
+                                  raid_device, message)
+                    sys.exit(2)
             else:
-                logging.info("Created RAID%d device '%s'", raid_level, raid_device)
-                return
-        # a non-retryable error occurred or we ran out of tries
-        sys.exit(2)
+                logging.info("Created RAID%d device %s", raid_level, raid_device)
+                break
 
 
 def handle_raid_volumes(raid_volumes):
