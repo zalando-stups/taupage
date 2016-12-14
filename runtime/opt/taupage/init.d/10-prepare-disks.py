@@ -94,34 +94,18 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
         logging.info("Nothing to do for disk %s", partition)
 
 
-def resize_partition(partition, mountpoint, filesystem):
-    try:
-        if filesystem.startswith('ext'):
-            resize_command = ['resize2fs', partition]
-            resize = subprocess.Popen(resize_command, stderr=subprocess.PIPE)
-            stdout, stderr = resize.communicate()
-            if resize.returncode != 0:
-                errmsg = stderr.decode('utf-8')
-                if 'e2fsck -f' in errmsg:
-                    logging.warning("Forcing e2fsck on %s before extending: %s",
-                                    partition, errmsg)
-                    subprocess.check_call(['e2fsck', '-f', partition])
-                else:
-                    logging.warning("Could not extend filesystem on %s: %s",
-                                    partition, errmsg)
-                    return
-            else:
-                # skip calling resize_command the second time
-                return
-        elif filesystem == 'xfs':
-            resize_command = ['xfs_growfs', mountpoint]
-        else:
-            logging.warning('Unable to extend filesystem on %s: %s is not supported',
-                            partition, filesystem)
-            return
-        subprocess.check_call(resize_command)
-    except Exception as e:
-        logging.warning("Could not extend filesystem on %s: %s", partition, str(e))
+def check_partition(partition, filesystem):
+    if filesystem.startswith('ext'):
+        call = ['e2fsck', '-f']
+    elif filesystem == 'xfs':
+        call = ['xfs_repair']
+    else:
+        logging.warning('Unable to check filesystem on %s: %s is not supported',
+                        partition, filesystem)
+        return
+    call.append(partition)
+    wait_for_device(partition)
+    subprocess.check_call(call)
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
@@ -145,6 +129,21 @@ def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=
     os.chmod(mountpoint, 0o777)
 
 
+def extend_partition(partition, mountpoint, filesystem):
+    try:
+        if filesystem.startswith('ext'):
+            call = ['resize2fs', partition]
+        elif filesystem == 'xfs':
+            call = ['xfs_growfs', mountpoint]
+        else:
+            logging.warning('Unable to extend filesystem on %s: %s is not supported',
+                            partition, filesystem)
+            return
+        subprocess.check_call(call)
+    except Exception as e:
+        logging.warning("Could not extend filesystem on %s: %s", partition, str(e))
+
+
 def iterate_mounts(config):
     """Iterates over mount points file to provide disk device paths"""
     for mountpoint, data in config.get("mounts", {}).items():
@@ -161,29 +160,39 @@ def iterate_mounts(config):
         options = data.get('options')
         already_mounted = os.path.ismount(mountpoint)
 
-        def format():
-            format_partition(partition, filesystem, initialize, already_mounted, config.get('root'))
-
-        def mount():
-            mount_partition(partition, mountpoint, options, filesystem, os.path.isdir(mountpoint), already_mounted)
-
-        def resize():
-            resize_partition(partition, mountpoint, filesystem)
-
         if partition and not already_mounted:
-            if initialize:
-                format()
-            try:
-                mount()
-                if not initialize:
-                    resize()
-            except Exception as e:
-                logging.error("Could not mount partition %s: %s", partition, str(e))
+            while True:
+                if initialize:
+                    format_partition(partition, filesystem, initialize,
+                                     already_mounted, config.get('root'))
 
-                if not initialize:
+                try:
+                    if not initialize:
+                        check_partition(partition, filesystem)
+
+                    mount_partition(partition, mountpoint, options, filesystem,
+                                    os.path.isdir(mountpoint), already_mounted)
+
+                    if not initialize:
+                        extend_partition(partition, mountpoint, filesystem)
+
+                    # no exception occurred, so we are fine
+                    break
+                except Exception as e:
+                    if initialize:
+                        logging.error("Could not mount freshly formatted partition %s: %s",
+                                      partition, str(e))
+                        sys.exit(2)
+
+                    logging.warning("Could not check+mount partition %s: %s; assuming empty volume!",
+                                    partition, str(e))
+
+                    #
+                    # Assume empty volume and try again.  If that still fails,
+                    # we will trigger sys.exit() due to check on initialize in
+                    # this except block, so the there's no endless loop here.
+                    #
                     initialize = True
-                    format()
-                    mount()
 
 
 def handle_ebs_volumes(args, ebs_volumes):
