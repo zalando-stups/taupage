@@ -40,4 +40,5 @@ xfsprogs
 
 echo "Installing packages..."
 
-apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
+apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs
+
