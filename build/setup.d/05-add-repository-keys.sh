@@ -8,6 +8,8 @@ apt_keys="
 local_keys="
 newrelic.key
 logentries.key
+yandex.key
+docker.key
 scalyr.asc
 "
 
@@ -15,20 +17,14 @@ scalyr.asc
 echo "Adding repository keys..."
 
 for key in $apt_keys; do
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $key >>keys.log
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $key
 done
 
 for key in $local_keys; do
-    apt-key add keys/$key >>keys.log
+    apt-key add keys/$key
 done
 
-#add logentries repo and add pub key
 echo 'deb http://rep.logentries.com/ trusty main' > /etc/apt/sources.list.d/logentries.list
-gpg --keyserver pgp.mit.edu --recv-keys C43C79AD && gpg -a --export C43C79AD | apt-key add -
-
-# Docker key Yandex
-wget -qO- http://mirror.yandex.ru/mirrors/docker/gpg | apt-key add -
-
 
 # add Newrelic repo
 # echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' >> /etc/apt/sources.list.d/newrelic.list
