@@ -16,6 +16,7 @@ libruby1.9.1
 libssl-dev
 libswitch-perl
 libwww-perl
+libyaml-dev
 libyaml-0-2
 linux-image-extra-virtual-lts-utopic
 logentries
