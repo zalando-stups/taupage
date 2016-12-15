@@ -17,7 +17,7 @@ libssl-dev
 libswitch-perl
 libwww-perl
 libyaml-0-2
-linux-image-extra-$(uname -r)
+linux-image-extra-virtual-lts-utopic
 logentries
 logentries-daemon
 mdadm
