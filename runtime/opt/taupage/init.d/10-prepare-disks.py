@@ -172,11 +172,11 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
         if partition and not already_mounted:
             tries = 0
             while True:
-                if initialize:
-                    format_partition(partition, filesystem, initialize,
-                                     already_mounted, config.get('root'))
-
                 try:
+                    if initialize:
+                        format_partition(partition, filesystem, initialize,
+                                         already_mounted, config.get('root'))
+
                     if not initialize:
                         check_partition(partition, filesystem)
 
