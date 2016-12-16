@@ -105,7 +105,7 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
 
 def check_partition(partition, filesystem):
     if filesystem.startswith('ext'):
-        call = ['e2fsck', '-f']
+        call = ['e2fsck', '-f', '-p']
     elif filesystem == 'xfs':
         call = ['xfs_repair']
     else:
