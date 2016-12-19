@@ -129,8 +129,7 @@ def check_partition(partition, filesystem):
             elif (e.returncode & 4) != 0:
                 logging.exception("File system errors left uncorrected on %s.", partition)
             elif e.returncode == 8:
-                # must be an unformatted or unrecoverable partition
-                raise
+                logging.exception("Operational error %s.", partition)
             elif e.returncode >= 16:
                 logging.exception("Unexpected error when checking %s.", partition)
             sys.exit(2)
