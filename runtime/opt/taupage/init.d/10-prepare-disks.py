@@ -76,12 +76,22 @@ def wait_for_device(device, max_tries=12, wait_time=5):
         sleep(wait_time)
 
 
+class CmdException(Exception):
+    def __init__(self, returncode, errmsg):
+        self._returncode = returncode
+        message = "Command returned non-zero exit status {}:\n{}".format(returncode, errmsg)
+        super(CmdException, self).__init__(message)
+
+    @property
+    def returncode(self):
+        return self._returncode
+
+
 def call_command(call):
     proc = subprocess.Popen(call, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     if proc.returncode != 0:
-        errmsg = stderr.decode('utf-8')
-        raise Exception("Command {} returned non-zero exit status {}:\n{}".format(call, proc.returncode, errmsg))
+        raise CmdException(proc.returncode, stderr.decode('utf-8'))
 
 
 def format_partition(partition, filesystem="ext4", initialize=False, is_already_mounted=False, is_root=False):
@@ -105,16 +115,33 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
 
 def check_partition(partition, filesystem):
     if filesystem.startswith('ext'):
-        call = ['e2fsck', '-f']
+        call = ['e2fsck', '-f', '-p', partition]
+        wait_for_device(partition)
+        try:
+            call_command(call)
+        except CmdException as e:
+            # see e2fsck(8) man page for description of exit codes
+            if e.returncode <= 1:
+                # all OK
+                return
+            elif (e.returncode & 2) != 0:
+                logging.exception("File system errors corrected on %s, system should be rebooted.", partition)
+            elif (e.returncode & 4) != 0:
+                logging.exception("File system errors left uncorrected on %s.", partition)
+            elif e.returncode == 8:
+                # must be an unformatted or unrecoverable partition
+                raise
+            elif e.returncode >= 16:
+                logging.exception("Unexpected error when checking %s.", partition)
+            sys.exit(2)
     elif filesystem == 'xfs':
-        call = ['xfs_repair']
+        call = ['xfs_repair', partition]
+        wait_for_device(partition)
+        call_command(call)
     else:
         logging.warning('Unable to check filesystem on %s: %s is not supported',
                         partition, filesystem)
         return
-    call.append(partition)
-    wait_for_device(partition)
-    call_command(call)
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
