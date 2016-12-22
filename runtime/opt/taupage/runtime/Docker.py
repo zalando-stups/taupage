@@ -124,6 +124,9 @@ def get_env_options(config: dict):
         # set appdynamics analytics url
         yield '-e'
         yield 'APPDYNAMICS_ANALYTICS_URL=http://172.17.0.1:9090/v1/sinks/bt'
+        # set appdynamics node.js snippet path
+        yield '-e'
+        yield 'APPDYNAMICS_NODEJS_SETUP=/agents/appdynamics-nodejs/integration.snippet'
 
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
     # NOTE: we should not add other environment variables here (even if it sounds tempting),
