@@ -54,8 +54,8 @@ generated_nodename="${config_notify_cfn_stack}_$(hostname)_$(ec2metadata --avail
 #truncate the nodename if it has more than 100 chars
 node=${generated_nodename:0:99}
 
-# write values in node.js snippet for agent integration
-nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
+# write values in config.js for AppD Node.js agent integration
+nodejsSnippet="/opt/proprietary/appdynamics-nodejs/config.json"
 # check if node.js snippet exists and add values
 if [ -f "$nodejsSnippet" ]; then
 	sed -i "s/APPLICATIONNAME/$APPLICATIONNAME/" $nodejsSnippet

@@ -19,8 +19,8 @@ else
 			appdynamics_configs="$appdynamics_configs $conf"
 		done
 	done
-	# write values in node.js snippet for agent integration
-	nodejsSnippet="/opt/proprietary/appdynamics-nodejs/integration.snippet"
+	# write values in config.json for AppD Node.js agent integration
+	nodejsSnippet="/opt/proprietary/appdynamics-nodejs/config.json"
 	# check if node.js snippet exists and add values
 	if [ -f "$nodejsSnippet" ]; then
 		# Check if AppDynamics values exist
