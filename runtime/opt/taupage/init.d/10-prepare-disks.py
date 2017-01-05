@@ -153,7 +153,52 @@ def extend_partition(partition, mountpoint, filesystem):
         logging.warning("Could not extend filesystem on %s: %s", partition, str(e))
 
 
-def iterate_mounts(config, max_tries=12, wait_time=5):
+ERASE_ON_BOOT_TAG_NAME = 'Taupage:erase-on-boot'
+
+
+def should_format_volume(ec2, partition, erase_on_boot):
+    """
+We need to take a safe decision whether to format a volume or not
+based on two inputs: value of user data flag and EBS volume tag.  The
+tag can either be or not be there, which we model with values True and
+False.  The user data flag can have 3 possible values: True, False and
+None (when not given at all).
+
+In the following table we mark the decision to format with exclamation
+mark:
+
+Data \ Tag | T | F
+-----------+---+---
+         T | ! | !
+-----------+---+---
+         F | - | -
+-----------+---+---
+         N | ! | -
+    """
+    erase_tag_set = False
+
+    volumes = list(ec2.get_all_volumes(filters={
+        'attachment.instance-id': instance_id(),
+        'attachment.device': partition}))
+    if volumes:
+        volume_id = volumes[0].id
+        logging.info("%s: volume_id=%s", partition, volume_id)
+
+        tags = ec2.get_all_tags(filters={
+            'resource-id': volume_id,
+            'key': ERASE_ON_BOOT_TAG_NAME,
+            'value': 'True'})
+        if list(tags):
+            ec2.delete_tags(volume_id, [ERASE_ON_BOOT_TAG_NAME])
+            erase_tag_set = True
+
+    logging.info("%s: erase_on_boot=%s, erase_tag_set=%s",
+                 partition, erase_on_boot, erase_tag_set)
+
+    return erase_on_boot or (erase_on_boot is None and erase_tag_set)
+
+
+def iterate_mounts(ec2, config, max_tries=12, wait_time=5):
     """Iterates over mount points file to provide disk device paths"""
     for mountpoint, data in config.get("mounts", {}).items():
         # mount path below /mounts on the host system
@@ -162,10 +207,11 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
 
         partition = data.get("partition")
         filesystem = data.get("filesystem", "ext4")
-        initialize = data.get("erase_on_boot", False)
-        if not isinstance(initialize, bool):
+        erase_on_boot = data.get("erase_on_boot", None)
+        if not(isinstance(erase_on_boot, bool) or erase_on_boot is None):
             logging.error('"erase_on_boot" must be boolean')
             sys.exit(2)
+        initialize = should_format_volume(ec2, partition, erase_on_boot)
         options = data.get('options')
         already_mounted = os.path.ismount(mountpoint)
 
@@ -176,8 +222,7 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
                     if initialize:
                         format_partition(partition, filesystem, initialize,
                                          already_mounted, config.get('root'))
-
-                    if not initialize:
+                    else:
                         check_partition(partition, filesystem)
 
                     mount_partition(partition, mountpoint, options, filesystem,
@@ -198,27 +243,12 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
                                           partition, max_tries)
                             sys.exit(2)
                         sleep(wait_time)
-                        continue
-
-                    if initialize:
-                        logging.error("Could not mount freshly formatted partition %s: %s",
-                                      partition, message)
-                        sys.exit(2)
-
-                    logging.warning("Could not check+mount partition %s: %s; assuming empty volume!",
-                                    partition, message)
-
-                    #
-                    # Assume empty volume and try again.  If that still fails,
-                    # we will trigger sys.exit() due to check on initialize in
-                    # this except block, so the there's no endless loop here.
-                    #
-                    initialize = True
+                    else:
+                        logging.error("Could not mount partition %s: %s", partition, message)
+                    sys.exit(2)
 
 
-def handle_ebs_volumes(args, ebs_volumes):
-    current_region = args.region if args.region else region()
-    ec2 = boto.ec2.connect_to_region(current_region)
+def handle_ebs_volumes(ec2, ebs_volumes):
     for device, name in ebs_volumes.items():
         if os.path.exists(device):
             logging.info("Device already exists %s", device)
@@ -284,13 +314,13 @@ def handle_raid_volumes(raid_volumes):
             create_raid_device(raid_device, raid_config)
 
 
-def handle_volumes(args, config):
+def handle_volumes(ec2, config):
     """Try to attach volumes"""
     volumes = config.get("volumes", {})
 
     # attach ESB volumes first
     if "ebs" in volumes:
-        handle_ebs_volumes(args, volumes.get("ebs"))
+        handle_ebs_volumes(ec2, volumes.get("ebs"))
 
     # then take care of any RAID definitions
     if "raid" in volumes:
@@ -319,11 +349,14 @@ def main():
     # Load configuration from YAML file
     config = get_config(args.filename)
 
+    current_region = args.region if args.region else region()
+    ec2 = boto.ec2.connect_to_region(current_region)
+
     if config.get("volumes"):
-        handle_volumes(args, config)
+        handle_volumes(ec2, config)
 
     # Iterate over mount points
-    iterate_mounts(config)
+    iterate_mounts(ec2, config)
 
 
 if __name__ == '__main__':
