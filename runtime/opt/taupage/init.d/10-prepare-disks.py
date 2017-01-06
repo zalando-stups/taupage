@@ -14,9 +14,6 @@ from time import sleep
 from taupage import configure_logging, get_config
 
 
-current_region = None
-
-
 def instance_id():
     """Helper to return theid for the current instance"""
     return boto.utils.get_instance_metadata()['instance-id']
@@ -32,8 +29,8 @@ def zone():
     return boto.utils.get_instance_metadata()['placement']['availability-zone']
 
 
-def ec2_client():
-    return boto.ec2.connect_to_region(current_region)
+def ec2_client(region):
+    return boto.ec2.connect_to_region(region)
 
 
 def find_volume(ec2, name):
@@ -189,7 +186,7 @@ def extend_partition(partition, mountpoint, filesystem):
 ERASE_ON_BOOT_TAG_NAME = 'Taupage:erase-on-boot'
 
 
-def should_format_volume(partition, erase_on_boot):
+def should_format_volume(region, partition, erase_on_boot):
     """
 We need to take a safe decision whether to format a volume or not
 based on two inputs: value of user data flag and EBS volume tag.  The
@@ -215,7 +212,7 @@ Data \ Tag | T | F
     # don't have any role attached.
     #
     if erase_on_boot is None:
-        ec2 = ec2_client()
+        ec2 = ec2_client(region)
         volumes = list(ec2.get_all_volumes(filters={
             'attachment.instance-id': instance_id(),
             'attachment.device': partition}))
@@ -287,8 +284,8 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
                     sys.exit(2)
 
 
-def handle_ebs_volumes(ebs_volumes):
-    ec2 = ec2_client()
+def handle_ebs_volumes(region, ebs_volumes):
+    ec2 = ec2_client(region)
     for device, name in ebs_volumes.items():
         if os.path.exists(device):
             logging.info("Device already exists %s", device)
@@ -354,13 +351,13 @@ def handle_raid_volumes(raid_volumes):
             create_raid_device(raid_device, raid_config)
 
 
-def handle_volumes(config):
+def handle_volumes(region, config):
     """Try to attach volumes"""
     volumes = config.get("volumes", {})
 
     # attach ESB volumes first
     if "ebs" in volumes:
-        handle_ebs_volumes(volumes.get("ebs"))
+        handle_ebs_volumes(region, volumes.get("ebs"))
 
     # then take care of any RAID definitions
     if "raid" in volumes:
@@ -386,17 +383,16 @@ def main():
     else:
         configure_logging(logging.INFO)
 
-    global current_region
     current_region = args.region if args.region else region()
 
     # Load configuration from YAML file
     config = get_config(args.filename)
 
     if config.get("volumes"):
-        handle_volumes(config)
+        handle_volumes(current_region, config)
 
     # Iterate over mount points
-    iterate_mounts(config)
+    iterate_mounts(current_region, config)
 
 
 if __name__ == '__main__':
