@@ -19,7 +19,7 @@ def instance_id():
     return boto.utils.get_instance_metadata()['instance-id']
 
 
-def region():
+def detect_region():
     """Helper to return the region for the current instance"""
     return boto.utils.get_instance_metadata()['placement']['availability-zone'][:-1]
 
@@ -234,7 +234,7 @@ Data \ Tag | T | F
     return erase_on_boot or (erase_on_boot is None and erase_tag_set)
 
 
-def iterate_mounts(config, max_tries=12, wait_time=5):
+def iterate_mounts(region, config, max_tries=12, wait_time=5):
     """Iterates over mount points file to provide disk device paths"""
     for mountpoint, data in config.get("mounts", {}).items():
         # mount path below /mounts on the host system
@@ -247,7 +247,7 @@ def iterate_mounts(config, max_tries=12, wait_time=5):
         if not(isinstance(erase_on_boot, bool) or erase_on_boot is None):
             logging.error('"erase_on_boot" must be boolean')
             sys.exit(2)
-        initialize = should_format_volume(partition, erase_on_boot)
+        initialize = should_format_volume(region, partition, erase_on_boot)
         options = data.get('options')
         already_mounted = os.path.ismount(mountpoint)
 
@@ -383,7 +383,7 @@ def main():
     else:
         configure_logging(logging.INFO)
 
-    current_region = args.region if args.region else region()
+    current_region = args.region if args.region else detect_region()
 
     # Load configuration from YAML file
     config = get_config(args.filename)
