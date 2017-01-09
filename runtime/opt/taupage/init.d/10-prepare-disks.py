@@ -109,7 +109,6 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
     elif is_already_mounted:
         logging.warning("%s is already mounted.", partition)
     else:
-        wait_for_device(partition)
         logging.info("Nothing to do for disk %s", partition)
 
 
@@ -137,10 +136,9 @@ def check_partition(partition, filesystem):
         call = ['xfs_repair', partition]
         wait_for_device(partition)
         call_command(call)
-    else:
+    elif filesystem != 'tmpfs':
         logging.warning('Unable to check filesystem on %s: %s is not supported',
                         partition, filesystem)
-        return
 
 
 def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=None, is_mounted=None):
@@ -154,7 +152,8 @@ def mount_partition(partition, mountpoint, options, filesystem=None, dir_exists=
         if options:
             call.extend(['-o', options.replace(' ', '')])
         call.extend([partition, mountpoint])
-        wait_for_device(partition)
+        if filesystem != 'tmpfs':
+            wait_for_device(partition)
         call_command(call)
     elif is_mounted is True and dir_exists is True:
         logging.warning("Directory %s already exists and device is already mounted.", mountpoint)
@@ -171,8 +170,9 @@ def extend_partition(partition, mountpoint, filesystem):
         elif filesystem == 'xfs':
             call = ['xfs_growfs', mountpoint]
         else:
-            logging.warning('Unable to extend filesystem on %s: %s is not supported',
-                            partition, filesystem)
+            if filesystem != 'tmpfs':
+                logging.warning('Unable to extend filesystem on %s: %s is not supported',
+                                partition, filesystem)
             return
         call_command(call)
     except Exception as e:
