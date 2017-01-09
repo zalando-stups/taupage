@@ -59,6 +59,12 @@ mounts:
         erase_on_boot: true
         filesystem: ext4
 
+    /tmpfs_data:
+        filesystem: tmpfs
+        partition: none
+        erase_on_boot: false
+        options: size=32m
+
 mount_certs: true
 mount_var_log: true
 
