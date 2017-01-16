@@ -7,7 +7,7 @@ iproute
 libruby1.9.1
 libyaml-0-2
 linux-image-extra-$(uname -r)
-docker-engine=1.9.1-0~trusty
+docker-engine
 mdadm
 newrelic-sysmond
 ntp
