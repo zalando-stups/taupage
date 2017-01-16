@@ -4,10 +4,10 @@ describe package('docker-engine') do
   it { should be_installed }
 end
 
-describe command('docker --version') do
+#describe command('docker --version') do
   # check Docker version
-  its(:stdout) { should match /1.9.1/ }
-end
+  #its(:stdout) { should match /1.9.1/ }
+#end
 
 describe service('docker') do
   it { should be_enabled   }
