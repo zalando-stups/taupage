@@ -181,6 +181,9 @@ def get_volume_options(config: dict):
         if os.path.isdir('/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job'):
             yield '-v'
             yield '/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job:/agents/jobfiles:rw'
+        if os.path.isdir('/opt/proprietary/appdynamics-machine/monitors/'):
+            yield '-v'
+            yield '/opt/proprietary/appdynamics-machine/monitors:/agents/extensions:rw'
 
     # typically, for continuous integration/delivery systems, you need to be able to build
     # Docker images and there is no better solution currently.
