@@ -1,6 +1,6 @@
 /var/log/etcd.log
 {
-        rotate 1
+        rotate 48
         hourly
         missingok
         notifempty
