@@ -8,7 +8,8 @@ echo "Updating system..."
 apt-get update -y  # -q >>/tmp/build/upgrade.log
 
 # install 3.16. LTS kernel and make sure it updates to the last version
-apt-get install -y linux-image-virtual-lts-utopic
+# we need the general kernel for GPU instances
+apt-get install -y linux-image-generic-lts-utopic
 
 apt-mark hold openssh-server
 apt-get install -y --only-upgrade libc6 libssl1.0.0
