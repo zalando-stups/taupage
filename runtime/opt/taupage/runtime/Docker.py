@@ -16,6 +16,7 @@ import subprocess
 import time
 import yaml
 import os
+import glob
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
 
@@ -94,13 +95,15 @@ def wait_for_local_planb_tokeninfo():
     # => use global one
     return None
 
+
 def get_docker_command(config: dict):
     '''get the docker command to use'''
     cuda_device_files = glob.glob('/dev/nvidia*')
-    if size(cuda_device_files) > 0:
+    if len(cuda_device_files) > 0:
         return 'nvidia-docker'
     else:
         return 'docker'
+
 
 def get_env_options(config: dict):
     '''build Docker environment options'''
