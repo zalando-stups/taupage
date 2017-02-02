@@ -5,6 +5,7 @@
 DRIVER_ARCH="Linux-x86_64"
 DRIVER_VERSION="375.26"
 DRIVER_FILENAME="NVIDIA-${DRIVER_ARCH}-${DRIVER_VERSION}.run"
+DRIVER_CHECKSUM="d60819b2e377398c7296999ab5e7c1a4"
 
 DOCKER_DRIVER_VERSION="1.0.0"
 DOCKER_DRIVER_FILENAME="nvidia-docker_${DOCKER_DRIVER_VERSION}-1_amd64.deb"
@@ -26,6 +27,13 @@ echo "Installing NVIDIA driver ver: ${DRIVER_VERSION}"
 
 # Using the run File
 wget -P /tmp "http://us.download.nvidia.com/XFree86/${DRIVER_ARCH}/${DRIVER_VERSION}/${DRIVER_FILENAME}"
+
+filechecksum=($(md5sum "/tmp/${DRIVER_FILENAME}"))
+# shellcheck disable=SC2128
+if [[ "${filechecksum}" -ne "${DRIVER_CHECKSUM}" ]]; then
+  echo "MD5 missmatch got: ${filechecksum} expected: ${DRIVER_CHECKSUM}"
+  exit 1
+fi
 
 chmod +x "/tmp/${DRIVER_FILENAME}"
 
