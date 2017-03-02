@@ -10,25 +10,42 @@ apt-get update -y  # -q >>/tmp/build/upgrade.log
 # install kernel headers and dkms
 apt-get install -y linux-headers-generic-lts-utopic dkms
 
-# download and configure ixgbevf
-IXGBEVF_VERSION=3.4.3
-curl -L https://downloadmirror.intel.com/26572/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz | tar -C /usr/src -xz
-cat > /usr/src/ixgbevf-${IXGBEVF_VERSION}/dkms.conf << EOF
-PACKAGE_NAME="ixgbevf"
+function configure_dkms() {
+    local PACKAGE_NAME=$1
+    local PACKAGE_VERSION=$2
+    local MODULE_NAME=$3
+    local MODULE_LOCATION=$4
+
+    cat > ${PACKAGE_NAME}-${PACKAGE_VERSION}/dkms.conf << EOF
+PACKAGE_NAME="${DRV_NAME}"
 PACKAGE_VERSION="${IXGBEVF_VERSION}"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
-BUILT_MODULE_LOCATION[0]="src/"
-BUILT_MODULE_NAME[0]="ixgbevf"
+BUILT_MODULE_LOCATION[0]="${MODULE_LOCATION}"
+BUILT_MODULE_NAME[0]="${MODULE_NAME}"
 DEST_MODULE_LOCATION[0]="/updates"
-DEST_MODULE_NAME[0]="ixgbevf"
+DEST_MODULE_NAME[0]="${MODULE_NAME}"
 AUTOINSTALL="yes"
 EOF
 
-dkms add -m ixgbevf -v ${IXGBEVF_VERSION}
+    dkms add -m ${PACKAGE_NAME} -v ${PACKAGE_VERSION}
+}
+
+pushd /usr/src
+# download and configure ixgbevf
+IXGBEVF_VERSION=3.4.3
+curl -L https://downloadmirror.intel.com/26572/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz | tar xz
+configure_dkms ixgbevf ${IXGBEVF_VERSION} ixgbevf src/
+
+# download and configure ena
+ENA_VERSION=1.1.3
+curl -s -L https://github.com/amzn/amzn-drivers/archive/ena_linux_${ENA_VERSION}.tar.gz | tar xz
+mv amzn-drivers-ena_linux_${ENA_VERSION} amzn-drivers-${ENA_VERSION}
+configure_dkms amzn-drivers ${ENA_VERSION} ena kernel/linux/ena
+popd
 
 # install 3.16. LTS kernel and make sure it updates to the last version
-# also this step should build ixgbevf kernel module and put it into initramfs
+# also this step should build ixgbevf and ena kernel modules and put them into initramfs
 apt-get install -y linux-image-virtual-lts-utopic
 
 # uninstall kernel headers and dkms
