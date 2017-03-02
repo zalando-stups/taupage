@@ -32,14 +32,22 @@ EOF
 }
 
 pushd /usr/src
-# download and configure ixgbevf
-IXGBEVF_VERSION=3.4.3
-curl -L https://downloadmirror.intel.com/26572/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz | tar xz
+# download and configure ixgbevf: https://downloadcenter.intel.com/download/18700/
+IXGBEVF_VERSION=4.0.3
+IXGBEVF_DOWNLOAD=18700 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
+IXGBEVF_MD5=382f2faa4496a1301400a65339f1f341
+curl -L https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz > ixgbevf-${IXGBEVF_VERSION}.tar.gz
+if [[ $(md5sum ixgbevf-${IXGBEVF_VERSION}.tar.gz | awk '{print $1}') != $IXGBEVF_MD5 ]]; then
+    echo "ixgbevf-${IXGBEVF_VERSION}.tar.gz: bad md5 sum"
+    exit 1
+fi
+tar xzf ixgbevf-${IXGBEVF_VERSION}.tar.gz && rm ixgbevf-${IXGBEVF_VERSION}.tar.gz
 configure_dkms ixgbevf ${IXGBEVF_VERSION} ixgbevf src/
 
 # download and configure ena
 ENA_VERSION=1.1.3
 curl -s -L https://github.com/amzn/amzn-drivers/archive/ena_linux_${ENA_VERSION}.tar.gz | tar xz
+# We don't know checksums of archives on github
 mv amzn-drivers-ena_linux_${ENA_VERSION} amzn-drivers-${ENA_VERSION}
 configure_dkms amzn-drivers ${ENA_VERSION} ena kernel/linux/ena
 popd
