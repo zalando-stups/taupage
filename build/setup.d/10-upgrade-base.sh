@@ -18,9 +18,9 @@ function configure_dkms() {
 
     cat > ${PACKAGE_NAME}-${PACKAGE_VERSION}/dkms.conf << EOF
 PACKAGE_NAME="${MODULE_NAME}"
-PACKAGE_VERSION="${IXGBEVF_VERSION}"
-CLEAN="cd src/; make clean"
-MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
+PACKAGE_VERSION="${MODULE_VERSION}"
+CLEAN="cd ${MODULE_LOCATION}; make clean"
+MAKE="cd ${MODULE_LOCATION}; make BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_LOCATION[0]="${MODULE_LOCATION}"
 BUILT_MODULE_NAME[0]="${MODULE_NAME}"
 DEST_MODULE_LOCATION[0]="/updates"
