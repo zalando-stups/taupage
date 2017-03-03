@@ -17,7 +17,7 @@ function configure_dkms() {
     local MODULE_LOCATION=$4
 
     cat > ${PACKAGE_NAME}-${PACKAGE_VERSION}/dkms.conf << EOF
-PACKAGE_NAME="${DRV_NAME}"
+PACKAGE_NAME="${MODULE_NAME}"
 PACKAGE_VERSION="${IXGBEVF_VERSION}"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
