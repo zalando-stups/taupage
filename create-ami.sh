@@ -161,7 +161,7 @@ while [[ $(aws ec2 describe-instances --region $region --instance-id $instanceid
 done
 
 echo "Setting EnaSupport flag"
-aws ec2 modify-instance-attribute --region $region --instance-id "instance-id" --ena-support
+aws ec2 modify-instance-attribute --region $region --instance-id $instanceid --ena-support
 
 # create ami
 ami_name="Taupage${ami_suffix}-AMI-$(date +%Y%m%d-%H%M%S)"
