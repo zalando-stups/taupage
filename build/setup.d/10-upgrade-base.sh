@@ -56,9 +56,6 @@ popd
 # also this step should build ixgbevf and ena kernel modules and put them into initramfs
 apt-get install -y linux-image-virtual-lts-utopic
 
-# uninstall kernel headers and dkms
-apt-get purge -y linux-headers-generic-lts-utopic dkms
-
 apt-mark hold openssh-server
 apt-get install -y --only-upgrade libc6 libssl1.0.0
 #apt-get dist-upgrade -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y # -q  >>/tmp/build/upgrade.log
