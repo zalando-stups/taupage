@@ -1,7 +1,8 @@
 approvals:
-  minimum: 1
-  pattern: "^(:\\+1:|👍|LGTM|lgtm)$"
-  from:
-    orgs:
-      - stups
-    collaborators: true
+  groups:
+    zalando:
+      minimum: 2
+      from:
+        orgs:
+          - "zalando"
+X-Zalando-Team: "teapot"
