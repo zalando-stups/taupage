@@ -10,6 +10,7 @@ ACCESSKEY=$config_appdynamics_account_access_key
 ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 STACK_NAME=$config_notify_cfn_stack
 ENABLE_LOGGING=$config_appdynamics_enable_logging
+SCALYR_KEY=$config_scalyr_account_key
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
@@ -99,8 +100,8 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 done
 
 # since Scalyr is our new central log shipping provider
-# DISABLE Logging by default
-if [ -n $ENABLE_LOGGING && $ENABLE_LOGGING == "True" ]; then
+# DISABLE Logging if a SCALYR Key is present
+if [[ -n $SCALYR_KEY || ( -n $ENABLE_LOGGING && "$ENABLE_LOGGING" ==  "True" ) ]]; then
 
 	# configure application.log & syslog
 	# first "hack" this should be configurable over the taupage.yaml file.
