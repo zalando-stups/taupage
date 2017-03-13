@@ -100,8 +100,8 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 done
 
 # since Scalyr is our new central log shipping provider
-# DISABLE Logging if a SCALYR Key is present
-if [[ -n $SCALYR_KEY || ( -n $ENABLE_LOGGING && "$ENABLE_LOGGING" ==  "True" ) ]]; then
+# DISABLE Logging if a SCALYR Key is present if there is no SCALYR_KEY enable logging again
+if [[ -z $SCALYR_KEY || ( -n $ENABLE_LOGGING && "$ENABLE_LOGGING" ==  "True" ) ]]; then
 
 	# configure application.log & syslog
 	# first "hack" this should be configurable over the taupage.yaml file.
