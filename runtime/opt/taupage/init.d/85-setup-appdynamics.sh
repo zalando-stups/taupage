@@ -9,6 +9,7 @@ ACCOUNT_NAME=$config_appdynamics_account_name
 ACCESSKEY=$config_appdynamics_account_access_key
 ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 STACK_NAME=$config_notify_cfn_stack
+ENABLE_LOGGING=$config_appdynamics_enable_logging
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
@@ -97,59 +98,65 @@ cat /opt/proprietary/appdynamics-configs | while read conf; do
 	echo $node > $agent_dir/uniqueHostId
 done
 
-# configure application.log & syslog
-# first "hack" this should be configurable over the taupage.yaml file.
-application_log_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/application-log.job"
-syslog_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/syslog.job"
-appdynamics_machineagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-machineagent-log.job"
-appdynamics_jvmagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-jvmagent-log.job"
+# since Scalyr is our new central log shipping provider
+# DISABLE Logging by default
+if [ -n $ENABLE_LOGGING && $ENABLE_LOGGING == "True" ]; then
 
-#enable application.log job
-if [ -f $application_log_job ]; then
-    sed -i "s/enabled.*$/enabled: true/" $application_log_job
-    sed -i "s/APPLICATION_ID/$config_application_id/" $application_log_job
-    sed -i "s/APPLICATION_VERSION/$config_application_version/" $application_log_job
-    sed -i "s/APPDYNAMICS_NODE/$node/" $application_log_job
-    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
-    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $application_log_job
-    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $application_log_job
-else
-    echo "INFO: application_job file doesn't exists, skipping setup"
-fi
+	# configure application.log & syslog
+	# first "hack" this should be configurable over the taupage.yaml file.
+	application_log_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/application-log.job"
+	syslog_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/syslog.job"
+	appdynamics_machineagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-machineagent-log.job"
+	appdynamics_jvmagent_job="/opt/proprietary/appdynamics-machine/monitors/analytics-agent/conf/job/appdynamics-jvmagent-log.job"
 
-# enable syslogjob
-if [ -f $syslog_job ]; then
-    sed -i "s/enabled.*$/enabled: true/" $syslog_job
-    sed -i "s/APPLICATION_ID/$config_application_id/" $syslog_job
-    sed -i "s/APPLICATION_VERSION/$config_application_version/" $syslog_job
-    sed -i "s/APPDYNAMICS_NODE/$node/" $syslog_job
-    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $syslog_job
-    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $syslog_job
-    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $syslog_job
-else
-  echo "INFO: syslog_job file doesn't exists, skipping setup"
-fi
+	#enable application.log job
+	if [ -f $application_log_job ]; then
+	    sed -i "s/enabled.*$/enabled: true/" $application_log_job
+	    sed -i "s/APPLICATION_ID/$config_application_id/" $application_log_job
+	    sed -i "s/APPLICATION_VERSION/$config_application_version/" $application_log_job
+	    sed -i "s/APPDYNAMICS_NODE/$node/" $application_log_job
+	    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $application_log_job
+	    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $application_log_job
+	    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $application_log_job
+	else
+	    echo "INFO: application_job file doesn't exists, skipping setup"
+	fi
 
-# enable appdynamics machineagent job
-if [ -f $appdynamics_machineagent_job ]; then
-	  # leave it disabled per default
-    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
-    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
-    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
-    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
-else
-  echo "INFO: appdynamics-machineagent-log job file doesn't exists, skipping setup"
-fi
+	# enable syslogjob
+	if [ -f $syslog_job ]; then
+	    sed -i "s/enabled.*$/enabled: true/" $syslog_job
+	    sed -i "s/APPLICATION_ID/$config_application_id/" $syslog_job
+	    sed -i "s/APPLICATION_VERSION/$config_application_version/" $syslog_job
+	    sed -i "s/APPDYNAMICS_NODE/$node/" $syslog_job
+	    sed -i "s/APPDYNAMICS_STACKNAME/$STACK_NAME/" $syslog_job
+	    sed -i "s/APPDYNAMICS_APPLICATION/$APPLICATIONNAME/" $syslog_job
+	    sed -i "s/APPDYNAMICS_TIERNAME/$config_application_id/" $syslog_job
+	else
+	  echo "INFO: syslog_job file doesn't exists, skipping setup"
+	fi
 
-# enable appdynamics jvmagent job
-if [ -f $appdynamics_jvmagent_job ]; then
-	  # leave it disabled per default
-    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
-    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
-    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
-    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
-else
-  echo "INFO: appdynamics-jvmagent-log job file doesn't exists, skipping setup"
+	# enable appdynamics machineagent job
+	if [ -f $appdynamics_machineagent_job ]; then
+		  # leave it disabled per default
+	    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_machineagent_job
+	    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_machineagent_job
+	    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_machineagent_job
+	    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_machineagent_job
+	else
+	  echo "INFO: appdynamics-machineagent-log job file doesn't exists, skipping setup"
+	fi
+
+	# enable appdynamics jvmagent job
+	if [ -f $appdynamics_jvmagent_job ]; then
+		  # leave it disabled per default
+	    #sed -i "1,$ s/enabled.*$/enabled: true/" $appdynamics_jvmagent_job
+	    sed -i "s/APPLICATION_ID/$config_application_id/" $appdynamics_jvmagent_job
+	    sed -i "s/APPLICATION_VERSION/$config_application_version/" $appdynamics_jvmagent_job
+	    sed -i "s/APPDYNAMICS_NODE/$node/" $appdynamics_jvmagent_job
+	else
+	  echo "INFO: appdynamics-jvmagent-log job file doesn't exists, skipping setup"
+	fi
+# close enable log IF
 fi
 
 #add TIER_NAME to the machine agent if the TIER_NAME was provided over the TAUPAGE_CONFIG
