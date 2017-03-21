@@ -273,6 +273,10 @@ def extract_registry(docker_image: str) -> str:
 
 
 def registry_login(config: dict, registry: str):
+    if config.get('use_iid_auth'):
+        pierone.api.docker_login_with_iid('https://{}'.format(registry))
+        return
+
     if 'pierone' not in registry:
         logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
         return
