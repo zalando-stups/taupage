@@ -16,8 +16,13 @@ import subprocess
 import time
 import yaml
 import os
+import glob
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
+from taupage import is_sensitive_key
+from taupage import CREDENTIALS_DIR
+from taupage import get_or
+from taupage import get_default_port
+from taupage import get_token
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -129,7 +134,8 @@ def get_env_options(config: dict):
         yield 'APPDYNAMICS_NODEJS_SETUP=/agents/appdynamics-nodejs/integration.snippet'
 
     # set APPLICATION_ID and APPLICATION_VERSION for convenience
-    # NOTE: we should not add other environment variables here (even if it sounds tempting),
+    # NOTE: we should not add other environment variables here
+    # (even if it sounds tempting),
     # esp. EC2 metadata should not be passed as env. variables!
     for key in ('application_id', 'application_version'):
         yield '-e'
@@ -140,17 +146,21 @@ def get_volume_options(config: dict):
     '''build Docker volume mount options'''
     for path, mount in get_or(config, 'mounts', {}).items():
         yield '-v'
-        # /opt/taupage/init.d/10-prepare-disks.py will mount the path below "/mounts" on the host system
+        # /opt/taupage/init.d/10-prepare-disks.py will mount the path below
+        # "/mounts" on the host system
         yield '{}:{}'.format('/mounts{}'.format(path), path)
 
-    # meta directory, e.g. containing application credentials retrieved by berry
+    # meta directory, e.g. containing application credentials retrieved by
+    # berry
     yield '-v'
     # mount the meta directory as read-only filesystem
     yield '/meta:/meta:ro'
 
     if config.get('newrelic_account_key'):
         # mount newrelic agent into docker
-        print('DEPRECATED WARNING: /data/newrelic will be removed please use /agents/newrelic instead ')
+        print(
+            'DEPRECATED WARNING: /data/newrelic will be removed please use '
+            '/agents/newrelic instead ')
         yield '-v'
         yield '/opt/proprietary/newrelic:/data/newrelic:rw'
         yield '-v'
@@ -170,7 +180,8 @@ def get_volume_options(config: dict):
         yield '-v'
         yield '/etc/ssl/certs:/etc/ssl/certs:ro'
 
-    # if AppDynamics applicationname is in the config and directory exists mount the agent & jobfiles to the container
+    # if AppDynamics applicationname is in the config and directory exists
+    # mount the agent & jobfiles to the container
     if 'appdynamics_application' in config:
         if os.path.isdir('/opt/proprietary/appdynamics-jvm'):
             yield '-v'
@@ -211,6 +222,22 @@ def get_volume_options(config: dict):
 
     yield '-e'
     yield 'CREDENTIALS_DIR={}'.format(CREDENTIALS_DIR)
+
+
+def get_gpu_options(config: dict):
+    '''
+    Add the GPU drivers as volumes to the docker container.
+    '''
+    cuda_driver_files = glob.glob('/usr/lib/x86_64-linux-gnu/libcuda.*')
+    for f in cuda_driver_files:
+        yield '-v'
+        yield '{}:{}'.format(f, f)
+
+    # Map the NVIDIA devices to the docker container.
+    cuda_device_files = glob.glob('/dev/nvidia*')
+    for d in cuda_device_files:
+        yield '--device'
+        yield '{}:{}'.format(d, d)
 
 
 def get_port_options(config: dict):
@@ -278,7 +305,8 @@ def registry_login(config: dict, registry: str):
         return
 
     if 'pierone' not in registry:
-        logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
+        logging.warning(
+            'Docker registry seems not to be Pier One, skipping OAuth login')
         return
     pierone_url = 'https://{}'.format(registry)
 
@@ -301,7 +329,8 @@ def run_docker(cmd, dry_run):
                 break
             except Exception as e:
                 if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                    logging.info(
+                        'Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
@@ -313,20 +342,24 @@ def wait_for_health_check(config: dict):
     default_port = get_default_port(config)
     health_check_port = config.get('health_check_port', default_port)
     health_check_path = config.get('health_check_path')
-    health_check_timeout_seconds = get_or(config, 'health_check_timeout_seconds', 60)
+    health_check_timeout_seconds = get_or(
+        config, 'health_check_timeout_seconds', 60)
 
     if not health_check_path:
-        logging.info('Health check path is not configured, not waiting for health check')
+        logging.info(
+            'Health check path is not configured, not waiting for health check')
         return
     if not health_check_port:
-        logging.warning('Health check port is not configured, skipping health check')
+        logging.warning(
+            'Health check port is not configured, skipping health check')
         return
 
     url = 'http://localhost:{}{}'.format(health_check_port, health_check_path)
 
     start = time.time()
     while time.time() < start + health_check_timeout_seconds:
-        logging.info('Waiting for health check :{}{}..'.format(health_check_port, health_check_path))
+        logging.info('Waiting for health check :{}{}..'.format(
+            health_check_port, health_check_path))
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
@@ -338,7 +371,8 @@ def wait_for_health_check(config: dict):
         time.sleep(2)
 
     logging.error('Timeout of {}s expired for health check :{}{}'.format(
-                  health_check_timeout_seconds, health_check_port, health_check_path))
+                  health_check_timeout_seconds, health_check_port,
+                  health_check_path))
     sys.exit(2)
 
 
@@ -365,7 +399,8 @@ def main(args):
             if not args.dry_run:
                 subprocess.check_output(cmd)
         except Exception as e:
-            logging.error('Docker start of existing container failed: %s', str(e))
+            logging.error(
+                'Docker start of existing container failed: %s', str(e))
             sys.exit(1)
     else:
         registry = extract_registry(source)
@@ -373,15 +408,17 @@ def main(args):
         if registry:
             registry_login(config, registry)
 
-        cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
-        for f in get_env_options, get_volume_options, get_port_options, get_other_options:
+        cmd = ['docker', 'run', '-d', '--log-driver=syslog',
+               '--name=taupageapp', '--restart=on-failure:10']
+        for f in get_env_options, get_volume_options, get_port_options, get_other_options, get_gpu_options:
             cmd += list(f(config))
         cmd += [source]
 
         try:
             run_docker(cmd, args.dry_run)
         except Exception as e:
-            logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
+            logging.error(
+                'Docker run failed: %s', mask_command(str(e).split(' ')))
             sys.exit(1)
 
     wait_for_health_check(config)
@@ -389,9 +426,12 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', '-c', help='Config file', default='/meta/taupage.yaml')
-    parser.add_argument('--dry-run', help='Print what would be done', action='store_true')
+    parser.add_argument(
+        '--config', '-c', help='Config file', default='/meta/taupage.yaml')
+    parser.add_argument(
+        '--dry-run', help='Print what would be done', action='store_true')
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    logging.basicConfig(
+        level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.getLogger("urllib3.connectionpool").setLevel(logging.WARN)
     main(args)
