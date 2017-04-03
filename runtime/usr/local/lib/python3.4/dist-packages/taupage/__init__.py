@@ -3,6 +3,7 @@ Taupage base module with helper functions
 '''
 
 import logging
+import yaml
 
 from boto.utils import get_instance_metadata
 
