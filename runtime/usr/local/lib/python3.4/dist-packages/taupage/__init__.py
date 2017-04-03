@@ -2,13 +2,8 @@
 Taupage base module with helper functions
 '''
 
-import json
 import logging
-import os
-import time
 import yaml
-import tokens
-import zign.api
 
 from boto.utils import get_instance_metadata
 
@@ -127,87 +122,6 @@ def get_config(filename=TAUPAGE_CONFIG_PATH):
     with open(filename) as fd:
         config = yaml.safe_load(fd)
     return config
-
-
-def get_token(config: dict, token_name: str, scopes: list):
-    oauth_access_token_url = config.get('oauth_access_token_url')
-    token_url = config.get('token_service_url')
-
-    if not oauth_access_token_url:
-        logging.warning('No OAuth access token URL configured in Taupage YAML ("oauth_access_token_url" property)')
-
-    if not token_url:
-        logging.warning('No token service URL configured in Taupage YAML ("token_service_url" property)')
-
-    if not oauth_access_token_url and not token_url:
-        # neither of the URLs is given, no chance to continue
-        return
-
-    if not config.get('mint_bucket'):
-        # berry will only be started if a mint bucket is configured,
-        # skip OAuth token retrieval if this is not the case
-        logging.warning('No mint bucket configured in Taupage YAML ("mint_bucket" property)')
-        return
-
-    user_path = os.path.join(CREDENTIALS_DIR, 'user.json')
-    client_path = os.path.join(CREDENTIALS_DIR, 'client.json')
-
-    while not os.path.exists(user_path):
-        logging.info('Waiting for berry to download OAuth credentials to {}..'.format(user_path))
-        time.sleep(5)
-
-    with open(user_path) as fd:
-        user_credentials = json.load(fd)
-
-    user = user_credentials.get('application_username')
-    passwd = user_credentials.get('application_password')
-
-    if not user or not passwd:
-        logging.warning('Invalid OAuth user credentials: application user and/or password missing in %s', user_path)
-        return
-
-    try:
-        with open(client_path) as fd:
-            client_credentials = json.load(fd)
-    except:
-        logging.warning('Invalid OAuth client credentials: could not read %s', client_path)
-        # we might continue as Token Service does not require client credentials
-        client_credentials = {}
-
-    client_id = client_credentials.get('client_id')
-
-    if client_id and oauth_access_token_url:
-        # we have a client_id and the OAuth provider's URL
-        # => we can use the OAuth provider directly
-        # NOTE: the client_secret can be null
-        tokens.configure(url=oauth_access_token_url, dir=CREDENTIALS_DIR)
-        tokens.manage(token_name, scopes)
-        access_token = tokens.get(token_name)
-        return {'access_token': access_token}
-    else:
-        # fallback to custom Token Service
-        # Token Service only requires user and password
-        num_retries = 3
-        token = False
-        while num_retries > 0:
-            try:
-                token = zign.api.get_named_token(
-                    scopes,
-                    'services',
-                    token_name,
-                    user,
-                    passwd,
-                    url=token_url,
-                    use_keyring=False)
-                break
-            except zign.api.ServerError as e:
-                logging.info('Encountered error while obtaining token {}, will retry {} times. {}'.format(
-                    token_name, num_retries, e))
-                num_retries -= 1
-                time.sleep(30)
-        if not token:
-            raise Exception('Could not obtain token {}'.format(token_name))
-        return token
 
 
 def get_boot_time():
