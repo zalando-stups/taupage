@@ -2,13 +2,7 @@
 Taupage base module with helper functions
 '''
 
-import json
 import logging
-import os
-import time
-import yaml
-import tokens
-import zign.api
 
 from boto.utils import get_instance_metadata
 
