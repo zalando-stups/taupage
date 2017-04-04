@@ -32,3 +32,6 @@ fi
 if [ -n "$REVOCATION_PROVIDER_URL" ]; then
     echo "revocation_provider_url: $REVOCATION_PROVIDER_URL" >> /meta/taupage.yaml
 fi
+if [ -n "$TOKENINFO_BUSINESS_PARTNERS" ]; then
+    echo "tokeninfo_business_partners: $TOKENINFO_BUSINESS_PARTNERS" >> /meta/taupage.yaml
+fi

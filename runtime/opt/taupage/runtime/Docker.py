@@ -18,7 +18,7 @@ import yaml
 import os
 import glob
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -287,14 +287,7 @@ def registry_login(config: dict, registry: str):
         logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
         return
     pierone_url = 'https://{}'.format(registry)
-
-    token = get_token(config, 'pierone', ['uid'])
-
-    if not token or 'access_token' not in token:
-        logging.warning('Missing OAuth token for Pier One login')
-        return
-
-    pierone.api.docker_login_with_token(pierone_url, token['access_token'])
+    pierone.api.docker_login_with_iid(pierone_url)
 
 
 def run_docker(cmd, dry_run):

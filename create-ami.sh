@@ -152,6 +152,17 @@ ssh $ssh_args ubuntu@$ip sudo rm -rf /tmp/build
 # echo "Giving deluser some time..."
 # sleep 15
 
+echo "Stopping instance to enable ENA support"
+aws ec2 stop-instances --region $region --instance-ids $instanceid
+
+while [[ $(aws ec2 describe-instances --region $region --instance-id $instanceid --output json | jq -r '.Reservations[].Instances[].State.Name') != "stopped" ]]; do
+    echo "Waiting for Instance.State == 'stopped'"
+    sleep 5
+done
+
+echo "Setting EnaSupport flag"
+aws ec2 modify-instance-attribute --region $region --instance-id $instanceid --ena-support
+
 # create ami
 ami_name="Taupage${ami_suffix}-AMI-$(date +%Y%m%d-%H%M%S)"
 echo "Creating $ami_name ..."
