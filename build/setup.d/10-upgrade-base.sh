@@ -8,7 +8,7 @@ echo "Updating system..."
 apt-get update -y  # -q >>/tmp/build/upgrade.log
 
 # install kernel headers and dkms
-apt-get install -y linux-headers-generic-lts-utopic dkms
+apt-get install -y linux-headers-generic-lts-xenial dkms
 
 function configure_dkms() {
     local PACKAGE_NAME=$1
@@ -54,7 +54,7 @@ popd
 
 # install 3.16. LTS kernel and make sure it updates to the last version
 # also this step should build ixgbevf and ena kernel modules and put them into initramfs
-apt-get install -y linux-image-virtual-lts-utopic
+apt-get install -y linux-image-virtual-lts-xenial
 
 apt-mark hold openssh-server
 apt-get install -y --only-upgrade libc6 libssl1.0.0
