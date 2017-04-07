@@ -8,7 +8,7 @@ g++-4.8
 gcc
 gcc-4.8
 laptop-detect
-linux-headers-generic-lts-utopic
+linux-headers-generic-lts-xenial
 dkms
 "
 
