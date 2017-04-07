@@ -54,7 +54,7 @@ popd
 
 # install 3.16. LTS kernel and make sure it updates to the last version
 # also this step should build ixgbevf and ena kernel modules and put them into initramfs
-apt-get install -y linux-image-virtual-lts-xenial
+apt-get install -y linux-image-generic-lts-xenial
 
 apt-mark hold openssh-server
 apt-get install -y --only-upgrade libc6 libssl1.0.0
