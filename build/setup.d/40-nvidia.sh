@@ -15,12 +15,11 @@ apt-get update
 
 pkgs="
 build-essential
-linux-headers-generic-lts-utopic
+linux-headers-virtual-lts-xenial
 "
 
-#get the version of the lts kernel
-kernelname=$(apt-cache showpkg linux-headers-generic-lts-utopic | grep -a1 "Dependencies:" | tail -n1 | sed 's/.*linux-headers-\([0-9a-z.-]\+\).*/\1/')
-
+# find latest headers
+kernelname=$(ls -lah /usr/src/ | tail -n1 | sed 's/.*linux-headers-\([0-9a-z.-]\+\).*/\1/')
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs >>install.log
 
 echo "Installing NVIDIA driver ver: ${DRIVER_VERSION}"
