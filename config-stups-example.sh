@@ -17,6 +17,7 @@ instance_type="c3.large"
 testinstance_types="
 t2.micro
 m4.xlarge
+c3.large
 p2.xlarge
 "
 

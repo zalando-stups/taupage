@@ -4,8 +4,9 @@ set -e
 # finally cleanup ec2 instance
 function finally() {
 	# clean up aka terminate test server
+	e=$?
 	if [ $DRY_RUN = false ]; then
-		if [ "$?" -gt 0 ] || [ ${1:-false} = true ]; then
+		if [ "$e" -gt 0 ] || [ ${1:-false} = true ]; then
 			echo "Terminating server..."
 			aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
 			delete_test_volumes
@@ -59,11 +60,8 @@ fi
 
 AMI_ID=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
 
-if [ -z $testinstance_types ]; then
-	# backward compability
-	testinstance_types="
-$instance_type
-"
+if [ -z "$testinstance_types" ]; then
+	testinstance_types="$instance_type"
 fi
 
 for testinstance_type in $testinstance_types; do
