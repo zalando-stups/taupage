@@ -15,9 +15,9 @@ instance_type="c3.large"
 
 # test common instance types
 testinstance_types="
+$instance_type
 t2.micro
 m4.xlarge
-c3.large
 p2.xlarge
 "
 
