@@ -6,7 +6,7 @@
 pkgs="
 auditd
 build-essential
-docker-engine=1.11.1-0~trusty
+docker-engine=1.12.6-0~ubuntu-trusty
 gcc
 iproute
 jq
@@ -42,4 +42,3 @@ xfsprogs
 echo "Installing packages..."
 
 apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confold" $pkgs
-

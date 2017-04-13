@@ -13,6 +13,14 @@ base_ami="ami-accff2b1"
 
 instance_type="c3.large"
 
+# test common instance types
+testinstance_types="
+$instance_type
+t2.micro
+m4.xlarge
+p2.xlarge
+"
+
 config_dir=$(dirname $1)
 secret_dir="$config_dir/secret"
 

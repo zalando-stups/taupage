@@ -16,6 +16,7 @@ import subprocess
 import time
 import yaml
 import os
+import glob
 
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
@@ -93,6 +94,15 @@ def wait_for_local_planb_tokeninfo():
     # failed to start local Token Info
     # => use global one
     return None
+
+
+def get_docker_command(config: dict):
+    '''get the docker command to use'''
+    cuda_device_files = glob.glob('/dev/nvidia*')
+    if len(cuda_device_files) > 0:
+        return 'nvidia-docker'
+    else:
+        return 'docker'
 
 
 def get_env_options(config: dict):
@@ -338,9 +348,11 @@ def main(args):
 
     source = config['source']
 
+    docker_cmd = get_docker_command(config)
+
     already_exists = False
     try:
-        cmd = ['docker', 'ps', '-a', '-q', '-f', 'name=taupageapp']
+        cmd = [docker_cmd, 'ps', '-a', '-q', '-f', 'name=taupageapp']
         if subprocess.check_output(cmd):
             already_exists = True
     except Exception as e:
@@ -349,7 +361,7 @@ def main(args):
 
     if already_exists:
         try:
-            cmd = ['docker', 'start', 'taupageapp']
+            cmd = [docker_cmd, 'start', 'taupageapp']
             logging.info('Starting existing Docker container: {}'.format(cmd))
             if not args.dry_run:
                 subprocess.check_output(cmd)
@@ -362,7 +374,7 @@ def main(args):
         if registry:
             registry_login(config, registry)
 
-        cmd = ['docker', 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
+        cmd = [docker_cmd, 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
         for f in get_env_options, get_volume_options, get_port_options, get_other_options:
             cmd += list(f(config))
         cmd += [source]

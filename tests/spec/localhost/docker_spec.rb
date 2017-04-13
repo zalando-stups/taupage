@@ -6,7 +6,7 @@ end
 
 describe command('docker --version') do
   # check Docker version
-  its(:stdout) { should match /1.11.1/ }
+  its(:stdout) { should match /1.12.6/ }
 end
 
 describe service('docker') do

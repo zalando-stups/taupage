@@ -8,7 +8,7 @@ echo "Updating system..."
 apt-get update -y  # -q >>/tmp/build/upgrade.log
 
 # install kernel headers and dkms
-apt-get install -y linux-headers-generic-lts-xenial dkms
+apt-get install -y linux-headers-virtual-lts-xenial dkms
 
 function configure_dkms() {
     local PACKAGE_NAME=$1
