@@ -168,6 +168,9 @@ def get_other_options(config: dict):
             yield '--log-opt'
             yield '{}={}'.format(key, value)
 
+    if config.get('docker', {}).get('stop_timeout'):
+        yield '--stop-timeout'
+        yield config.get('docker', {}).get('stop_timeout')
 
 def extract_registry(docker_image: str) -> str:
     """
