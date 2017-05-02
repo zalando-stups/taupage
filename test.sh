@@ -187,4 +187,75 @@ for testinstance_type in $testinstance_types; do
 	finally true
 done
 
+# get a batch server
+echo "Starting batch server..."
+result=$(aws ec2 run-instances \
+    --image-id $AMI_ID \
+    --count 1 \
+    --instance-type $instance_type \
+		--instance-initiated-shutdown-behavior terminate\
+    --associate-public-ip-address \
+    --key-name $keypair \
+    --security-group-ids $security_group \
+    --subnet-id $subnet \
+    --output json \
+    --region $region \
+    --user-data file://$(pwd)/test-batchdata.yaml)
+
+instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
+echo "Instance: $instanceid"
+
+aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Batch Test, Key=Version,Value=$TAUPAGE_VERSION"
+
+while [ true ]; do
+    result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
+    ip=$(echo $result | jq .Reservations\[0\].Instances\[0\].PublicIpAddress | sed 's/"//g')
+
+    [ ! -z "$ip" ] && [ "$ip" != "null" ] && break
+
+    echo "Waiting for public IP..."
+    sleep 5
+done
+
+echo "IP: $ip"
+
+# wait for server
+while [ true ]; do
+    echo "Waiting for server..."
+
+    set +e
+    ssh $ssh_args ubuntu@$ip echo >/dev/null
+    alive=$?
+    set -e
+
+    if [ $alive -eq 0 ]; then
+        break
+    fi
+
+    sleep 2
+done
+
+terminationcounter=300
+
+while [ true ]; do
+	echo "Waiting for self termination"
+
+	result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
+	state=$(echo $result | jq .Reservations\[0\].Instances\[0\].State.Name | sed 's/"//g')
+
+	if [ "$state" == "terminated" ]; then
+		break
+	fi
+
+	terminationcounter=$((--terminationcounter))
+
+	if [ "$terminationcounter" -le 0 ]; then
+		"Waited 5min for self termination destroying..."
+		exit 1
+	fi
+
+	sleep 2
+
+done
+
 exit 0

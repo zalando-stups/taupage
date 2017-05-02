@@ -1,0 +1,27 @@
+#taupage-ami-config
+
+application_id: my-http-test-batch-ami
+application_version: "1.0"
+
+runtime: Docker
+source: fatz/docker-simple-job:latest
+
+environment:
+  EXIT: 0
+
+keep_instance_users: true
+
+cloudwatch_logs:
+  /var/log/syslog: my-syslog-loggroup
+  /var/log/application.log: my-application-loggroup
+
+mount_certs: true
+mount_var_log: true
+
+# Start etcd in single node mode
+etcd_discovery_domain: disable
+
+# start local planb-tokeninfo
+local_planb_tokeninfo: true
+
+shutdown: on-exit
