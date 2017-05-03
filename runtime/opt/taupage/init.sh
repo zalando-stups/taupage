@@ -94,18 +94,23 @@ else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
 fi
 
-# FIXME: should be improved by checking for on-exit and on-success
 if [ "$config_shutdown" ] && [ "$config_shutdown" != "never" ]; then
-  echo "INFO: waiting for taupage"
-  EXITCODE=$(docker wait taupage)
+  echo "INFO: waiting for taupage container"
+  EXITCODE=$(docker wait taupageapp)
 
   echo "INFO: taupage ended with status ${EXITCODE}"
-  if [ "$config_shutdown" = "on-exit" ]; then
-    shutdown -h 1 "taupage ended: status ${EXITCODE} calling shutdown in 1"
-  else
-    [ "$EXITCODE" -eq 0 ] && shutdown -h 1 "taupage ended successfully: status ${EXITCODE} calling shutdown in 1"
-    exit §EXITCODE
-  fi
+  case "$config_shutdown" in
+    on-exit)
+      shutdown -h 1 "taupage ended: status ${EXITCODE} calling shutdown in 1";;
+    on-success)
+      [ "$EXITCODE" -eq 0 ] && shutdown -h 1 "taupage ended successfully: status ${EXITCODE} calling shutdown in 1"
+      exit $EXITCODE
+      ;;
+    *)
+      echo "ERROR: shutdown condition unknown"
+      exit 1
+      ;;
+  esac
 
 else
   echo "INFO: skipping shutdown expecting never"
