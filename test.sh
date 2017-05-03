@@ -193,7 +193,7 @@ result=$(aws ec2 run-instances \
     --image-id $AMI_ID \
     --count 1 \
     --instance-type $instance_type \
-		--instance-initiated-shutdown-behavior terminate\
+    --instance-initiated-shutdown-behavior terminate\
     --associate-public-ip-address \
     --key-name $keypair \
     --security-group-ids $security_group \
