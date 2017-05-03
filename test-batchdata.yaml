@@ -24,4 +24,4 @@ etcd_discovery_domain: disable
 # start local planb-tokeninfo
 local_planb_tokeninfo: true
 
-shutdown: on-exit
+shutdown: on-success
