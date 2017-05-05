@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # this ugly patching ensures that the shutdown of the docker daemon honours an increased
 # stop timeout of the container. Otherwise upstart will kill
 
