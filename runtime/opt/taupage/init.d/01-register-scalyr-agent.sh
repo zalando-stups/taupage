@@ -11,7 +11,6 @@ APPID=$config_application_id
 APPVERSION=$config_application_version
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
-ENVIRONMENT=$config_environment
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
 CUSTOMLOG=$config_mount_custom_log
