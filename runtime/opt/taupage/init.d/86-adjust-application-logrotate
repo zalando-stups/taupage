@@ -1,30 +1,54 @@
 #!/bin/sh
-# the script can adjust the logrotate of the application.log if needed. 
+# the script can adjust the logrotate of the application.log and custom logs if needed.
 
 # read global taupage config
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 
 application_logrotate="/etc/logrotate.d/application"
+customlog_logrotate="/etc/logrotate.d/custom"
 
-#set custom filesize 
+#settings for application.log
+
+#set custom filesize
 if [ -n "$config_application_logrotate_size" ]; then
 	echo "INFO: Set filesize to $config_application_logrotate_size for application.log Logrotate"
-        sed -i "s/\bsize\b.*$/size $config_application_logrotate_size/g" $application_logrotate 
+        sed -i "s/\bsize\b.*$/size $config_application_logrotate_size/g" $application_logrotate
 fi
 
-
 #change period if it is set in the yaml ( weekly, daily, monthly )
-#hourly is only possible if we also adjust the logrotate cronjob 
+#hourly is only possible if we also adjust the logrotate cronjob
 if [ -n "$config_application_logrotate_interval" ]; then
 	echo "INFO: Set period to $config_application_logrotate_interval for application.log Logrotate"
         sed -i "1,$ s/weekly/$config_application_logrotate_interval/" $application_logrotate
 fi
 
 #change how often the file will be rotated until overwrite
-#default is "4" 
+#default is "4"
 if [ -n "$config_application_logrotate_rotate" ]; then
         echo "INFO: Set rotate to $config_application_logrotate_rotate for application.log Logrotate"
         sed -i "s/\brotate\b.*$/rotate $config_application_logrotate_rotate/g" $application_logrotate
 fi
-   
+
+#settings for all custom logs.
+
+#set custom filesize
+if [ -n "$config_customlog_logrotate_size" ]; then
+	echo "INFO: Set logrotate filesize to $config_customlog_logrotate_size for all custom logs"
+        sed -i "s/\bsize\b.*$/size $config_customlog_logrotate_size/g" $customlog_logrotate
+fi
+
+
+#change period if it is set in the yaml ( weekly, daily, monthly )
+#hourly is only possible if we also adjust the logrotate cronjob
+if [ -n "$config_customlog_logrotate_interval" ]; then
+	echo "INFO: Set logrotate period to $config_customlog_logrotate_interval for all custom logs"
+        sed -i "1,$ s/daily/$config_customlog_logrotate_interval/" $customlog_logrotate
+fi
+
+#change how often the file will be rotated until overwrite
+#default is "4"
+if [ -n "$config_customlog_logrotate_rotate" ]; then
+        echo "INFO: Set rotate to $config_customlog_logrotate_rotate for all custom logs"
+        sed -i "s/\brotate\b.*$/rotate $config_customlog_logrotate_rotate/g" $customlog_logrotate
+fi

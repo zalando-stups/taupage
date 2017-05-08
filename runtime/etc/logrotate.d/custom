@@ -2,6 +2,7 @@
 {
         rotate 5
         daily
+        size 256M
         missingok
         notifempty
         copytruncate
