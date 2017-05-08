@@ -11,8 +11,11 @@ APPID=$config_application_id
 APPVERSION=$config_application_version
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
+ENVIRONMENT=$config_environment
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
+CUSTOMLOG=$config_mount_custom_log
+CUSTOMPARSER=${config_scalyr_custom_log_parser:-slf4j}
 
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
@@ -110,6 +113,22 @@ then
 else
     echo -n "ERROR";
     exit
+fi
+
+#follow custom logs if it's enabled in senza.yaml
+if [ -n "$CUSTOMLOG" ];
+then
+  echo "";
+  echo -n "insert custom log directory to follow ... ";
+  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", attributes: {parser: \"$CUSTOMPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+  if [ $? -eq 0 ];
+  then
+      echo -n "DONE";
+      echo "";
+  else
+      echo -n "ERROR";
+      exit
+  fi
 fi
 
 #add max_log_offset_size
