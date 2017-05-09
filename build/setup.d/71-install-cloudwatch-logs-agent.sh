@@ -7,7 +7,7 @@ cd /tmp/cw-logs-setup
 touch cloudwatch_logs_empty.conf
 
 # download and install latest version of the cloudwatch logs agent
-wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+wget https://s3.amazonaws.com/aws-cloudwatch/downloads/1.3.9/awslogs-agent-setup.py
 chmod +x ./awslogs-agent-setup.py
 
 # the region parameter is not relevant here but required
