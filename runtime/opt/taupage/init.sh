@@ -20,8 +20,8 @@ START_TIME=$(date +"%s")
 cd $(dirname $0)
 
 # general preparation
-for script in $(ls init.d); do
-    ./init.d/$script
+for script in ./init.d/*; do
+    ./$script
     if [ "$?" -ne 0 ]; then
         echo "ERROR: Failed to start $script" >&2
         exit 1
@@ -94,5 +94,27 @@ else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
 fi
 
-# finished!
-exit $result
+if [ "$config_shutdown" ] && [ "$config_shutdown" != "never" ]; then
+  echo "INFO: waiting for taupage container"
+  EXITCODE=$(docker wait taupageapp)
+
+  echo "INFO: taupage ended with status ${EXITCODE}"
+  case "$config_shutdown" in
+    on-exit)
+      shutdown -h 1 "taupage ended: status ${EXITCODE} calling shutdown in 1";;
+    on-success)
+      [ "$EXITCODE" -eq 0 ] && shutdown -h 1 "taupage ended successfully: status ${EXITCODE} calling shutdown in 1"
+      exit $EXITCODE
+      ;;
+    *)
+      echo "ERROR: shutdown condition unknown"
+      exit 1
+      ;;
+  esac
+
+else
+  echo "INFO: skipping shutdown expecting never"
+
+  # finished!
+  exit $result
+fi
