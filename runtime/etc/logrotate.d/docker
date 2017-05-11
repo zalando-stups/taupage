@@ -1,0 +1,9 @@
+/var/log/upstart/docker.log {
+        daily
+        missingok
+        size 50m
+        rotate 7
+        compress
+        notifempty
+        nocreate
+}
