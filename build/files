@@ -31,6 +31,8 @@
 /etc/logrotate.d/application root:root 0644
 /etc/logrotate.d/auditlog root:root 0644
 /etc/logrotate.d/custom root:root 0644
+/etc/logrotate.d/docker root:root 0644
+/etc/logrotate.d/etcd root:root 0644
 /etc/logrotate.d/rsyslog root:root 0644
 
 /etc/default/docker root:root 0755

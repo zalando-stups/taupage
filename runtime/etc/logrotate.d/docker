@@ -1,7 +1,7 @@
 /var/log/upstart/docker.log {
         daily
         missingok
-        size 50m
+        size 50M
         rotate 7
         compress
         notifempty
