@@ -8,6 +8,7 @@ auditd
 build-essential
 docker-engine=1.12.6-0~ubuntu-trusty
 gcc
+htop
 iproute
 jq
 libdatetime-perl
@@ -34,6 +35,7 @@ rkhunter
 rsyslog-gnutls
 ruby
 scalyr-agent-2
+sysstat
 unhide.rb
 unzip
 xfsprogs
