@@ -78,7 +78,7 @@ fi
 #follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", attributes: {parser: \"systemLog\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"systemLog\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -91,7 +91,7 @@ fi
 #follow auth.log
 echo "";
 echo -n "insert authlog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", attributes: {parser: \"systemLog\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"systemLog\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -104,7 +104,7 @@ fi
 #follow application.log
 echo "";
 echo -n "insert application to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -119,7 +119,7 @@ if [ -n "$CUSTOMLOG" ];
 then
   echo "";
   echo -n "insert custom log directory to follow ... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", attributes: {parser: \"$CUSTOMPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo -n "DONE";
