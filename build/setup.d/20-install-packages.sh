@@ -20,8 +20,6 @@ libwww-perl
 libyaml-dev
 libyaml-0-2
 linux-image-extra-virtual-lts-xenial
-logentries
-logentries-daemon
 mdadm
 ntp
 openjdk-7-jre-headless
