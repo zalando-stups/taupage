@@ -1,6 +1,7 @@
 #!/bin/bash
 
 pkgs="
+awscli
 boto
 boto3
 botocore
