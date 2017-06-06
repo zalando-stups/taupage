@@ -17,7 +17,7 @@ import yaml
 import shutil
 import glob
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -171,6 +171,7 @@ def get_other_options(config: dict):
     if config.get('docker', {}).get('stop_timeout'):
         yield '--stop-timeout'
         yield str(config.get('docker', {}).get('stop_timeout'))
+
 
 def extract_registry(docker_image: str) -> str:
     """

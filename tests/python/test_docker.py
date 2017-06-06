@@ -18,7 +18,7 @@ class DockerRuntimeTests(TestCase):
     @patch("Docker.boto.kms.connect_to_region")
     def test_decrypt_decrypts_prefixed_values(self, kms_mock, get_region_mock):
         kms_connection_mock = Mock()
-        kms_connection_mock.decrypt.return_value = {"Plaintext": bytes("my-plaintext",encoding='utf-8')}
+        kms_connection_mock.decrypt.return_value = {"Plaintext": bytes("my-plaintext", encoding='utf-8')}
         kms_mock.return_value = kms_connection_mock
 
         get_region_mock.return_value = "eu-west-1"
@@ -32,7 +32,7 @@ class DockerRuntimeTests(TestCase):
     @patch("Docker.boto.kms.connect_to_region")
     def test_decrypt_decrypts_prefixed_values_with_encryption_context(self, kms_mock, get_region_mock):
         kms_connection_mock = Mock()
-        kms_connection_mock.decrypt.return_value = {"Plaintext": bytes("my-plaintext",encoding='utf-8')}
+        kms_connection_mock.decrypt.return_value = {"Plaintext": bytes("my-plaintext", encoding='utf-8')}
         kms_mock.return_value = kms_connection_mock
 
         get_region_mock.return_value = "eu-west-1"

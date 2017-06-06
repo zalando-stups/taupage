@@ -27,6 +27,7 @@ def aws_decrypt(to_decrypt, region, aws_access_key, aws_secret_key):
     )
     return str(response['Plaintext'], "UTF-8")
 
+
 for arg in sys.argv[1:]:
     try:
         print(aws_decrypt(arg, region_name, aws_access_key=None, aws_secret_key=None))
