@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # read /etc/taupage.yaml
 # get NewRelic Key and register the agent
 
@@ -7,7 +7,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 #set more readable variables
 ACCOUNTKEY=$config_newrelic_account_key
-newrelic_config=/etc/newrelic.infra.yml
+newrelic_config=/etc/newrelic-infra.yml
 
 #if NewRelic account exists in the yaml file. Register the NewRelic Daemon to this Account
 if [ -n "$ACCOUNTKEY" ];
