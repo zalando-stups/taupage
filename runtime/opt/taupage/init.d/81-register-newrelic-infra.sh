@@ -25,5 +25,6 @@ then
     fi
 else
     echo "INFO: NewRelic is not configured; skipping daemon setup.";
+    service newrelic-infra stop || true
     exit;
 fi
