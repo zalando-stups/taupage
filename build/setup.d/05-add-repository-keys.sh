@@ -24,4 +24,4 @@ echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sour
 
 # newrelic
 curl https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg | sudo apt-key add -
-printf "deb [arch=amd64] http://download.newrelic.com/infrastructure_agent/linux/apt ubuntu-trusty main" | sudo tee -a /etc/apt/sources.list.d/newrelic-infra.list
+printf "deb [arch=amd64] http://download.newrelic.com/infrastructure_agent/linux/apt trusty main" | sudo tee -a /etc/apt/sources.list.d/newrelic-infra.list
