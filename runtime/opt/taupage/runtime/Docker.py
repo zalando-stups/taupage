@@ -17,7 +17,7 @@ import yaml
 import shutil
 import glob
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_token
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -172,6 +172,7 @@ def get_other_options(config: dict):
         yield '--stop-timeout'
         yield str(config.get('docker', {}).get('stop_timeout'))
 
+
 def extract_registry(docker_image: str) -> str:
     """
     >>> extract_registry('nginx')
@@ -253,7 +254,7 @@ def main(args):
 
         try:
             logging.info('pull ecr')
-            out = subprocess.check_output(pull_cmd)
+            subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
@@ -264,7 +265,7 @@ def main(args):
 
         try:
             logging.info('pull private')
-            out = subprocess.check_output(pull_cmd)
+            subprocess.check_output(pull_cmd)
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
 

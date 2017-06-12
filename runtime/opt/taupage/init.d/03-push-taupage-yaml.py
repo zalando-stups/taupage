@@ -51,5 +51,6 @@ def main():
         except:
             logging.exception('Failed to push Taupage YAML')
 
+
 if __name__ == '__main__':
     main()

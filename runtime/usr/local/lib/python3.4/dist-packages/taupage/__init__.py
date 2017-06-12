@@ -126,6 +126,7 @@ def get_config(filename=TAUPAGE_CONFIG_PATH):
 def get_token(config: dict, token_name: str, scopes: list):
     return
 
+
 def get_boot_time():
     with open('/run/taupage-init-ran/date') as fd:
         boot_time = fd.read().strip()
