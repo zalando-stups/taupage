@@ -254,7 +254,7 @@ def main(args):
 
         try:
             logging.info('pull ecr')
-            subprocess.check_output(pull_cmd)
+            subprocess.check_output(pull_cmdb) # noqa
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
@@ -265,7 +265,7 @@ def main(args):
 
         try:
             logging.info('pull private')
-            subprocess.check_output(pull_cmd)
+            subprocess.check_output(pull_cmd) # noqa
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
 
