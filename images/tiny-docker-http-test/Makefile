@@ -2,7 +2,7 @@
 
 BINARY        		 ?= tiny-docker-http-test
 VERSION       		 ?= $(shell git describe --tags --always --dirty)
-IMAGE         		 ?= hjacobs/$(BINARY)
+IMAGE         		 ?= registry-write.opensource.zalan.do/teapot/$(BINARY)
 TAG           		 ?= $(VERSION)
 GITHEAD       		 = $(shell git rev-parse --short HEAD)
 GITURL        		 = $(shell git config --get remote.origin.url)
