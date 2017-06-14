@@ -14,7 +14,6 @@ if [ -n "$ACCOUNTKEY" ];
 then
     echo "license_key: $ACCOUNTKEY" > $newrelic_config
     echo -n "Starting newrelic-infra ... ";
-    service newrelic-infra stop || true
     service newrelic-infra start
     if [ $? -eq 0 ];
     then
@@ -25,6 +24,5 @@ then
     fi
 else
     echo "INFO: NewRelic is not configured; skipping daemon setup.";
-    service newrelic-infra stop || true
     exit;
 fi
