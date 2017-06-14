@@ -245,7 +245,7 @@ def main(args):
 
         try:
             logging.info('pull ecr')
-            subprocess.check_output(pull_cmdb) # noqa
+            subprocess.check_output(pull_cmd) # noqa
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
