@@ -9,7 +9,7 @@ libyaml-0-2
 linux-image-extra-$(uname -r)
 docker-engine
 mdadm
-newrelic-sysmond
+newrelic-infra
 ntp
 openjdk-7-jre-headless
 python3-pip

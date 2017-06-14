@@ -14,7 +14,7 @@ basepackage = [ 'rsyslog-gnutls',
                 'unhide.rb',
                 'ruby',
                 'scalyr-agent-2',
-                'newrelic-sysmond',
+                'newrelic-infra',
                 'unzip'
               ]
 
