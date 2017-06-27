@@ -226,7 +226,7 @@ Data \ Tag | T | F
                 'value': 'True'})
             if list(tags):
                 ec2.delete_tags(volume_id, [ERASE_ON_BOOT_TAG_NAME])
-                erase_tag_set = True
+            erase_tag_set = True
 
     logging.info("%s: erase_on_boot=%s, erase_tag_set=%s",
                  partition, erase_on_boot, erase_tag_set)
