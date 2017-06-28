@@ -217,16 +217,19 @@ Data \ Tag | T | F
             'attachment.instance-id': instance_id(),
             'attachment.device': partition}))
         if volumes:
-            volume_id = volumes[0].id
-            logging.info("%s: volume_id=%s", partition, volume_id)
+            try:
+                volume_id = volumes[0].id
+                logging.info("%s: volume_id=%s", partition, volume_id)
 
-            tags = ec2.get_all_tags(filters={
-                'resource-id': volume_id,
-                'key': ERASE_ON_BOOT_TAG_NAME,
-                'value': 'True'})
-            if list(tags):
-                ec2.delete_tags(volume_id, [ERASE_ON_BOOT_TAG_NAME])
-                erase_tag_set = True
+                tags = ec2.get_all_tags(filters={
+                    'resource-id': volume_id,
+                    'key': ERASE_ON_BOOT_TAG_NAME,
+                    'value': 'True'})
+                if list(tags):
+                    ec2.delete_tags(volume_id, [ERASE_ON_BOOT_TAG_NAME])
+                    erase_tag_set = True
+            except Exception as e:
+                logging.warning("could not read tags, defaulting to no erase, exception: %s", str(e))
 
     logging.info("%s: erase_on_boot=%s, erase_tag_set=%s",
                  partition, erase_on_boot, erase_tag_set)
