@@ -30,6 +30,18 @@ if [ -n "$config_application_logrotate_rotate" ]; then
         sed -i "s/\brotate\b.*$/rotate $config_application_logrotate_rotate/g" $application_logrotate
 fi
 
+#disable the copytruncate and use the default behavior for logrotate
+if [ -n "$config_application_logrotate_disable_copytruncate" = True ]; then
+	echo "INFO: Disable copytruncate for application.log Logrotate"
+	sed -i '/^\s*copytruncate\s*$/d' $application_logrotate
+fi
+
+#disable the delaycompress and use the default behavior for logrotate
+if [ -n "$config_application_logrotate_disable_delaycompress" = True ]; then
+	echo "INFO: Disable delaycompress for application.log Logrotate"
+	sed -i '/^\s*delaycompress\s*$/d' $application_logrotate
+fi
+
 #settings for all custom logs.
 
 #set custom filesize
