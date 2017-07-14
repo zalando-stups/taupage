@@ -290,7 +290,9 @@ def iterate_mounts(region, config, max_tries=12, wait_time=5):
 def handle_ebs_volumes(region, ebs_volumes):
     ec2 = ec2_client(region)
     for device, name in ebs_volumes.items():
-        if os.path.exists(device):
+        # /dev/sda is renamed into /dev/xvda
+        xv_device = device.replace('/dev/sd', '/dev/xvd')
+        if os.path.exists(device) or os.path.exists(xv_device):
             logging.info("Device already exists %s", device)
         else:
             attach_volume(ec2, find_volume(ec2, name), device)
@@ -317,11 +319,7 @@ def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
                 "--create", raid_device,
                 "--run",
                 "--level=" + str(raid_level),
-                "--raid-devices=" + str(num_devices)]
-        # Give devices some time to be available in case they were recently attached
-        for device in devices:
-            wait_for_device(device)
-            call.append(device)
+                "--raid-devices=" + str(num_devices)] + devices
 
         tries = 0
         while True:
@@ -348,6 +346,10 @@ def create_raid_device(raid_device, raid_config, max_tries=12, wait_time=5):
 
 def handle_raid_volumes(raid_volumes):
     for raid_device, raid_config in raid_volumes.items():
+        # Give devices some time to be available in case they were recently attached
+        for device in raid_config.get("devices", []):
+            wait_for_device(device)
+
         if raid_device_exists(raid_device):
             logging.info("%s already exists", raid_device)
         else:
