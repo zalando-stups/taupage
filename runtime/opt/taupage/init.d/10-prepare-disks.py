@@ -102,11 +102,14 @@ def format_partition(partition, filesystem="ext4", initialize=False, is_already_
     """Formats disks if initialize is True"""
     if initialize and not is_already_mounted and filesystem != 'tmpfs':
         call = ["mkfs." + filesystem]
-        if not is_root and filesystem.startswith("ext"):
-            logging.debug("%s being formatted with unprivileged user as owner")
-            entry = pwd.getpwnam('application')
-            call.append("-E")
-            call.append("root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
+        if not is_root:
+            if filesystem.startswith("ext"):
+                logging.debug("%s being formatted with unprivileged user as owner")
+                entry = pwd.getpwnam('application')
+                call.append("-E")
+                call.append("nodiscard,root_owner={}:{}".format(entry.pw_uid, entry.pw_gid))
+            elif filesystem == 'xfs':
+                call.append('-K')  # nodiscard argument for mkfs.xfs
         call.append(partition)
         wait_for_device(partition)
         call_command(call)
