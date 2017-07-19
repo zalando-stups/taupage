@@ -61,8 +61,10 @@ def main():
         logging.exception('Failed to write into %s', RT_TABLES)
         sys.exit(1)
 
-    subprocess_call(['iptables', '-t', 'mangle', '-A', 'OUTPUT', '-p', 'tcp', '!',
-                     '-d', '172.16.0.0/12', '--dport', '443', '-j', 'MARK', '--set-mark', '443'])
+    iptables = ['iptables', '-w', '-t', 'mangle']
+
+    subprocess_call(iptables + ['-A', 'OUTPUT', '-p', 'tcp', '!', '-d', '172.16.0.0/12',
+                                '--dport', '443', '-j', 'MARK', '--set-mark', '443'])
 
     subprocess_call(['ip', 'rule', 'add', 'fwmark', '443', 'lookup', 'https'])
 
@@ -78,7 +80,7 @@ def main():
 
     # Don't mark outgoing traffic to S3
     for r in ranges:
-        subprocess_call(['iptables', '-t', 'mangle', '-I', 'OUTPUT', '-d', r, '-j', 'ACCEPT'])
+        subprocess_call(iptables + ['-I', 'OUTPUT', '-d', r, '-j', 'ACCEPT'])
 
 
 if __name__ == '__main__':
