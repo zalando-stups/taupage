@@ -37,14 +37,12 @@ def retry(func):
             try:
                 return func(*args, **kwargs)
             except boto.exception.BotoServerError as e:
-                if str(e.error_code) not in ('Throttling', 'RequestLimitExceeded'):
+                if count >= 10 or str(e.error_code) not in ('Throttling', 'RequestLimitExceeded'):
                     raise
                 logging.info('Throttling AWS API requests...')
+                time.sleep(2 ** count * 0.5)
+                count += 1
 
-            if count >= 10:
-                break
-            time.sleep(2 ** count * 0.5)
-            count += 1
     return wrapped
 
 
