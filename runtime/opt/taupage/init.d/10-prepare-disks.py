@@ -243,7 +243,7 @@ Data \ Tag | T | F
     #
     if erase_on_boot is None:
         ec2 = ec2_client(region)
-        volumes = list(get_all_volumes(ec2, filters={
+        volumes = list(get_all_volumes(ec2, {
             'attachment.instance-id': instance_id(),
             'attachment.device': partition}))
         if volumes:
@@ -251,7 +251,7 @@ Data \ Tag | T | F
                 volume_id = volumes[0].id
                 logging.info("%s: volume_id=%s", partition, volume_id)
 
-                tags = get_all_tags(ec2, filters={
+                tags = get_all_tags(ec2, {
                     'resource-id': volume_id,
                     'key': ERASE_ON_BOOT_TAG_NAME,
                     'value': 'True'})
