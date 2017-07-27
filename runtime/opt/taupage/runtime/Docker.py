@@ -40,7 +40,18 @@ def decrypt(val):
         ciphertext_blob = val[len(AWS_KMS_PREFIX):]
         ciphertext_blob = base64.b64decode(ciphertext_blob)
         conn = boto.kms.connect_to_region(get_region())
-        data = conn.decrypt(ciphertext_blob)
+        count = 0
+        while True:
+            try:
+                data = conn.decrypt(ciphertext_blob)
+                break
+            except boto.exception.BotoServerError as e:
+                if count >= 10 or str(e.error_code) not in ('Throttling', 'RequestLimitExceeded'):
+                    raise
+                logging.info('Throttling AWS API requests...')
+                time.sleep(2 ** count * 0.5)
+                count += 1
+
         if 'Plaintext' not in data:
             raise Exception('KMS decrypt failed')
         return data['Plaintext'].decode('utf-8')
