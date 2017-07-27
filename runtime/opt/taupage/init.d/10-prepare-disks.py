@@ -6,6 +6,7 @@ import sys
 import subprocess
 import os
 import pwd
+import time
 
 import boto.ec2
 import boto.utils
@@ -29,14 +30,52 @@ def zone():
     return boto.utils.get_instance_metadata()['placement']['availability-zone']
 
 
+def retry(func):
+    def wrapped(*args, **kwargs):
+        count = 0
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except boto.exception.BotoServerError as e:
+                if str(e.error_code) not in ('Throttling', 'RequestLimitExceeded'):
+                    raise
+                logging.info('Throttling AWS API requests...')
+
+            if count >= 10:
+                break
+            time.sleep(2 ** count * 0.5)
+            count += 1
+    return wrapped
+
+
 def ec2_client(region):
     return boto.ec2.connect_to_region(region)
+
+
+@retry
+def get_all_volumes(ec2, filters):
+    return ec2.get_all_volumes(filters=filters)
+
+
+@retry
+def attach_volume(ec2, volume_id, attach_as):
+    ec2.attach_volume(volume_id, instance_id(), attach_as)
+
+
+@retry
+def get_all_tags(ec2, filters):
+    return ec2.get_all_tags(filters=filters)
+
+
+@retry
+def delete_tags(ec2, resource_ids, tags):
+    ec2.delete_tags(resource_ids, tags)
 
 
 def find_volume(ec2, name):
     """Looks up the EBS volume with a given Name tag"""
     try:
-        volumes = list(ec2.get_all_volumes(filters={
+        volumes = list(get_all_volumes(ec2, {
             'tag:Name': name,
             'status': 'available',
             'availability-zone': zone()}))
@@ -50,15 +89,6 @@ def find_volume(ec2, name):
         logging.warning('More than one EBS volume with name %s found.', name)
         volumes.sort(key=lambda v: v.id)
     return volumes[0].id
-
-
-def attach_volume(ec2, volume_id, attach_as):
-    """Attaches a volume to the current instance"""
-    try:
-        ec2.attach_volume(volume_id, instance_id(), attach_as)
-    except Exception as e:
-        logging.exception(e)
-        sys.exit(3)
 
 
 def wait_for_device(device, max_tries=12, wait_time=5):
@@ -213,7 +243,7 @@ Data \ Tag | T | F
     #
     if erase_on_boot is None:
         ec2 = ec2_client(region)
-        volumes = list(ec2.get_all_volumes(filters={
+        volumes = list(get_all_volumes(ec2, filters={
             'attachment.instance-id': instance_id(),
             'attachment.device': partition}))
         if volumes:
@@ -221,12 +251,12 @@ Data \ Tag | T | F
                 volume_id = volumes[0].id
                 logging.info("%s: volume_id=%s", partition, volume_id)
 
-                tags = ec2.get_all_tags(filters={
+                tags = get_all_tags(ec2, filters={
                     'resource-id': volume_id,
                     'key': ERASE_ON_BOOT_TAG_NAME,
                     'value': 'True'})
                 if list(tags):
-                    ec2.delete_tags(volume_id, [ERASE_ON_BOOT_TAG_NAME])
+                    delete_tags(ec2, volume_id, [ERASE_ON_BOOT_TAG_NAME])
                     erase_tag_set = True
             except Exception as e:
                 logging.warning("could not read tags, defaulting to no erase, exception: %s", str(e))
@@ -295,7 +325,11 @@ def handle_ebs_volumes(region, ebs_volumes):
         if os.path.exists(device) or os.path.exists(xv_device):
             logging.info("Device already exists %s", device)
         else:
-            attach_volume(ec2, find_volume(ec2, name), device)
+            try:
+                attach_volume(ec2, find_volume(ec2, name), device)
+            except Exception as e:
+                logging.exception(e)
+                sys.exit(3)
             logging.info("Attached EBS volume '%s' as '%s'", name, device)
 
 
