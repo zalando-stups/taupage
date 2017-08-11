@@ -72,18 +72,28 @@ def delete_tags(ec2, resource_ids, tags):
 
 def find_volume(ec2, name):
     """Looks up the EBS volume with a given Name tag"""
-    try:
-        volumes = list(get_all_volumes(ec2, {
-            'tag:Name': name,
-            'status': 'available',
-            'availability-zone': zone()}))
-    except Exception as e:
-        logging.exception(e)
-        sys.exit(2)
-    if not volumes:
-        logging.error('No matching EBS volume with name %s found.', name)
-        sys.exit(2)
-    elif len(volumes) > 1:
+    tries = 3
+    volumes = []
+    while not volumes:
+        try:
+            volumes = list(get_all_volumes(ec2, {
+                'tag:Name': name,
+                'status': 'available',
+                'availability-zone': zone()}))
+        except Exception as e:
+            logging.exception(e)
+            sys.exit(2)
+
+        if not volumes:
+            logging.error('No matching "available" EBS volume with name %s found.', name)
+            tries -= 1
+            if tries > 0:
+                logging.error('Sleeping for 60 seconds and hope volume will become "available"')
+                time.sleep(60)
+            else:
+                sys.exit(2)
+
+    if len(volumes) > 1:
         logging.warning('More than one EBS volume with name %s found.', name)
         volumes.sort(key=lambda v: v.id)
     return volumes[0].id
