@@ -278,6 +278,9 @@ def get_other_options(config: dict):
     if config.get('read_only'):
         yield '--read-only'
 
+    # set shm_size
+    if config.get('shm_size'):
+        yield '--shm-size={}'.format(config.get('shm_size'))
 
 def extract_registry(docker_image: str) -> str:
     """
