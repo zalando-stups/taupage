@@ -282,6 +282,7 @@ def get_other_options(config: dict):
     if config.get('shm_size'):
         yield '--shm-size={}'.format(config.get('shm_size'))
 
+
 def extract_registry(docker_image: str) -> str:
     """
     >>> extract_registry('nginx')
