@@ -23,7 +23,7 @@ cd $(dirname $0)
 for script in ./init.d/*; do
     ./$script
     if [ "$?" -ne 0 ]; then
-        echo "ERROR: Failed to start $script" >&2
+        echo "ERROR: $script did not successfully finish" >&2
         exit 1
     fi
 done
