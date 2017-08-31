@@ -13,7 +13,7 @@ useradd --create-home --user-group --groups adm granting-service
 
 echo "Setting up SSH access..."
 mkdir ~granting-service/.ssh/
-sed 's/^/command="grant-ssh-access-forced-command.py" /' ssh-access-granting-service.pub > ~granting-service/.ssh/authorized_keys
+sed 's/^/command="/opt/taupage/bin/grant-ssh-access-forced-command.py" /' ssh-access-granting-service.pub > ~granting-service/.ssh/authorized_keys
 
 chown granting-service:root -R ~granting-service
 chmod 0700 ~granting-service
