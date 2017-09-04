@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CONFIG_FILE=$1
+CONFIG_DIR=$(dirname $CONFIG_FILE)
 TAUPAGE_VERSION=$2
 
 cd $(dirname $0)
@@ -57,6 +58,13 @@ if [ "$state" = "available" ]; then
     # git add new release tag
     git tag $ami_name
     git push --tags
+    if [ -d "$CONFIG_DIR" ]; then
+        cd "$CONFIG_DIR"
+        git tag $ami_name
+        git push --tags
+        cd -
+    fi
+
     #tag image in Frankfurt with commitID
     aws ec2 create-tags --region $region --resources $imageid --tags Key=CommitID,Value=$commit_id
 else
