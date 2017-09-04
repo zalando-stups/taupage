@@ -1,6 +1,7 @@
 # These packages will be deleted in order to have a PCI DSS compatible image
 
 pkgs="
+apt-xapian-index
 build-essential
 g++
 g++-4.8
