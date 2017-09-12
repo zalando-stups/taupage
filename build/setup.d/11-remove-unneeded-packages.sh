@@ -1,6 +1,4 @@
 #!/bin/bash
-set -euo pipefail
-
 pkgs="
 popularity-contest
 update-notifier-common
