@@ -6,7 +6,7 @@
 pkgs="
 auditd
 build-essential
-docker-engine=1.12.6-0~ubuntu-trusty
+docker-engine=17.05.0~ce-0~ubuntu-trusty
 gcc
 htop
 iproute
