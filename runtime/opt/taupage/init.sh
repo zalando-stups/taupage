@@ -90,6 +90,12 @@ if [ "$result" -eq 0 ]; then
       echo "INFO: start AppDynamics Machine Agent"
       service appdynamics start
     fi
+    # Start the Instana agent if it is activated
+    if [-z "$config_instana_agent_key"]; then
+      echo "INFO: Starting Instana agent"
+      systemctl start instana-agent.service
+
+    fi
 else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
 fi

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# read global taupage config
+eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
+
+#Set instana environment variables#
+#export INSTANA_AGENT_HOST=$config_instana_agent_host
+#export INSTANA_AGENT_PORT=$config_instana_agent_port
+export INSTANA_AGENT_KEY=$config_instana_agent_key
+
+# If KMS encrypted, decrypt KMS and save to INSTANA_AGENT_KEY variable
+if [! -z "${INSTANA_AGENT_KEY}"] ; then
+  if [[ $INSTANA_AGENT_KEY == "aws:kms:"* ]]; then
+  	ACCOUNTKEY=${INSTANA_AGENT_KEY##aws:kms:}
+  	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
+  	#overwrite INSTANA_AGENT_KEY with decrypted value
+  	INSTANA_AGENT_KEY=$ACCOUNTKEY
+  fi
+else
+  echo "INFO: Instana access key is missing. Skipping Instana setup."
+  exit 1
+fi
+
+#Set instana zone for application -- e.g. AWS account alias
+if [! -z "${config_instana_zone}"] ; then
+  export INSTANA_ZONE=config_instana_zone
+else
+  echo "INFO: Instana zone configuration is missing. Skipping Instana setup."
+  exit 1
+
+#Set instana tags -- If not specified use the stack name from senza
+if [! -z "$config_instana_tags"]; then
+  export INSTANA_TAGS=$config_instana_tags
+else
+  export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+
+# GET the INFRA/APM mode from environment variable
+if [! -z "${config_instana_agent_mode}"]; then
+    shopt -s nocasematch
+  if [[$config_instana_agent_mode =~ "APM"]]; then
+    AGENTMODE="APM"
+  elif [[ $config_instana_agent_mode =~ "INFRASTRUCTURE" ]]; then
+    AGENTMODE="INFRASTRUCTURE"
+  elif [[ $config_instana_agent_mode =~ "OFF" ]]; then
+    AGENTMODE="OFF"
+  fi
+else
+  AGENTMODE="INFRASTRUCTURE"
+  echo "WARN: AgentMode not specified. Falling back to Instana infrastructure monitoring. Check your senza configuration."
+fi
+# Set the INFRA/APM mode in file -- instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
+agentConfig = instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
+sed -i "1, $ s/mode.*/mode = $AGENTMODE/" $agentConfig
