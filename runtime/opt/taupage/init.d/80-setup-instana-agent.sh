@@ -39,14 +39,15 @@ if [! -z "${config_instana_agent_mode}"]; then
     shopt -s nocasematch
   if [[$config_instana_agent_mode =~ "APM"]]; then
     AGENTMODE="APM"
-  elif [[ $config_instana_agent_mode =~ "INFRASTRUCTURE" ]]; then
-    AGENTMODE="INFRASTRUCTURE"
   elif [[ $config_instana_agent_mode =~ "OFF" ]]; then
     AGENTMODE="OFF"
+  else
+    echo "INFO: Setting instana agent mode to INFRASTRUCTURE."
+    AGENTMODE="INFRASTRUCTURE"
   fi
 else
   AGENTMODE="INFRASTRUCTURE"
-  echo "WARN: AgentMode not specified. Falling back to Instana infrastructure monitoring. Check your senza configuration."
+  echo "WARN: Instana agent mode not specified in Senza. Falling back to Instana infrastructure monitoring."
 fi
 # Set the INFRA/APM mode in file -- instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
 agentConfig = instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
