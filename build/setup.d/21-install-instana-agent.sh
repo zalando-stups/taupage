@@ -19,11 +19,11 @@ apt-get update
 apt-get install instana-agent-static
 
 # Set the AUTO-UPDATE mode in file - instana-agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg
-instanaUpdateConfig = "instana-agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg";
+instanaUpdateConfig = "/opt/instana/agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg";
 if [-z "${INSTANA_AGENT_AUTO_UPDATE}"]; then
   echo "WARN: Instana agent auto update mode not specified. Falling back to OFF"
   sed -i "1, $ s/mode.*/mode = OFF/" $instanaUpdateConfig
 else
   echo "INFO: Setting Instana agent auto update mode to ${INSTANA_AGENT_AUTO_UPDATE}."
-  sed -i "1, $ s/mode.*/mode = ${INSTANA_AGENT_AUTO_UPDATE}/" $instanaUpdateConfig
+  sed -i -e "1, $ s/mode.*/mode = ${INSTANA_AGENT_AUTO_UPDATE}/" $instanaUpdateConfig
 fi

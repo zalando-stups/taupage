@@ -50,5 +50,5 @@ else
   echo "WARN: Instana agent mode not specified in Senza. Falling back to Instana infrastructure monitoring."
 fi
 # Set the INFRA/APM mode in file -- instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
-agentConfig = instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
-sed -i "1, $ s/mode.*/mode = $AGENTMODE/" $agentConfig
+agentConfig = /opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg
+echo "mode = $AGENTMODE" >> $agentConfig
