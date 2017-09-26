@@ -30,7 +30,7 @@ else
 
 #Set instana tags -- If not specified use the stack name from senza
 if [! -z "$config_instana_tags"]; then
-  export INSTANA_TAGS=$config_instana_tags
+  export INSTANA_TAGS="$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
 else
   export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
 
