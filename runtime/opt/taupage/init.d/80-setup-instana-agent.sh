@@ -11,7 +11,7 @@ AGENTMODE=${config_instana_agent_mode}
 #export INSTANA_AGENT_HOST=$config_instana_agent_host
 #export INSTANA_AGENT_PORT=$config_instana_agent_port
 # Set INSTANA_AGENT_KEY as ENV variable. If KMS encrypted, decrypt KMS and save to INSTANA_AGENT_KEY variable
-if [! -z "$INSTANA_AGENT_KEY"] ; then
+if [ ! -z "$INSTANA_AGENT_KEY" ] ; then
   if [[ $INSTANA_AGENT_KEY == "aws:kms:"* ]]; then
   	ACCOUNTKEY=${INSTANA_AGENT_KEY##aws:kms:}
   	ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
@@ -25,24 +25,24 @@ else
 fi
 
 #Set instana zone for application -- e.g. AWS account alias
-if [! -z "$INSTANA_ZONE"] ; then
+if [ ! -z "$INSTANA_ZONE" ] ; then
   export INSTANA_ZONE=$INSTANA_ZONE
 else
   echo "INFO: Instana zone configuration is missing. Skipping Instana setup."
   exit 1
 
 #Set instana tags -- If not specified use the stack name from senza
-if [! -z "$INSTANA_TAGS"]; then
+if [ ! -z "$INSTANA_TAGS" ]; then
   export INSTANA_TAGS="$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
 else
   export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
 
 # GET the INFRA/APM mode from environment variable
-if [! -z "$AGENTMODE"]; then
+if [ ! -z "$AGENTMODE" ]; then
     shopt -s nocasematch
-  if [[$AGENTMODE =~ "APM"]]; then
+  if [[ $AGENTMODE =~ "APM" ]]; then
     AGENTMODE="APM"
-  elif [[$AGENTMODE =~ "OFF" ]]; then
+  elif [[ $AGENTMODE =~ "OFF" ]]; then
     AGENTMODE="OFF"
   else
     echo "INFO: Setting instana agent mode to INFRASTRUCTURE."

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #check if INSTANA_AGENT_KEY exists, if not cancel the installation process.
-if [-z "${INSTANA_AGENT_KEY}"]; then
+if [ -z "${INSTANA_AGENT_KEY}" ]; then
   echo "ERROR: Instana access key is missing. Check your secrets configuration."
   exit 1
 fi
@@ -20,7 +20,7 @@ apt-get install -y -q instana-agent-static
 
 # Set the AUTO-UPDATE mode in file - instana-agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg
 instanaUpdateConfig="/opt/instana/agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg";
-if [-z "${INSTANA_AGENT_AUTO_UPDATE}"]; then
+if [ -z "${INSTANA_AGENT_AUTO_UPDATE}" ]; then
   echo "WARN: Instana agent auto update mode not specified. Falling back to OFF"
   sed -i -e "1, $ s/mode.*/mode = OFF/" $instanaUpdateConfig
 else
