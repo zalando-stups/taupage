@@ -86,14 +86,14 @@ ELAPSED_SECONDS=$(($END_TIME-$START_TIME))
 if [ "$result" -eq 0 ]; then
     echo "SUCCESS: Initialization completed successfully in $ELAPSED_SECONDS seconds"
     # run the AppDynamics Machine Agent if it is activated
-    if [ -n "$config_appdynamics_application" ]; then
+    if [ "$config_appdynamics_application" ]; then
       echo "INFO: start AppDynamics Machine Agent"
       service appdynamics start
     fi
     # Start the Instana agent if it is activated
-    if [-z "$config_instana_agent_key"]; then
+    if [ "$config_instana_agent_key" ]; then
       echo "INFO: Starting Instana agent"
-      systemctl start instana-agent.service
+      service instana-agent start
 
     fi
 else
