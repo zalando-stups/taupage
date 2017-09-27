@@ -16,7 +16,7 @@ wget -O - https://packages.instana.io/Instana.gpg | apt-key add -
 apt-get update
 
 #install Instana static Agent
-apt-get install instana-agent-static
+apt-get install -y -q instana-agent-static
 
 # Set the AUTO-UPDATE mode in file - instana-agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg
 instanaUpdateConfig = "/opt/instana/agent/etc/instana/com.instana.agent.main.config.UpdateManager.cfg";
