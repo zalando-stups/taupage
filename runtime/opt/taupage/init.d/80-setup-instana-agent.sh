@@ -21,7 +21,7 @@ if [ "$INSTANA_AGENT_KEY" ] ; then
   export INSTANA_AGENT_KEY=$INSTANA_AGENT_KEY
 else
   echo "INFO: Instana access key is missing. Skipping Instana setup."
-  exit 1
+  exit 0
 fi
 
 #Set instana zone for application -- e.g. AWS account alias
@@ -29,7 +29,7 @@ if [ "$INSTANA_ZONE" ] ; then
   export INSTANA_ZONE=$INSTANA_ZONE
 else
   echo "INFO: Instana zone configuration is missing. Skipping Instana setup."
-  exit 1
+  exit 0
 
 #Set instana tags -- If not specified use the stack name from senza
 if [ "$INSTANA_TAGS" ]; then
