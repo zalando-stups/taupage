@@ -32,9 +32,9 @@ EOF
 }
 
 pushd /usr/src
-# download and configure ixgbevf: https://downloadcenter.intel.com/download/18700/
+# download and configure ixgbevf: https://downloadcenter.intel.com/download/27160/
 IXGBEVF_VERSION=4.2.1
-IXGBEVF_DOWNLOAD=18700 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
+IXGBEVF_DOWNLOAD=27160 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
 IXGBEVF_MD5=1e6bb9804cd475872db82f487e28e45f
 curl --fail -s -L https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz > ixgbevf-${IXGBEVF_VERSION}.tar.gz
 if [[ $(md5sum ixgbevf-${IXGBEVF_VERSION}.tar.gz | awk '{print $1}') != $IXGBEVF_MD5 ]]; then
