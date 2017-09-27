@@ -32,11 +32,11 @@ EOF
 }
 
 pushd /usr/src
-# download and configure ixgbevf: https://downloadcenter.intel.com/download/18700/
+# download and configure ixgbevf: https://downloadcenter.intel.com/download/27160/
 IXGBEVF_VERSION=4.2.1
-IXGBEVF_DOWNLOAD=18700 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
+IXGBEVF_DOWNLOAD=27160 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
 IXGBEVF_MD5=1e6bb9804cd475872db82f487e28e45f
-curl -L https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz > ixgbevf-${IXGBEVF_VERSION}.tar.gz
+curl --fail -s -L https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz > ixgbevf-${IXGBEVF_VERSION}.tar.gz
 if [[ $(md5sum ixgbevf-${IXGBEVF_VERSION}.tar.gz | awk '{print $1}') != $IXGBEVF_MD5 ]]; then
     echo "ixgbevf-${IXGBEVF_VERSION}.tar.gz: bad md5 sum"
     exit 1
@@ -46,7 +46,7 @@ configure_dkms ixgbevf ${IXGBEVF_VERSION} ixgbevf src/
 
 # download and configure ena
 ENA_VERSION=1.2.0
-curl -s -L https://github.com/amzn/amzn-drivers/archive/ena_linux_${ENA_VERSION}.tar.gz | tar xz
+curl --fail -L https://github.com/amzn/amzn-drivers/archive/ena_linux_${ENA_VERSION}.tar.gz | tar xz
 # We don't know checksums of archives on github
 mv amzn-drivers-ena_linux_${ENA_VERSION} amzn-drivers-${ENA_VERSION}
 configure_dkms amzn-drivers ${ENA_VERSION} ena kernel/linux/ena
