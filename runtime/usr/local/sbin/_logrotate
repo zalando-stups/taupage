@@ -1,0 +1,2 @@
+#!/bin/sh
+flock /var/run/lock/logrotate.lock nice -n 19 ionice -c3 /usr/sbin/logrotate /etc/logrotate.conf

@@ -1,1 +1,2 @@
-*/1 * * * * root    flock /var/run/lock/logrotate.lock nice -n 19 ionice -c3 /usr/sbin/logrotate /etc/logrotate.conf
+# This can get overwritten by 04-configure-logrotate.py
+17 * * * * root    /usr/local/sbin/_logrotate
