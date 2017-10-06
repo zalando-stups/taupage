@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import logging
-import sys
 import os
-import json
 import taupage
 
-CRON_TEMPLATE="*/{interval} * * * *   root    /usr/local/sbin/_logrotate"
+CRON_TEMPLATE = "*/{interval} * * * *   root    /usr/local/sbin/_logrotate"
+
 
 def logrotate_interval(config):
     result = config.get('logrotate_interval_minutes')
@@ -20,6 +19,7 @@ def logrotate_interval(config):
             logging.error("Invalid configuration for logrotate_interval_minutes")
             logging.exception(e)
 
+
 def main():
     taupage.configure_logging()
     config = taupage.get_config()
@@ -31,6 +31,7 @@ def main():
             f.write(CRON_TEMPLATE.format(interval=interval))
             f.write("\n")
         os.rename("/etc/.logrotate.tmp", "/etc/cron.d/logrotate")
+
 
 if __name__ == '__main__':
     main()

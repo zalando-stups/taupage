@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 
 import logging
-import sys
 import os
 import taupage
 import subprocess
-import re
 from contextlib import contextmanager
-import tempfile
 
 RSYSLOG_CONF = "/etc/rsyslog.conf"
-APPLICATION_LOG_TEMPLATE="""
+APPLICATION_LOG_TEMPLATE = """
 $outchannel docker_application_log,/var/log/application.log,{max_size},/usr/local/sbin/_logrotate
 :syslogtag, startswith, "docker" :omfile:$docker_application_log\n
 & ~
 """
+
 
 @contextmanager
 def atomically_replace(path):
@@ -22,6 +20,7 @@ def atomically_replace(path):
     with open(tempfile, "w") as f:
         yield f
     os.rename(tempfile, path)
+
 
 def parse_application_log_hardlimit(config):
     hardlimit = config.get("rsyslog_application_hardlimit")
@@ -41,6 +40,7 @@ def parse_application_log_hardlimit(config):
             logging.error("Invalid configuration for rsyslog_application_hardlimit")
             logging.exception(e)
 
+
 def apply_max_message_size(max_message_size):
     if max_message_size is not None:
         with atomically_replace(RSYSLOG_CONF) as f:
@@ -51,9 +51,10 @@ def apply_max_message_size(max_message_size):
                 logging.info("Configuring rsyslog max message size: {}".format(max_message_size))
                 f.write("$MaxMessageSize {}\n".format(max_message_size))
 
+
 def apply_application_log_hardlimit(hardlimit):
     if hardlimit is not None:
-        logging.info("Configuring rsyslogd to forcibly rotate application.log after a hard limit of {} bytes".format(hardlimit))
+        logging.info("Configuring rsyslogd to forcibly rotate application.log after {} bytes".format(hardlimit))
         with atomically_replace("/etc/rsyslog.d/24-application.conf") as f:
             f.write(APPLICATION_LOG_TEMPLATE.format(max_size=hardlimit))
             f.write("\n")
@@ -63,6 +64,7 @@ def apply_application_log_hardlimit(hardlimit):
             with open(RSYSLOG_CONF) as old_config:
                 f.writelines((line for line in old_config if "$PrivDrop" not in line))
                 f.write("\n")
+
 
 def main():
     taupage.configure_logging()
@@ -77,6 +79,7 @@ def main():
     if max_message_size is not None or application_log_hardlimit is not None:
         logging.info("Restarting rsyslogd to apply configuration changes...")
         subprocess.check_call(["service", "rsyslog", "restart"])
+
 
 if __name__ == '__main__':
     main()
