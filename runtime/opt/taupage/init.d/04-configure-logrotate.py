@@ -27,9 +27,10 @@ def main():
     interval = logrotate_interval(config)
     if interval:
         logging.info("Reconfiguring logrotate to run every {} minutes".format(interval))
-        with open("/etc/cron.d/logrotate", "w") as f:
+        with open("/etc/.logrotate.tmp", "w") as f:
             f.write(CRON_TEMPLATE.format(interval=interval))
             f.write("\n")
+        os.rename("/etc/.logrotate.tmp", "/etc/cron.d/logrotate")
 
 if __name__ == '__main__':
     main()
