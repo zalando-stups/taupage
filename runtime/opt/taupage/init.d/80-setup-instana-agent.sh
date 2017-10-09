@@ -37,6 +37,7 @@ if [ "$INSTANA_TAGS" ]; then
   export INSTANA_TAGS="$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
 else
   export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+fi
 
 # GET the INFRA/APM mode from environment variable
 if [ "$AGENTMODE" ]; then
@@ -54,5 +55,5 @@ else
   echo "WARN: Instana agent mode not specified in Senza. Falling back to Instana infrastructure monitoring."
 fi
 # Set the INFRA/APM mode in file -- instana-agent/etc/instana/com.instana.agent.main.config.Agent.cfg
-agentConfig = /opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg
+agentConfig=/opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg
 echo "mode = $AGENTMODE" >> $agentConfig
