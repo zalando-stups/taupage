@@ -30,6 +30,7 @@ if [ "$INSTANA_ZONE" ] ; then
 else
   echo "INFO: Instana zone configuration is missing. Skipping Instana setup."
   exit 0
+fi
 
 #Set instana tags -- If not specified use the stack name from senza
 if [ "$INSTANA_TAGS" ]; then
