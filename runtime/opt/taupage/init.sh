@@ -92,9 +92,13 @@ if [ "$result" -eq 0 ]; then
     fi
     # Start the Instana agent if it is activated
     if [ "$config_instana_agent_key" ]; then
-      echo "INFO: Starting Instana agent"
-      service instana-agent start
-
+      # Only start instana agent if AppDynamics agent is not enabled
+      if [ "$config_appdynamics_application" ]; then
+        echo "WARN: AppDynamics and Instana are not allowed to co-exist. Instana agent not starting. Change your senza configurations to enable either AppDynamics or Instana."
+      else
+        echo "INFO: Starting Instana agent"
+        service instana-agent start
+      fi
     fi
 else
     echo "ERROR: $RUNTIME failed to start with exit code $result ($ELAPSED_SECONDS seconds elapsed)"
