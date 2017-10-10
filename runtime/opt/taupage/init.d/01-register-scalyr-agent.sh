@@ -49,10 +49,10 @@ else
 fi
 
 # Allow custom Scalyr region
-if [[ "$SCALYR_REGION" == "eu" ]];
+if [[ "$SCALYR_REGION" == "eu" ]] || [[ "$SCALYR_REGION" == "EU" ]];
 then
 
-    echo -n "Configuring Scalyr region ... ";
+    echo -n "Configuring Scalyr region to eu.scalyr.com ... ";
     /usr/sbin/scalyr-agent-2-config --set-server-host "https://upload.eu.scalyr.com"
     if [ $? -eq 0 ];
     then
