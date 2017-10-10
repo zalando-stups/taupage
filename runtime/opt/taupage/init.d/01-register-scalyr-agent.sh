@@ -9,6 +9,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
+SCALYR_HOST=$config_scalyr_host
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
@@ -40,6 +41,24 @@ then
         echo -n "DONE"
     else
         echo -n "ERROR: Register to Scalyr account failed";
+        exit;
+    fi
+else
+    echo "INFO: scalyr not configured; skipping daemon setup.";
+    exit;
+fi
+
+# Allow custom Scalyr host
+if [ -n "$SCALYR_HOST" ];
+then
+
+    echo -n "Configuring scalyr daemon ... ";
+    /usr/sbin/scalyr-agent-2-config --set-server-host "$SCALYR_HOST"
+    if [ $? -eq 0 ];
+    then
+        echo -n "DONE"
+    else
+        echo -n "ERROR: Setting custom Scalyr host failed";
         exit;
     fi
 else
