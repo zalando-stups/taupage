@@ -9,7 +9,7 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
-SCALYR_HOST=$config_scalyr_host
+SCALYR_REGION=$config_scalyr_region
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
@@ -49,20 +49,20 @@ else
 fi
 
 # Allow custom Scalyr host
-if [ -n "$SCALYR_HOST" ];
+if [[ "$SCALYR_REGION" == "eu" ]];
 then
 
     echo -n "Configuring scalyr daemon ... ";
-    /usr/sbin/scalyr-agent-2-config --set-server-host "$SCALYR_HOST"
+    /usr/sbin/scalyr-agent-2-config --set-server-host "https://upload.eu.scalyr.com"
     if [ $? -eq 0 ];
     then
         echo -n "DONE"
     else
-        echo -n "ERROR: Setting custom Scalyr host failed";
+        echo -n "ERROR: Setting custom Scalyr region failed";
         exit;
     fi
 else
-    echo "INFO: scalyr not configured; skipping daemon setup.";
+    echo "INFO: Scalyr region config not set; skipping region setup.";
     exit;
 fi
 
