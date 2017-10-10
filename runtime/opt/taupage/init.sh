@@ -89,11 +89,6 @@ if [ "$result" -eq 0 ]; then
     if [ "$config_appdynamics_application" ]; then
       echo "INFO: start AppDynamics Machine Agent"
       service appdynamics start
-    fi
-    # Start the Instana agent if it is activated
-    if [ "$config_instana_agent_key" ]; then
-      echo "INFO: Starting Instana agent"
-      service instana-agent start
 
     fi
 else
