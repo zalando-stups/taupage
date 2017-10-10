@@ -48,11 +48,11 @@ else
     exit;
 fi
 
-# Allow custom Scalyr host
+# Allow custom Scalyr region
 if [[ "$SCALYR_REGION" == "eu" ]];
 then
 
-    echo -n "Configuring scalyr daemon ... ";
+    echo -n "Configuring Scalyr region ... ";
     /usr/sbin/scalyr-agent-2-config --set-server-host "https://upload.eu.scalyr.com"
     if [ $? -eq 0 ];
     then
