@@ -91,6 +91,10 @@ if [ "$result" -eq 0 ]; then
       service appdynamics start
     fi
     # Start the Instana agent if it is activated
+    #TODO: Starting instana agent without any checks as the key is hardcoded and not available as an env variable through the Senza
+    echo "INFO: Starting Instana agent"
+    service instana-agent start
+    
     if [ "$config_instana_agent_key" ]; then
       # Only start instana agent if AppDynamics agent is not enabled
       if [ "$config_appdynamics_application" ]; then
