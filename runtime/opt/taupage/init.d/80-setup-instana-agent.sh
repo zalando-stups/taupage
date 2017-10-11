@@ -2,10 +2,16 @@
 
 # read global taupage config
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
-INSTANA_AGENT_KEY=${config_instana_agent_key}
-INSTANA_ZONE=${config_instana_zone}
-INSTANA_TAGS=$config_instana_tags
-AGENTMODE=${config_instana_agent_mode}
+#INSTANA_AGENT_KEY=${config_instana_agent_key}
+#INSTANA_ZONE=${config_instana_zone}
+#INSTANA_TAGS=${config_instana_tags}
+#AGENTMODE=${config_instana_agent_mode}
+
+#TODO:Hardcoding instana parameters for Instana POC
+INSTANA_AGENT_KEY="mD52HcuI5kdQFdsixwmLbW"
+INSTANA_ZONE="stups-test"
+INSTANA_TAGS="cluster_alias=cassandra_zmon_stups-test"
+AGENTMODE="APM"
 
 #Set instana environment variables#
 #export INSTANA_AGENT_HOST=$config_instana_agent_host
@@ -34,9 +40,11 @@ fi
 
 #Set instana tags -- If not specified use the stack name from senza
 if [ "$INSTANA_TAGS" ]; then
-  export INSTANA_TAGS="$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+  #TODO:Hardcoding instana parameters for Instana POC
+  #export INSTANA_TAGS="${config_instana_tags},stack_name=${config_notify_cfn_stack},application_id=${config_application_id},aplication_version=${config_application_version}"
+  export INSTANA_TAGS="$INSTANA_TAGS,stack_name=${config_notify_cfn_stack},application_id=${config_application_id},aplication_version=${config_application_version}"
 else
-  export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+  export INSTANA_TAGS="stack_name=${config_notify_cfn_stack},application_id=${config_application_id},aplication_version=${config_application_version}"
 fi
 
 # GET the INFRA/APM mode from environment variable
