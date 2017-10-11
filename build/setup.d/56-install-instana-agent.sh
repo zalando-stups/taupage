@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #check if INSTANA_AGENT_KEY exists, if not cancel the installation process.
-if [ -z "${INSTANA_AGENT_KEY}" ]; then
-  echo "ERROR: Instana access key is missing. Check your secrets configuration."
+if [ -z "${INSTANA_AGENT_KEY}" ] || [ -z "${INSTANA_AGENT_HOST}" ] || [ -z "${INSTANA_AGENT_PORT}" ]; then
+  echo "ERROR: Instana host/port/key missing. Check your secrets configuration."
   exit 1
 fi
 
@@ -27,3 +27,10 @@ else
   echo "INFO: Setting Instana agent auto update mode to ${INSTANA_AGENT_AUTO_UPDATE}."
   sed -i -e "1, $ s/mode.*/mode = ${INSTANA_AGENT_AUTO_UPDATE}/" $instanaUpdateConfig
 fi
+
+# Set the host, port and protocol in file - /opt/instana/agent/etc/instana/com.instana.agent.main.sender.Backend.cfg
+backendConfig=/opt/instana/agent/etc/instana/com.instana.agent.main.sender.Backend.cfg
+echo "host=${INSTANA_AGENT_HOST}" >> $backendConfig
+echo "port=${INSTANA_AGENT_PORT}" >> $backendConfig
+echo "protocol=HTTP/2" >> $backendConfig
+echo "key=${INSTANA_AGENT_KEY}" >> $backendConfig
