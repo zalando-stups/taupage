@@ -19,6 +19,7 @@ if [ "$INSTANA_AGENT_KEY" ] ; then
   	INSTANA_AGENT_KEY=$ACCOUNTKEY
   fi
   export INSTANA_AGENT_KEY=$INSTANA_AGENT_KEY
+  echo "INSTANA_AGENT_KEY=$INSTANA_AGENT_KEY" >> /etc/environment
 else
   echo "INFO: Instana access key is missing. Skipping Instana setup."
   exit 0
@@ -27,7 +28,8 @@ fi
 #Set instana zone for application -- e.g. AWS account alias
 configurationYaml=/opt/instana/agent/etc/instana/configuration.yaml
 if [ "$INSTANA_ZONE" ] ; then
-  #export INSTANA_ZONE=$INSTANA_ZONE
+  export INSTANA_ZONE=$INSTANA_ZONE
+  echo "INSTANA_ZONE=$INSTANA_ZONE" >> /etc/environment
   sed -i -e "1, $ s/#com.instana.plugin.generic.hardware.*/com.instana.plugin.generic.hardware:/" $configurationYaml
   sed -i -e "1, $ s/#  enabled: true.*/  enabled: true/" $configurationYaml
   sed -i -e "1, $ s/#  availability-zone.*/  availability-zone: '$INSTANA_ZONE'/" $configurationYaml
@@ -39,8 +41,10 @@ fi
 #Set instana tags -- If not specified use the stack name from senza
 if [ "$INSTANA_TAGS" ]; then
   export INSTANA_TAGS="$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+  echo "INSTANA_TAGS=$config_instana_tags,stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version" >> /etc/environment
 else
   export INSTANA_TAGS="stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version"
+  echo "INSTANA_TAGS=stack_name=$config_notify_cfn_stack,application_id=$config_application_id,aplication_version=$config_application_version" >> /etc/environment
 fi
 
 # GET the INFRA/APM mode from environment variable
