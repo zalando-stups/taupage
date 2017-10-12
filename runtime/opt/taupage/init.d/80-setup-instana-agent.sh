@@ -25,8 +25,12 @@ else
 fi
 
 #Set instana zone for application -- e.g. AWS account alias
+configurationYaml=/opt/instana/agent/etc/instana/configuration.yaml
 if [ "$INSTANA_ZONE" ] ; then
-  export INSTANA_ZONE=$INSTANA_ZONE
+  #export INSTANA_ZONE=$INSTANA_ZONE
+  sed -i -e "1, $ s/#com.instana.plugin.generic.hardware.*/com.instana.plugin.generic.hardware:/" $configurationYaml
+  sed -i -e "1, $ s/#  enabled: true.*/  enabled: true/" $configurationYaml
+  sed -i -e "1, $ s/#  availability-zone.*/  availability-zone: '$INSTANA_ZONE'/" $configurationYaml
 else
   echo "INFO: Instana zone configuration is missing. Skipping Instana setup."
   exit 0
