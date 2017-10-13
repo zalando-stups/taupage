@@ -50,7 +50,7 @@ if [ "$INSTANA_TAGS" ]; then
     tags="$tags\\
      - '$tag'"
     done
-  tags="\\
+  tags="$tags\\
      - 'stack_name=$config_notify_cfn_stack'\\
      - 'application_id=$config_application_id'\\
      - 'aplication_version=$config_application_version'"
