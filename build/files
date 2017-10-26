@@ -17,7 +17,6 @@
 
 /opt/taupage/init.d/10-prepare-disks.py root:root 0700
 /opt/taupage/cloudwatch/mon-put-instance-data.pl root:root 0700
-/etc/cron.d/logrotate root:root 0644
 /etc/cron.d/mon-put-instance-data-cloudwatch root:root 0700
 /opt/taupage/init.sh root:root 0700
 /opt/taupage/runtime/Docker root:root 0700
