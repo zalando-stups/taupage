@@ -1,2 +1,0 @@
-# This can get overwritten by 04-configure-logrotate.py
-17 * * * * root    /usr/local/sbin/_logrotate
