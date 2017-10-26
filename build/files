@@ -5,6 +5,8 @@
 
 /etc/cloud/cloud.cfg root:root 0644
 
+/etc/cron.hourly/logrotate_auditlog root:root 0755
+
 /etc/sudoers root:root 0440
 /etc/sysctl.conf root:root 0644
 

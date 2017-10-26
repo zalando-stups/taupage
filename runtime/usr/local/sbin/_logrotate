@@ -1,4 +1,0 @@
-#!/bin/sh
-export SHELL=/bin/sh
-export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-flock /var/run/lock/logrotate.lock nice -n 19 ionice -c3 /usr/sbin/logrotate /etc/logrotate.conf
