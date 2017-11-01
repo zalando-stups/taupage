@@ -3,7 +3,7 @@
 # See https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Amazon-EC2
 # But we're using the run script to not depend on build tools
 DRIVER_ARCH="Linux-x86_64"
-DRIVER_VERSION="375.26"
+DRIVER_VERSION="384.81"
 DRIVER_FILENAME="NVIDIA-${DRIVER_ARCH}-${DRIVER_VERSION}.run"
 DRIVER_CHECKSUM="d60819b2e377398c7296999ab5e7c1a4"
 
