@@ -1,7 +1,7 @@
 import base64
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from Docker import decrypt
+from Docker import decrypt, get_other_options
 
 
 class DockerRuntimeTests(TestCase):
@@ -41,3 +41,47 @@ class DockerRuntimeTests(TestCase):
         cyphertext_blob = base64.b64decode("my-cyphertext")
 
         kms_mock.return_value.decrypt.assert_called_once_with(cyphertext_blob, encryption_context='my-app')
+
+    @patch("Docker.pwd.getpwnam")
+    @patch("Docker.get_region")
+    @patch("Docker.get_instance_id")
+    def test_get_other_options_sets_cloudwatch_logstream_if_awslogs_logdriver_is_used(self, get_instance_id_mock, get_region_mock, _):
+        get_instance_id_mock.return_value = "i-12345678"
+        get_region_mock.return_value = "eu-west-1"
+
+        config = {"docker": {"log_driver": "awslogs"}}
+        result = list(get_other_options(config))
+        self.assertTrue("awslogs-stream=i-12345678" in result, "awslogs-stream config should be set")
+
+    @patch("Docker.pwd.getpwnam")
+    @patch("Docker.get_region")
+    @patch("Docker.get_instance_id")
+    def test_get_other_options_sets_cloudwatch_region_if_awslogs_logdriver_is_used(self, get_instance_id_mock, get_region_mock, _):
+        get_instance_id_mock.return_value = "i-12345678"
+        get_region_mock.return_value = "eu-west-1"
+
+        config = {"docker": {"log_driver": "awslogs"}}
+        result = list(get_other_options(config))
+        self.assertTrue("awslogs-region=eu-west-1" in result, "awslogs-region config should be set")
+
+    @patch("Docker.pwd.getpwnam")
+    @patch("Docker.get_region")
+    @patch("Docker.get_instance_id")
+    def test_get_other_options_does_not_set_cloudwatch_logstream_if_awslogs_logdriver_is_not_used(self, get_instance_id_mock, get_region_mock, _):
+        get_instance_id_mock.return_value = "i-12345678"
+        get_region_mock.return_value = "eu-west-1"
+
+        config = {"docker": {"log_driver": "syslog"}}
+        result = list(get_other_options(config))
+        self.assertTrue("awslogs-stream=i-12345678" not in result, "awslogs-stream config should not be set")
+
+    @patch("Docker.pwd.getpwnam")
+    @patch("Docker.get_region")
+    @patch("Docker.get_instance_id")
+    def test_get_other_options_does_not_set_cloudwatch_region_if_awslogs_logdriver_is_not_used(self, get_instance_id_mock, get_region_mock, _):
+        get_instance_id_mock.return_value = "i-12345678"
+        get_region_mock.return_value = "eu-west-1"
+
+        config = {"docker": {"log_driver": "syslog"}}
+        result = list(get_other_options(config))
+        self.assertTrue("awslogs-region=eu-west-1" not in result, "awslogs-region config should not be set")

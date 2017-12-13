@@ -17,7 +17,7 @@ import yaml
 import shutil
 import glob
 
-from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
+from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port, get_instance_id
 
 AWS_KMS_PREFIX = 'aws:kms:'
 
@@ -159,6 +159,15 @@ def get_other_options(config: dict):
             yield '--log-opt'
             yield '{}={}'.format(key, value)
 
+    if str(config.get('docker', {}).get('log_driver')).lower() == "awslogs":
+        if not config.get('docker', {}).get('log_opt', {}).get('awslogs-stream'):
+            yield '--log-opt'
+            yield '{}={}'.format("awslogs-stream", get_instance_id())
+
+        if not config.get('docker', {}).get('log_opt', {}).get('awslogs-region'):
+            yield '--log-opt'
+            yield '{}={}'.format("awslogs-region", get_region())
+
     if config.get('docker', {}).get('stop_timeout'):
         yield '--stop-timeout'
         yield str(config.get('docker', {}).get('stop_timeout'))
@@ -245,7 +254,7 @@ def main(args):
 
         try:
             logging.info('pull ecr')
-            subprocess.check_output(pull_cmd) # noqa
+            subprocess.check_output(pull_cmd)  # noqa
         except Exception as e:
             logging.error('Docker pull from ecr failed: %s', mask_command(str(e).split(' ')))
 
@@ -256,7 +265,7 @@ def main(args):
 
         try:
             logging.info('pull private')
-            subprocess.check_output(pull_cmd) # noqa
+            subprocess.check_output(pull_cmd)  # noqa
         except Exception as e:
             logging.error('Docker pull from private registry failed: %s', mask_command(str(e).split(' ')))
 
