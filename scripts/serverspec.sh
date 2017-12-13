@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Preparing Serverspec and running system tests..."
-# sudo apt-get update &&
+apt-get update &&
 apt-get install -y ruby1.9.1 rake
 gem install net-ssh -v 2.9.2 --no-ri --no-rdoc
  
