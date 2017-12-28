@@ -95,7 +95,7 @@ def wait_for_local_planb_tokeninfo():
             if response.status_code == 200:
                 logging.info('Local Plan B Token Info returned OK')
                 return tokeninfo_url
-        except:
+        except Exception:
             pass
 
         time.sleep(2)
@@ -346,7 +346,7 @@ def wait_for_health_check(config: dict):
             if response.status_code == 200:
                 logging.info('Health check returned OK')
                 return
-        except:
+        except Exception:
             pass
 
         time.sleep(2)

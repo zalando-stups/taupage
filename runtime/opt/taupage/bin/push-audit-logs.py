@@ -42,7 +42,7 @@ def push_audit_log(config: dict, instance_logs_url, account_id, region, instance
         else:
             logging.warn('Failed to push audit log: server returned HTTP status {}: {}'.format(
                          response.status_code, response.text))
-    except:
+    except Exception:
         logging.exception('Failed to push audit log')
 
 

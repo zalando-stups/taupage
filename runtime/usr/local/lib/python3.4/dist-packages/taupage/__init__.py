@@ -54,7 +54,7 @@ def is_tcp_port(port):
     try:
         int(port)
         return True
-    except:
+    except ValueError:
         return str(port).endswith('/tcp')
 
 
