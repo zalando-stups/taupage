@@ -40,7 +40,7 @@ def is_healthy(url):
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             return True
-    except:
+    except Exception:
         return False
     return False
 

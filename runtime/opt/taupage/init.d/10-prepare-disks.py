@@ -349,7 +349,7 @@ def raid_device_exists(raid_device):
     try:
         subprocess.check_call(["mdadm", raid_device])
         return True
-    except:
+    except Exception:
         return False
 
 
