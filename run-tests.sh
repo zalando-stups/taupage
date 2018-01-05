@@ -17,6 +17,7 @@ PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages python3 -m doctest -v r
 
 echo "### python unittests"
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages:runtime/opt/taupage/healthcheck python3 tests/python/test_elbHealthChecker.py
+PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages:runtime/opt/taupage/healthcheck python3 tests/python/test_albHealthChecker.py
 PYTHONPATH=runtime/usr/local/lib/python3.4/dist-packages:runtime/opt/taupage/runtime python3 tests/python/test_docker.py
 
 echo "#################################"
