@@ -11,22 +11,7 @@ import subprocess
 import netifaces
 from netaddr import IPAddress
 
-from taupage import configure_logging, get_config
-
-
-def instance_id():
-    """Helper to return theid for the current instance"""
-    return boto.utils.get_instance_metadata()['instance-id']
-
-
-def detect_region():
-    """Helper to return the region for the current instance"""
-    return boto.utils.get_instance_metadata()['placement']['availability-zone'][:-1]
-
-
-def zone():
-    """Helper to return the AZ for the current instance"""
-    return boto.utils.get_instance_metadata()['placement']['availability-zone']
+from taupage import configure_logging, get_config, get_instance_id, get_region, get_availability_zone
 
 
 def retry(func):
@@ -81,7 +66,7 @@ def find_network_interface(ec2, name):
             network_interfaces = list(get_all_network_interfaces(ec2, {
                 'tag:Name': name,
                 'status': 'available',
-                'availability-zone': zone()
+                'availability-zone': get_availability_zone()
             }))
         except Exception as e:
             logging.exception(e)
@@ -128,7 +113,7 @@ def attach_network_interface(ec2, network_interface_id, device_index):
     ec2.attach_network_interface(
         device_index=device_index,
         network_interface_id=network_interface_id,
-        instance_id=instance_id()
+        instance_id=get_instance_id()
     )
 
 
@@ -185,7 +170,7 @@ def main():
     else:
         configure_logging(logging.INFO)
 
-    current_region = args.region if args.region else detect_region()
+    current_region = args.region if args.region else get_region()
 
     # Load configuration from YAML file
     config = get_config(args.filename)
@@ -218,7 +203,7 @@ def main():
         # Note, we do not run dhclient on eth0 as this may affect network connectivity
         # of the instance
         for network_interface in network_interfaces[1:]:
-            call_command(["dhclient", str(network_interface)], allowed_error_codes=[0, 2])
+            call_command(["dhclient", str(network_interface)])
         route_tables = []
 
         # Here we implement source-based routing, according to the serverfault post linked above
