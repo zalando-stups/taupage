@@ -30,25 +30,6 @@ def retry(func):
     return wrapped
 
 
-class CmdException(Exception):
-    def __init__(self, returncode, errmsg):
-        self._returncode = returncode
-        message = "Command returned non-zero exit status {}:\n{}".format(returncode, errmsg)
-        super(CmdException, self).__init__(message)
-
-    @property
-    def returncode(self):
-        return self._returncode
-
-
-def call_command(call, allowed_error_codes=[0]):
-    proc = subprocess.Popen(call, stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
-    if proc.returncode not in allowed_error_codes:
-        raise CmdException(proc.returncode, stderr.decode('utf-8'))
-    return stdout
-
-
 def ec2_client(region):
     return boto.ec2.connect_to_region(region)
 
@@ -84,7 +65,8 @@ def find_network_interface(ec2, name):
                 sys.exit(2)
 
     if len(network_interfaces) > 1:
-        logging.warning('More than one network interface with name %s found.', name)
+        logging.warning(
+            'More than one network interface with name %s found.', name)
         network_interfaces.sort(key=lambda v: v.id)
     return network_interfaces[0].id
 
@@ -123,7 +105,8 @@ def handle_network_interfaces(region, config):
     for index, name in enumerate(network_interfaces):
         try:
             device_index = index + 1
-            attach_network_interface(ec2, find_network_interface(ec2, name), device_index)
+            attach_network_interface(
+                ec2, find_network_interface(ec2, name), device_index)
             wait_for_network_interface_attachment(device_index)
         except Exception as e:
             logging.exception(e)
@@ -203,26 +186,28 @@ def main():
         # Note, we do not run dhclient on eth0 as this may affect network connectivity
         # of the instance
         for network_interface in network_interfaces[1:]:
-            call_command(["dhclient", str(network_interface)])
+            subprocess.check_call(["dhclient", str(network_interface)])
         route_tables = []
 
         # Here we implement source-based routing, according to the serverfault post linked above
         for device_index in range(0, len(config.get("network_interfaces")) + 1):
-            route_tables.append("{} eth{}".format(device_index + 1, device_index))
+            route_tables.append("{} eth{}".format(
+                device_index + 1, device_index))
 
         with open("/etc/iproute2/rt_tables", "w") as rt_tables:
             rt_tables.write("\n".join(route_tables))
 
         for network_interface in network_interfaces:
-            interface = netifaces.ifaddresses(network_interface)[netifaces.AF_INET][0]
+            interface = netifaces.ifaddresses(network_interface)[
+                netifaces.AF_INET][0]
             ip = interface['addr']
             subnet_cidr = str(IPAddress(interface["netmask"]).netmask_bits())
-            call_command(["ip", "route", "add", "default", "via", default_gateway, "dev",
-                          network_interface, "table", network_interface], allowed_error_codes=[0, 2])
-            call_command(["ip", "route", "add", subnet_cidr, "dev", network_interface,
-                          "src", ip, "table", network_interface], allowed_error_codes=[0, 2])
-            call_command(["ip", "rule", "add", "from", ip, "table",
-                          network_interface], allowed_error_codes=[0, 2])
+            subprocess.check_call(["ip", "route", "add", "default", "via", default_gateway, "dev",
+                                   network_interface, "table", network_interface])
+            subprocess.check_call(["ip", "route", "add", subnet_cidr, "dev", network_interface,
+                                   "src", ip, "table", network_interface])
+            subprocess.check_call(["ip", "rule", "add", "from", ip, "table",
+                                   network_interface])
 
 
 if __name__ == '__main__':
