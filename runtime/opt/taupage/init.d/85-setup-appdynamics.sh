@@ -69,6 +69,9 @@ if [ -f "$nodejsSnippet" ]; then
 	if [ -n "$ACCESSKEY" ]; then
 		sed -i "s/accountAccessKey.*$/accountAccessKey:\ \'$ACCESSKEY\'\,/" $nodejsSnippet
 	fi
+        if [ "$NODEJS_SNAPSHOT" == "true" ]; then
+                sed -i "s/\"proxyAutolaunchDisabled\": true/\"proxyAutolaunchDisabled\": true,\n\"maxProcessSnapshotsPerPeriod\": 0/" $nodejsSnippet
+        fi
 fi
 
 
