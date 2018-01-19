@@ -11,6 +11,7 @@ ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 STACK_NAME=$config_notify_cfn_stack
 ENABLE_LOGGING=$config_appdynamics_enable_logging
 SCALYR_KEY=$config_scalyr_account_key
+NODEJS_SNAPSHOT=$config_nodejs_disable_snapshots
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
 if [[ $ACCESSKEY == "aws:kms:"* ]]; then
@@ -69,6 +70,9 @@ if [ -f "$nodejsSnippet" ]; then
 	if [ -n "$ACCESSKEY" ]; then
 		sed -i "s/accountAccessKey.*$/accountAccessKey:\ \'$ACCESSKEY\'\,/" $nodejsSnippet
 	fi
+        if [ "$NODEJS_SNAPSHOT" == "true" ]; then
+                sed -i "s/\"proxyAutolaunchDisabled\": true/\"proxyAutolaunchDisabled\": true,\n\"maxProcessSnapshotsPerPeriod\": 0/" $nodejsSnippet
+        fi
 fi
 
 
