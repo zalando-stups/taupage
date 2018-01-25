@@ -2,6 +2,8 @@
 
 # See https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Amazon-EC2
 # But we're using the run script to not depend on build tools
+set -euo pipefail
+
 DRIVER_ARCH="Linux-x86_64"
 DRIVER_VERSION="384.90"
 DRIVER_FILENAME="NVIDIA-${DRIVER_ARCH}-${DRIVER_VERSION}.run"
@@ -27,12 +29,7 @@ echo "Installing NVIDIA driver ver: ${DRIVER_VERSION}"
 # Using the run File
 wget -P /tmp "http://us.download.nvidia.com/XFree86/${DRIVER_ARCH}/${DRIVER_VERSION}/${DRIVER_FILENAME}"
 
-filechecksum=($(md5sum "/tmp/${DRIVER_FILENAME}"))
-# shellcheck disable=SC2128
-if [[ "${filechecksum}" -ne "${DRIVER_CHECKSUM}" ]]; then
-  echo "MD5 missmatch got: ${filechecksum} expected: ${DRIVER_CHECKSUM}"
-  exit 1
-fi
+echo "$DRIVER_CHECKSUM /tmp/$DRIVER_FILENAME" | md5sum -c
 
 chmod +x "/tmp/${DRIVER_FILENAME}"
 
