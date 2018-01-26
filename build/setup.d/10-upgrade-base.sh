@@ -7,6 +7,8 @@ echo "Updating system..."
 # sudo rm -rf /var/lib/apt/lists/*
 apt-get update -y  # -q >>/tmp/build/upgrade.log
 
+echo "nvme" >> /etc/initramfs-tools/modules
+
 # install kernel headers and dkms
 apt-get install -y linux-headers-virtual-lts-xenial dkms
 
