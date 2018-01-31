@@ -58,7 +58,7 @@ if [ -n "$mint_bucket" ]; then
 	sed -i "1,$ s/mint_bucket.*$/mint_bucket:\ $MINT_BUCKET/" $taupageyamlfile
 fi
 
-AMI_ID=$(aws ec2 describe-images --region $region --filters Name=tag-key,Values=Version Name=tag-value,Values=$TAUPAGE_VERSION --query 'Images[*].{ID:ImageId}' --output  text)
+AMI_ID=$(aws ec2 describe-images --region $region --filters "Name=name,Values=TaupageBuild-$TAUPAGE_VERSION" --query 'Images[*].{ID:ImageId}' --output  text)
 
 if [ -z "$testinstance_types" ]; then
 	testinstance_types="$instance_type"
