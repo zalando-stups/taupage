@@ -41,6 +41,7 @@ share_ami() {
             echo "Copying failed."
             exit 1
         elif [ "$state" = "available" ]; then
+            echo "AMI $region/$ami_name ($target_imageid) successfully created."
             break
         else
             echo "Waiting for AMI creation in $region ... ($state)"
@@ -51,6 +52,8 @@ share_ami() {
     # Update the image tags
     local tags="$(jq -n --arg build_date "$build_date" --arg version "$TAUPAGE_VERSION" --arg source_ami "$imageid" --arg commit_id "$commit_id" '[{Key: "BuildDate", Value: $build_date}, {Key: "SourceAMI", Value: $source_ami}, {Key: "CommitID", Value: $commit_id}, {Key: "Version", Value: $version}]')"
     aws ec2 create-tags --region "$region" --resources "$target_imageid" --tags "$tags"
+
+    echo "Sharing the AMI with AWS accounts: $all_accounts"
 
     # Share the image
     echo $all_accounts | xargs aws ec2 modify-image-attribute --region "$region" --image-id "$target_imageid" --attribute launchPermission --operation-type add --user-ids
