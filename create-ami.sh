@@ -14,10 +14,6 @@ function finally() {
 }
 trap finally EXIT
 
-
-# default description (may be overriden by config file)
-ami_description="STUPS' Taupage AMI with Docker runtime"
-
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
     echo "Dry run requested."
@@ -31,7 +27,7 @@ if [ -z "$1" ] || [ ! -r "$1" ] || [ -z "$2" ]; then
     echo "Usage:  $0 [--dry-run] <config-file> <taupage-version>" >&2
     exit 1
 fi
-CONFIG_FILE=./$1
+CONFIG_FILE=$1
 TAUPAGE_VERSION=$2
 
 # load configuration file
@@ -62,14 +58,14 @@ result=$(aws ec2 run-instances \
     --region $region \
     --subnet-id $subnet)
 
-instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
+instanceid=$(echo $result | jq -r .Instances\[0\].InstanceId)
 echo "Instance: $instanceid"
 
 aws ec2 create-tags --region $region --resources $instanceid --tags "Key=Name,Value=Taupage AMI Builder, Key=Version,Value=$TAUPAGE_VERSION"
 
 while [ true ]; do
     result=$(aws ec2 describe-instances --region $region --instance-id $instanceid --output json)
-    ip=$(echo $result | jq .Reservations\[0\].Instances\[0\].PublicIpAddress | sed 's/"//g')
+    ip=$(echo $result | jq -r .Reservations\[0\].Instances\[0\].PublicIpAddress)
 
     [ ! -z "$ip" ] && [ "$ip" != "null" ] && break
 
@@ -164,7 +160,8 @@ echo "Setting EnaSupport flag"
 aws ec2 modify-instance-attribute --region $region --instance-id $instanceid --ena-support
 
 # create ami
-ami_name="Taupage${ami_suffix}-AMI-$(date +%Y%m%d-%H%M%S)"
+build_date="$(date +%Y%m%d-%H%M%S)"
+ami_name="TaupageBuild-${TAUPAGE_VERSION}"
 echo "Creating $ami_name ..."
 result=$(aws ec2 create-image \
     --region $region \
@@ -173,58 +170,39 @@ result=$(aws ec2 create-image \
     --name $ami_name \
     --description "$ami_description")
 
-imageid=$(echo $result | jq .ImageId | sed 's/"//g')
+imageid=$(echo $result | jq -r .ImageId)
 echo "Image: $imageid"
 
-state="no state yet"
-while [ true ]; do
-    echo "Waiting for AMI creation... ($state)"
+function wait_for_ami() {
+    local region="$1"
+    local imageid="$2"
 
-    result=$(aws ec2 describe-images --region $region --output json --image-id $imageid)
-    state=$(echo $result | jq .Images\[0\].State | sed 's/"//g')
+    while true; do
+        local state=$(aws ec2 describe-images --region $region --output json --image-id $imageid | jq -r .Images\[0\].State)
+        echo "Waiting for AMI creation... ($state)"
 
-    if [ "$state" = "failed" ]; then
-        echo "Image creation failed."
-        exit 1
-    elif [ "$state" = "available" ]; then
-        # set AMI Version Tag
-        aws ec2 create-tags --region $region --resources $imageid --tags Key=Version,Value=$TAUPAGE_VERSION
-        break
+
+        if [ "$state" = "failed" ]; then
+            echo "Image creation failed."
+            exit 1
+        elif [ "$state" = "available" ]; then
+            echo "AMI $region/$ami_name ($imageid) successfully created."
+            # set AMI tags
+            image_tags="$(jq -n --arg version "$TAUPAGE_VERSION" --arg build_date "$build_date" '[{Key: "Version", Value: $version}, {Key: "BuildDate", Value: $build_date}]')"
+            aws ec2 create-tags --region $region --resources $imageid --tags "$image_tags"
+            return
+        fi
+
+        sleep 10
+    done
+}
+
+wait_for_ami "$region" "$imageid"
+
+# copy to other regions
+for target_region in $copy_regions; do
+    if [[ "$target_region" != "$region" ]]; then
+        target_imageid="$(aws ec2 copy-image --source-region "$region" --source-image-id "$imageid" --region "$target_region" --name "$ami_name" --description "$ami_description" --output text)"
+        wait_for_ami "$target_region" "$target_imageid"
     fi
-
-    sleep 10
 done
-
-# run tests
-if [ "$disable_tests" = true ]; then
-    echo "skipping tests as DISABLE_TESTS set to TRUE"
-else
-    ./test.sh $CONFIG_FILE $TAUPAGE_VERSION
-fi
-
-
-#if test failed then dont share and copy the image to other regions
-if [ $? -eq 0 ];
-then
-    if [ "$disable_ami_sharing" = true ]; then
-        echo "skipping AMI sharing as disable_ami_sharing set to true"
-    else
-        ./share-ami.sh $CONFIG_FILE $TAUPAGE_VERSION
-    fi
-    # TODO exit if git is dirty
-
-
-    # finished!
-    echo "AMI $ami_name ($imageid) successfully created and shared."
-
-    # HipChat notification
-    if [ "$hipchat_notification_enabled" = true ]; then
-        echo "Sending HipChat notification..."
-        curl -s -S -X POST -H "Content-Type: application/json" -d "{\"message\":\"$hipchat_message\"}" "https://${hipchat_server_address}/v2/room/${hipchat_room_id}/notification?auth_token=${hipchat_auth_token}"
-    fi
-
-else
-
-    echo "AMI $ami_name ($imageid) create failed "
-
-fi
