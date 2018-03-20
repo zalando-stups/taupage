@@ -4,7 +4,7 @@ set -euo pipefail
 CONFIG_FILE=$1
 CONFIG_DIR="$(dirname "$CONFIG_FILE")"
 TAUPAGE_VERSION=$2
-CHANNEL=$3
+CHANNEL_PREFIX=$3
 
 cd "$(dirname "$0")"
 
@@ -12,7 +12,7 @@ cd "$(dirname "$0")"
 . "$CONFIG_FILE"
 
 publish_date="$(date +%Y%m%d-%H%M%S)"
-ami_name="Taupage${CHANNEL}-AMI-${publish_date}"
+ami_name="${CHANNEL_PREFIX}-AMI-${publish_date}"
 commit_id=$(git rev-parse HEAD)
 
 share_ami() {
