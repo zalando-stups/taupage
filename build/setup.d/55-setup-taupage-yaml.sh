@@ -35,3 +35,6 @@ fi
 if [ -n "$TOKENINFO_BUSINESS_PARTNERS" ]; then
     echo "tokeninfo_business_partners: $TOKENINFO_BUSINESS_PARTNERS" >> /meta/taupage.yaml
 fi
+if [ -n "$TOKENINFO_ENABLE_INTROSPECTION" ]; then
+    echo "tokeninfo_enable_introspection: $TOKENINFO_ENABLE_INTROSPECTION" >> /meta/taupage.yaml
+fi
