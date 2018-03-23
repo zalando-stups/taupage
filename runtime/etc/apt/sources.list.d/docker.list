@@ -1,1 +1,1 @@
-deb https://apt.dockerproject.org/repo ubuntu-trusty main
+deb https://download.docker.com/linux/ubuntu ubuntu-trusty main
