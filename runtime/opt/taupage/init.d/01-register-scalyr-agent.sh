@@ -53,7 +53,7 @@ scalyr_config=/etc/scalyr-agent-2/agent.json
 
 #set serverhost to application_id
 echo -n "set app name and version ...";
-sed -i "1,$ s/\/\/\ serverHost:\ \"REPLACE THIS\"/serverHost:\ \"$APPID\"/g" $scalyr_config
+sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"@" $scalyr_config
 
 if [ $? -eq 0 ];
 then
@@ -79,7 +79,7 @@ fi
 #follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"systemLog\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"systemLog\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -105,7 +105,7 @@ fi
 #follow application.log
 echo "";
 echo -n "insert application to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -120,7 +120,7 @@ if [ -n "$CUSTOMLOG" ];
 then
   echo "";
   echo -n "insert custom log directory to follow ... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\"} } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo -n "DONE";
