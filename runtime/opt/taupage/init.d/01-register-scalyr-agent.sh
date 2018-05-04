@@ -16,6 +16,12 @@ IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
 CUSTOMLOG=$config_mount_custom_log
 CUSTOMPARSER=${config_scalyr_custom_log_parser:-slf4j}
+SYSLOGPARSER="systemLog"
+
+if [ -n "$config_rsyslog_aws_metadata" ];
+then
+    SYSLOGPARSER="systemLogMetadata"
+fi
 
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
@@ -79,7 +85,7 @@ fi
 #follow syslog
 echo "";
 echo -n "insert syslog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"systemLog\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
@@ -92,7 +98,7 @@ fi
 #follow auth.log
 echo "";
 echo -n "insert authlog to follow ... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"systemLog\"} } " $scalyr_config
+sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
