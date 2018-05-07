@@ -152,7 +152,7 @@ else
 fi
 #add compressionType
 echo "";
-echo -n "setting debug_init to true... ";
+echo -n "setting compressionType to bz2... ";
 sed -i '/api_key/a \  compressionType: "bz2",' $scalyr_config
 if [ $? -eq 0 ];
 then
