@@ -14,6 +14,9 @@ IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
 CUSTOMLOG=$config_mount_custom_log
 CUSTOMPARSER=${config_scalyr_custom_log_parser:-slf4j}
+AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .accountId)
+AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .region)
+
 #check if appname and appversion is provided from the yaml
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
 then
@@ -45,7 +48,7 @@ fi
 scalyr_config=/etc/scalyr-agent-2/agent.json
 #set serverhost to application_id
 echo -n "set app name and version ...";
-sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\"@" $scalyr_config
+sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\", aws_account:\"$AWS_ACCOUNT\", aws_region:\"$AWS_REGION\"@" $scalyr_config
 if [ $? -eq 0 ];
 then
     echo -n "DONE";
