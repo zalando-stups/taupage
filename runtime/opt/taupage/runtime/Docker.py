@@ -356,12 +356,47 @@ def wait_for_health_check(config: dict):
     sys.exit(2)
 
 
+def is_valid_source(source):
+    '''
+    >>> is_valid_source('')
+    False
+
+    >>> is_valid_source('foo/bar')
+    False
+
+    >>> is_valid_source('foo/bar:latest')
+    False
+
+    >>> is_valid_source('foo/bar:1.0-SNAPSHOT')
+    False
+
+    >>> is_valid_source('foo/bar:1.0')
+    True
+    '''
+    parts = source.rsplit(':', 1)
+    if len(parts) != 2:
+        # missing tag
+        return False
+    _, tag = parts
+    if tag == 'latest':
+        # mutable "latest" images are not allowed
+        return False
+    elif 'SNAPSHOT' in tag:
+        # mutable *-SNAPSHOT images are not allowed
+        return False
+    return True
+
+
 def main(args):
 
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
     source = config['source']
+
+    if not is_valid_source(source):
+        logging.error('Invalid source Docker image: %s', source)
+        sys.exit(1)
 
     docker_cmd = get_docker_command(config)
 
