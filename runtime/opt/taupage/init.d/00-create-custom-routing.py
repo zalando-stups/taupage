@@ -66,8 +66,6 @@ def main():
     subprocess_call(iptables + ['-A', 'OUTPUT', '-p', 'tcp', '!', '-d', '172.16.0.0/12',
                                 '--dport', '443', '-j', 'MARK', '--set-mark', '443'])
 
-    subprocess_call(iptables + ['-A', 'OUTPUT', '-p', 'udp', '--dport', '123', '-j', 'MARK', '--set-mark', '443'])
-
     subprocess_call(['ip', 'rule', 'add', 'fwmark', '443', 'lookup', 'https'])
 
     subprocess_call(['ip', 'route', 'add', 'default', 'via', nat_gateways[subnet], 'table', 'https'])
