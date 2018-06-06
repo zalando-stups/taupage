@@ -162,22 +162,17 @@ else
     echo -n "ERROR";
     exit
 fi
-# Allow custom Scalyr region
-if [[ "$SCALYR_REGION" == "eu" ]] || [[ "$SCALYR_REGION" == "EU" ]];
+# setting Scalyr region to europe
+echo -n "Configuring Scalyr region to eu.scalyr.com ... ";
+sed -i '/api_key/a \  \scalyr_server: "https://upload.eu.scalyr.com",' $scalyr_config
+if [ $? -eq 0 ];
 then
-    echo -n "Configuring Scalyr region to eu.scalyr.com ... ";
-    sed -i '/api_key/a \  \scalyr_server: "https://upload.eu.scalyr.com",' $scalyr_config
-    if [ $? -eq 0 ];
-    then
-        echo -n "DONE"
-    else
-        echo -n "ERROR: Setting custom Scalyr region failed";
-        exit;
-    fi
+    echo -n "DONE"
 else
-    echo "INFO: Scalyr region config not set; skipping region setup.";
+    echo -n "ERROR: Setting custom Scalyr region failed";
     exit;
 fi
+
 echo -n "restarting scalyr daemon ... ";
 /usr/sbin/scalyr-agent-2 stop # just in case
 /usr/sbin/scalyr-agent-2 start
