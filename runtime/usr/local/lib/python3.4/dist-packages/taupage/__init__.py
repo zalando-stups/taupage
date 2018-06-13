@@ -140,3 +140,7 @@ def get_instance_id():
 
 def get_region():
     return get_instance_metadata().get('placement')['availability-zone'][:-1]
+
+
+def get_availability_zone():
+    return get_instance_metadata().get('placement')['availability-zone']

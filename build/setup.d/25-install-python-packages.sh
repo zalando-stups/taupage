@@ -9,6 +9,8 @@ stups-berry
 stups-tokens
 stups-zign
 stups-pierone
+netifaces
+netaddr
 "
 
 echo "Installing Python packages..."
