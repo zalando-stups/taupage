@@ -13,3 +13,8 @@ describe service('td-agent') do
   it { should be_enabled   }
   it { should be_running   }
 end
+
+# Check if Scalyr output plugin is installed
+describe package('fluent-plugin-scalyr') do
+  it { should be_installed.by('gem') }
+end
