@@ -15,6 +15,6 @@ describe service('td-agent') do
 end
 
 # Check if Scalyr output plugin is installed
-describe package('fluent-plugin-scalyr') do
-  it { should be_installed.by('gem') }
+describe command('td-agent-gem list') do
+  its(:stdout) { should contain('fluent-plugin-scalyr') }
 end
