@@ -14,6 +14,11 @@ describe service('td-agent') do
   it { should be_running   }
 end
 
+# Ensure that td-agent init script has been removed
+describe file('/etc/init.d/td-agent') do
+  it { should_not exist }
+end
+
 # Check if Scalyr output plugin is installed
 describe command('td-agent-gem list') do
   its(:stdout) { should contain('fluent-plugin-scalyr') }
