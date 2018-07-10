@@ -8,6 +8,7 @@ ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
 SCALYR_REGION=$config_scalyr_region
+SCALYR_AGENT_ENABLED=$config_scalyr_agent_enabled
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
@@ -182,4 +183,11 @@ then
 else
     echo -n "ERROR: Failed to start scalyr daemon!";
     exit;
+fi
+
+# Stop Scalyr Agent if set to false.
+if [ -n "$SCALYR_AGENT_ENABLED" == "false" ];
+  then
+  echo -n "Scalyr Agent set to false. Stopping... ";
+  /usr/sbin/scalyr-agent-2 stop # just in case
 fi
