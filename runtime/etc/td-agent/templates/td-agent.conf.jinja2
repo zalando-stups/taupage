@@ -1,0 +1,40 @@
+<source>
+  @type syslog
+  tag system
+</source>
+
+<source>
+  @type tail
+  path /var/log/application.log
+  # pos_file /var/log/td-agent/httpd-access.log.pos
+  tag access.log
+  <parse>
+    @type none
+  </parse>
+</source>
+
+<match syslog>
+ @type scalyr
+ api_write_token  123
+ server_attributes {
+   "serverHost": "test-application",
+   "serverType": "test-host",
+   "region":     "eu-central-1"
+ }
+
+ ssl_verify_peer false
+ scalyr_server https://eu.scalyr.com/
+</match>
+
+<match *.*>
+ @type scalyr
+ api_write_token  123
+ server_attributes {
+   "serverHost": "test-application",
+   "serverType": "test-host",
+   "region":     "eu-central-1"
+ }
+
+ ssl_verify_peer false
+ scalyr_server https://eu.scalyr.com/
+</match>
