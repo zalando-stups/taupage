@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import logging
-import os
+# import logging
+# import os
 import subprocess
 
-from taupage import get_config
+# from taupage import get_config
 
 TD_AGENT_TEMPLATE = ''
 
@@ -22,4 +22,3 @@ def set_scalyr_api_key():
 
 def configure_scalyr():
     pass
-
