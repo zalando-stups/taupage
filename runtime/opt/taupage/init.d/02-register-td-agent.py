@@ -4,7 +4,6 @@ import logging
 import subprocess
 import re
 import boto.utils
-import os
 
 from jinja2 import Environment, FileSystemLoader
 from taupage import get_config
