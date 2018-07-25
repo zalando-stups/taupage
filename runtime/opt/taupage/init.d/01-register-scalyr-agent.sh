@@ -186,8 +186,9 @@ else
 fi
 
 # Stop Scalyr Agent if set to false.
-if [ -n "$SCALYR_AGENT_ENABLED" == "false" ];
-  then
+if [ "$SCALYR_AGENT_ENABLED" = "false" ] || [ "$SCALYR_AGENT_ENABLED" = "False" ];
+then
+  sleep 3
   echo -n "Scalyr Agent set to false. Stopping... ";
   /usr/sbin/scalyr-agent-2 stop # just in case
 fi

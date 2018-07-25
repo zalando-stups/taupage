@@ -99,9 +99,8 @@ def configure_custom_parser():
 if __name__ == '__main__':
     # print(get_scalyr_api_key())
     config = get_config()
-    # print(config)
 
     # HACK: Only run Fluentd if it's set to enabled in senza.yaml
-    if config.get('fluentd_enabled') == 'true':
+    if config.get('fluentd_enabled'):
         update_configuration_from_template()
         restart_td_agent_process()
