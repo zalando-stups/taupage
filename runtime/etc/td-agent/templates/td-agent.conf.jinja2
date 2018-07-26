@@ -15,16 +15,16 @@
 
 <match syslog>
  @type scalyr
- api_write_token  {{ scalyr_api_key }}
+ api_write_token  "{{ scalyr_api_key }}"
  server_attributes {
-   "application_id": {{ application_id }},
-   "application_version": {{ application_version }},
-   "aws_account": {{ aws_account }},
-   "aws_region": {{ aws_region }},
-   "image": {{ image }},
-   "serverHost": {{ application_id }},
-   "source": {{ source }},
-   "stack": {{ stack }}
+   "application_id": "{{ application_id }}",
+   "application_version": "{{ application_version }}",
+   "aws_account": "{{ aws_account }}",
+   "aws_region": "{{ aws_region }}",
+   "image": "{{ image }}",
+   "serverHost": "{{ application_id }}",
+   "source": "{{ source }}",
+   "stack": "{{ stack }}"
  }
 
  ssl_verify_peer false
@@ -35,14 +35,14 @@
  @type scalyr
  api_write_token  {{ scalyr_api_key }}
  server_attributes {
-   "application_id": {{ application_id }},
-   "application_version": {{ application_version }},
-   "aws_account": {{ aws_account }},
-   "aws_region": {{ aws_region }},
-   "image": {{ image }},
-   "serverHost": {{ application_id }},
-   "source": {{ source }},
-   "stack": {{ stack }}
+   "application_id": "{{ application_id }}",
+   "application_version": "{{ application_version }}",
+   "aws_account": "{{ aws_account }}",
+   "aws_region": "{{ aws_region }}",
+   "image": "{{ image }}",
+   "serverHost": "{{ application_id }}",
+   "source": "{{ source }}",
+   "stack": "{{ stack }}"
  }
 
  ssl_verify_peer false
