@@ -18,7 +18,7 @@ TD_AGENT_OUTPUT_PATH = '/etc/td-agent/td-agent.conf'
 
 def stop_scalyr_agent_process():
     ''' Stop Scalyr agent '''
-    process = subprocess.Popen(['service', 'scalyr-agent-2', 'start'])
+    process = subprocess.Popen(['service', 'scalyr-agent-2', 'stop'])
     exit_code = process.wait()
     if exit_code:
         raise Exception("'service scalyr-agent-2 stop' failed with exit code: {0}".format(exit_code))
