@@ -1,4 +1,5 @@
 #!/bin/bash
 # remove scalyr agent autostart entries
 
-find /etc/rc* -iname "*scalyr*" | xargs rm
+rm /etc/init.d/scalyr-agent-2
+update-rc.d -f scalyr-agent-2 remove
