@@ -9,7 +9,7 @@
   # pos_file /var/log/td-agent/httpd-access.log.pos
   tag access.log
   <parse>
-    @type {{ scalyr_application_log_parser }}
+    @type none
   </parse>
 </source>
 
@@ -49,6 +49,12 @@
  scalyr_server https://eu.scalyr.com/
 </match>
 
+<filter scalyr.access>
+  @type record_transformer
+  <record>
+    parser {{ scalyr_application_log_parser }}
+  </record>
+</filter>
 
 {% if scalyr_custom_parserserver %}
     "scalyr_server": "{{ scalyr_server }}",
