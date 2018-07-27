@@ -9,7 +9,7 @@
   # pos_file /var/log/td-agent/httpd-access.log.pos
   tag access.log
   <parse>
-    @type none
+    @type {{ scalyr_application_log_parser }}
   </parse>
 </source>
 
