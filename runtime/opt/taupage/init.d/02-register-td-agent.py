@@ -16,30 +16,6 @@ TD_AGENT_TEMPLATE_PATH = '/etc/td-agent/templates/'
 TD_AGENT_OUTPUT_PATH = '/etc/td-agent/td-agent.conf'
 
 
-def stop_scalyr_agent_process():
-    ''' Stop Scalyr agent '''
-    process = subprocess.Popen(['service', 'scalyr-agent-2', 'stop'])
-    exit_code = process.wait()
-    if exit_code:
-        raise Exception("'service scalyr-agent-2 stop' failed with exit code: {0}".format(exit_code))
-
-
-def start_td_agent_process():
-    ''' Start Fluentd '''
-    process = subprocess.Popen(['service', 'td-agent', 'start'])
-    exit_code = process.wait()
-    if exit_code:
-        raise Exception("'service td-agent start' failed with exit code: {0}".format(exit_code))
-
-
-def stop_td_agent_process():
-    ''' Stop Fluentd '''
-    process = subprocess.Popen(['service', 'td-agent', 'stop'])
-    exit_code = process.wait()
-    if exit_code:
-        raise Exception("'service td-agent stop' failed with exit code: {0}".format(exit_code))
-
-
 def restart_td_agent_process():
     ''' Restart Fluentd '''
     process = subprocess.Popen(['service', 'td-agent', 'restart'])
@@ -112,6 +88,5 @@ if __name__ == '__main__':
 
     # HACK: Only run Fluentd if it's set to enabled in senza.yaml
     if config.get('fluentd_enabled'):
-        stop_scalyr_agent_process()
         update_configuration_from_template()
         restart_td_agent_process()
