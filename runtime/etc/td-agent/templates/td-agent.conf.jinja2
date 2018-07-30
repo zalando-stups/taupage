@@ -32,7 +32,7 @@
   </record>
 </filter>
 
-<match *.*>
+<match scalyr.**>
  @type scalyr
  api_write_token  {{ scalyr_api_key }}
  server_attributes {
