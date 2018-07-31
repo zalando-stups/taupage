@@ -56,6 +56,10 @@ def update_configuration_from_template():
     aws_region = instance_data['region']
     aws_account = instance_data['accountId']
     scalyr_application_log_parser = config.get('scalyr_application_log_parser', "slf4j")
+    if config.get('rsyslog_aws_metadata'):
+        scalyr_syslog_log_parser = "systemLogMetadata"
+    else:
+        scalyr_syslog_log_parser = "systemLog"
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -68,7 +72,8 @@ def update_configuration_from_template():
         instance_data=instance_data,
         aws_region=aws_region,
         aws_account=aws_account,
-        scalyr_application_log_parser=scalyr_application_log_parser
+        scalyr_application_log_parser=scalyr_application_log_parser,
+        scalyr_syslog_log_parser=scalyr_syslog_log_parser
     )
 
     try:

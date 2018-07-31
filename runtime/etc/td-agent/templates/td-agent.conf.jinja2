@@ -28,7 +28,7 @@
 <filter **.syslog>
   @type record_transformer
   <record>
-    parser systemLog
+    parser {{ scalyr_syslog_log_parser }}
   </record>
 </filter>
 
