@@ -7,6 +7,7 @@ import argparse
 import base64
 import boto.kms
 import boto.utils
+import functools
 import logging
 import pierone.api
 import pwd
@@ -21,6 +22,25 @@ import glob
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
+
+
+def retry(name, max_tries=3, retry_delay=5):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def decorated(*args, **kwargs):
+            attempt = 1
+            while True:
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as e:
+                    if attempt >= max_tries:
+                        raise
+                    else:
+                        logging.warning('{} failed (try {}/{}), retrying...'.format(name, attempt, max_tries))
+                        attempt += 1
+                        time.sleep(retry_delay)
+        return decorated
+    return decorator
 
 
 def get_region():
@@ -298,42 +318,22 @@ def get_other_options(config: dict):
         yield '--shm-size={}'.format(config.get('shm_size'))
 
 
-def extract_registry(docker_image: str) -> str:
-    """
-    >>> extract_registry('nginx')
-
-    >>> extract_registry('foo.bar.example.com:2195/namespace/my_repo:1.0')
-    'foo.bar.example.com:2195'
-    """
-
-    parts = docker_image.split('/')
-    if len(parts) == 3:
-        return parts[0]
-    return None
-
-
 def registry_login(config: dict, registry: str):
-    if 'pierone' not in registry:
-        logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
+    if not registry_requires_auth(registry):
+        logging.warning("Docker registry doesn't seem to be private PierOne, skipping OAuth login")
         return
     pierone_url = 'https://{}'.format(registry)
     pierone.api.docker_login_with_iid(pierone_url)
 
 
+@retry("Docker run", max_tries=3, retry_delay=5)
+def start_docker(cmd):
+    return subprocess.check_output(cmd).decode('utf-8').strip()
+
+
 def run_docker(cmd, dry_run):
     if not args.dry_run:
-        max_tries = 3
-        for i in range(max_tries):
-            try:
-                out = subprocess.check_output(cmd)
-                break
-            except Exception as e:
-                if i + 1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
-                    time.sleep(5)
-                else:
-                    raise e
-        container_id = out.decode('utf-8').strip()
+        container_id = start_docker(cmd)
         logging.info('Container {} is running'.format(container_id))
 
 
@@ -401,11 +401,33 @@ def is_valid_source(source):
     return True
 
 
+def registry_requires_auth(registry: str):
+    return registry == 'pierone.stups.zalan.do'
+
+
+def registry_supports_trusted_images(registry: str):
+    return registry == 'pierone.stups.zalan.do' or registry == 'registry.opensource.zalan.do'
+
+
+def is_image_trusted(image):
+    if not registry_supports_trusted_images(image.registry):
+        logging.warning("Docker registry doesn't seem to be PierOne, skipping Trusted header check")
+        return False
+    image_details = pierone.api.get_image_tag(image)
+    return image_details is not None and image_details['trusted']
+
+
 def main(args):
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
     source = config['source']
+
+    try:
+        image = pierone.api.DockerImage.parse(source)
+    except ValueError as e:
+        logging.error('Error parsing Docker image: %s', e)
+        sys.exit(1)
 
     if not is_valid_source(source):
         logging.error('Invalid source Docker image: %s', source)
@@ -432,15 +454,16 @@ def main(args):
             logging.error('Docker start of existing container failed: %s', str(e))
             sys.exit(1)
     else:
-        registry = extract_registry(source)
+        registry_login(config, image.registry)
 
-        if registry:
-            registry_login(config, registry)
+        if not is_image_trusted(image):
+            logging.error('Image is not trusted: %s', image)
+            sys.exit(1)
 
         cmd = [docker_cmd, 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
         for f in get_env_options, get_volume_options, get_port_options, get_other_options:
             cmd += list(f(config))
-        cmd += [source]
+        cmd += [str(image)]
 
         secret_envs = get_secret_envs(config)
 
