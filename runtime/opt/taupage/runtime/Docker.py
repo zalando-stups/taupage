@@ -400,7 +400,7 @@ def is_image_trusted(image):
         logging.warning("Docker registry doesn't seem to be PierOne, skipping Trusted header check")
         return False
     image_details = pierone.api.get_image_tag(image)
-    return image_details != None and image_details['trusted'] == True
+    return image_details is not None and image_details['trusted']
 
 
 def main(args):
