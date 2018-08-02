@@ -1,1 +1,0 @@
-*/1 * * * * root /opt/taupage/bin/log_agent_mem.sh 2>/dev/null
