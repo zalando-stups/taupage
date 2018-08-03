@@ -19,7 +19,7 @@ TD_AGENT_OUTPUT_PATH = '/etc/td-agent/td-agent.conf'
 def restart_td_agent_process():
     ''' Restart Fluentd '''
     process = subprocess.Popen(['service', 'td-agent', 'restart'])
-    exit_code = process.wait()
+    exit_code = process.wait(timeout=5)
     if exit_code:
         raise Exception("'service td-agent restart' failed with exit code: {0}".format(exit_code))
 
@@ -69,7 +69,6 @@ def update_configuration_from_template():
         stack=stack,
         source=source,
         image=image,
-        instance_data=instance_data,
         aws_region=aws_region,
         aws_account=aws_account,
         scalyr_application_log_parser=scalyr_application_log_parser,
@@ -80,15 +79,10 @@ def update_configuration_from_template():
         with open(TD_AGENT_OUTPUT_PATH, 'w') as f:
             f.write(template_data)
     except Exception:
-        logger.error('Failed to write file td-agent.conf')
-
-
-def configure_custom_parser():
-    pass
+        logger.exception('Failed to write file td-agent.conf')
 
 
 if __name__ == '__main__':
-    # print(get_scalyr_api_key())
     config = get_config()
 
     # HACK: Only run Fluentd if it's set to enabled in senza.yaml
