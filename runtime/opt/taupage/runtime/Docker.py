@@ -7,7 +7,6 @@ import argparse
 import base64
 import boto.kms
 import boto.utils
-import codecs
 import functools
 import logging
 import pierone.api
@@ -332,7 +331,7 @@ def registry_login(config: dict, registry: str):
 @retry("verifying trusted image", max_tries=3, retry_delay=5)
 def image_trusted(registry, org, name, tag):
     if registry_requires_auth(registry):
-        headers = {"Authorization": "Basic {}".format(get_instance_identity_document())}
+        headers = {"Authorization": "Basic {}".format(pierone.api.iid_auth())}
     else:
         headers = {}
 
@@ -448,15 +447,6 @@ def parse_image_tag(source):
 
     registry, org, name = image_parts
     return registry, org, name, tag
-
-
-def get_instance_identity_document():
-    '''Gets the encoded IID'''
-
-    response = requests.get('http://169.254.169.254/latest/dynamic/instance-identity/pkcs7', timeout=30)
-    response.raise_for_status()
-    basic_auth = codecs.encode('instance-identity-document:{}'.format(response.text).encode('utf-8'), 'base64').strip()
-    return basic_auth.decode('utf-8').replace("\n", "")
 
 
 def main(args):
