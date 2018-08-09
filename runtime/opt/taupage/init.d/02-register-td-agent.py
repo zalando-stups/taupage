@@ -60,6 +60,7 @@ def update_configuration_from_template():
         scalyr_syslog_log_parser = "systemLogMetadata"
     else:
         scalyr_syslog_log_parser = "systemLog"
+    fluentd_loglevel = config.get('fluentd_loglevel', "info")
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -72,7 +73,8 @@ def update_configuration_from_template():
         aws_region=aws_region,
         aws_account=aws_account,
         scalyr_application_log_parser=scalyr_application_log_parser,
-        scalyr_syslog_log_parser=scalyr_syslog_log_parser
+        scalyr_syslog_log_parser=scalyr_syslog_log_parser,
+        fluentd_loglevel=fluentd_loglevel
     )
 
     try:
