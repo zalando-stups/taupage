@@ -63,3 +63,17 @@
 <system>
   log_level {{ fluentd_loglevel }}
 </system>
+
+<source>
+  @type prometheus
+  bind 0.0.0.0
+  port 9110
+  metrics_path /metrics
+</source>
+<source>
+  @type prometheus_output_monitor
+  interval 10
+  <labels>
+    hostname ${hostname}
+  </labels>
+</source>
