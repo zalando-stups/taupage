@@ -42,22 +42,49 @@
   </record>
 </filter>
 
-<match scalyr.**>
- @type scalyr
- api_write_token  {{ scalyr_api_key }}
- server_attributes {
-   "application_id": "{{ application_id }}",
-   "application_version": "{{ application_version }}",
-   "aws_account": "{{ aws_account }}",
-   "aws_region": "{{ aws_region }}",
-   "image": "{{ image }}",
-   "serverHost": "{{ application_id }}",
-   "source": "{{ source }}",
-   "stack": "{{ stack }}"
- }
+<filter scalyr.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
 
- ssl_verify_peer false
- scalyr_server https://eu.scalyr.com/
+<match scalyr.**>
+  @type copy
+  <store>
+    @type scalyr
+    api_write_token  {{ scalyr_api_key }}
+    server_attributes {
+      "application_id": "{{ application_id }}",
+      "application_version": "{{ application_version }}",
+      "aws_account": "{{ aws_account }}",
+      "aws_region": "{{ aws_region }}",
+      "image": "{{ image }}",
+      "serverHost": "{{ application_id }}",
+      "source": "{{ source }}",
+      "stack": "{{ stack }}"
+    }
+    ssl_verify_peer false
+    scalyr_server https://eu.scalyr.com/
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
 </match>
 
 <system>
@@ -70,9 +97,10 @@
   port 9110
   metrics_path /metrics
 </source>
+
 <source>
   @type prometheus_output_monitor
-  interval 10
+  interval 60
   <labels>
     hostname ${hostname}
   </labels>
