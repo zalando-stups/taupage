@@ -48,8 +48,8 @@ tar xzf "${IXGBEVF_FILENAME}" && rm "${IXGBEVF_FILENAME}"
 configure_dkms ixgbevf ${IXGBEVF_VERSION} ixgbevf src/
 
 # download and configure ena
-ENA_VERSION=1.2.0
-ENA_SHA="56d7054839a0fd0ecffc178042f900a1ce5601e15547e3a2c7f39ac55c7de2a7"
+ENA_VERSION=1.5.3
+ENA_SHA="6a0dcd42c28e19dee6759c7aec34a56b72e4187c9652731c0e2b371b92e79a14"
 ENA_FILENAME="ena_linux_${ENA_VERSION}.tar.gz"
 curl --fail -L "https://github.com/amzn/amzn-drivers/archive/${ENA_FILENAME}" > "${ENA_FILENAME}"
 if ! (echo "$ENA_SHA ${ENA_FILENAME}" | sha256sum -c); then
