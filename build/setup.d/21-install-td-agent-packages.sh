@@ -6,4 +6,4 @@ chmod -R 1777 /tmp/
 mkdir -p -m0755 /var/run/td-agent
 
 # Install Fluentd packages
-td-agent-gem install fluent-plugin-scalyr fluent-plugin-prometheus
+td-agent-gem install fluent-plugin-scalyr fluent-plugin-prometheus fluent-plugin-s3
