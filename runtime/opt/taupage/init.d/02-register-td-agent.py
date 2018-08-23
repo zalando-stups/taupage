@@ -27,20 +27,21 @@ def restart_td_agent_process():
 def get_scalyr_api_key():
     ''' Read Scalyr API key from Taupage config and set in template file '''
     config = get_config()
-    scalyr_api_key = config.get('scalyr_account_key')
+    scalyr_api_key = config.get('scalyr_account_key', False)
 
-    # If scalyr_api_key starts with "aws:kms:" then decrypt key
-    match_kms_key = re.search('aws:kms:', scalyr_api_key, re.IGNORECASE)
-    if match_kms_key:
-        scalyr_api_key = re.sub(r'aws:kms:', '', scalyr_api_key)
-        try:
-            scalyr_api_key = subprocess.check_output(['python3',
-                                                      '/opt/taupage/bin/decrypt-kms.py',
-                                                      scalyr_api_key]).decode('UTF-8').strip()
-        except Exception:
-            logger.error('Failed to run /opt/taupage/bin/decrypt-kms.py')
+    if scalyr_api_key:
+        # If scalyr_api_key starts with "aws:kms:" then decrypt key
+        match_kms_key = re.search('aws:kms:', scalyr_api_key, re.IGNORECASE)
+        if match_kms_key:
+            scalyr_api_key = re.sub(r'aws:kms:', '', scalyr_api_key)
+            try:
+                scalyr_api_key = subprocess.check_output(['python3',
+                                                          '/opt/taupage/bin/decrypt-kms.py',
+                                                          scalyr_api_key]).decode('UTF-8').strip()
+            except Exception:
+                logger.error('Failed to run /opt/taupage/bin/decrypt-kms.py')
 
-    return scalyr_api_key
+        return scalyr_api_key
 
 
 def update_configuration_from_template():
@@ -60,7 +61,13 @@ def update_configuration_from_template():
         scalyr_syslog_log_parser = "systemLogMetadata"
     else:
         scalyr_syslog_log_parser = "systemLog"
+    fluentd_syslog_destination = config.get('fluentd_syslog_destination', "scalyr")
+    fluentd_applog_destination = config.get('fluentd_applog_destination', "scalyr")
+    fluentd_authlog_destination = config.get('fluentd_authlog_destination', "scalyr")
     fluentd_loglevel = config.get('fluentd_loglevel', "info")
+    fluentd_s3_region = config.get('fluentd_s3_region', "eu-central-1")
+    fluentd_s3_bucket = config.get('fluentd_s3_bucket')
+    fluentd_s3_timekey = config.get('fluentd_s3_timekey', "1m")
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -74,7 +81,13 @@ def update_configuration_from_template():
         aws_account=aws_account,
         scalyr_application_log_parser=scalyr_application_log_parser,
         scalyr_syslog_log_parser=scalyr_syslog_log_parser,
-        fluentd_loglevel=fluentd_loglevel
+        fluentd_syslog_destination=fluentd_syslog_destination,
+        fluentd_applog_destination=fluentd_applog_destination,
+        fluentd_authlog_destination=fluentd_authlog_destination,
+        fluentd_loglevel=fluentd_loglevel,
+        fluentd_s3_region=fluentd_s3_region,
+        fluentd_s3_bucket=fluentd_s3_bucket,
+        fluentd_s3_timekey=fluentd_s3_timekey
     )
 
     try:

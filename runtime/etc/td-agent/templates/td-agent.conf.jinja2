@@ -2,7 +2,7 @@
   @type tail
   path /var/log/syslog
   pos_file /var/log/td-agent/syslog.pos
-  tag scalyr.*
+  tag {{ fluentd_syslog_destination }}.*
   <parse>
     @type none
   </parse>
@@ -12,7 +12,7 @@
   @type tail
   path /var/log/application.log
   pos_file /var/log/td-agent/application.log.pos
-  tag scalyr.*
+  tag {{ fluentd_applog_destination }}.*
   <parse>
     @type none
   </parse>
@@ -22,20 +22,20 @@
   @type tail
   path /var/log/auth.log
   pos_file /var/log/td-agent/auth.log.pos
-  tag scalyr.*
+  tag {{ fluentd_authlog_destination }}.*
   <parse>
     @type none
   </parse>
 </source>
 
-<filter **.application.log>
+<filter scalyr.**.application.log>
   @type record_transformer
   <record>
     parser {{ scalyr_application_log_parser }}
   </record>
 </filter>
 
-<filter **.syslog **.auth.log>
+<filter scalyr.**.syslog scalyr.**.auth.log>
   @type record_transformer
   <record>
     parser {{ scalyr_syslog_log_parser }}
@@ -55,6 +55,20 @@
   </metric>
 </filter>
 
+<filter s3.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
+{% if scalyr_api_key %}
 <match scalyr.**>
   @type copy
   <store>
@@ -86,6 +100,39 @@
     </metric>
   </store>
 </match>
+{% endif %}
+
+{% if fluentd_s3_bucket %}
+<match s3.**>
+  @type copy
+  <store>
+    @type s3
+    s3_region {{ fluentd_s3_region }}
+    s3_bucket {{ fluentd_s3_bucket }}
+    path logs/{{ stack }}
+    s3_object_key_format %{path}/%{hostname}/${tag}/%Y%m%d%H%M_%{index}.%{file_extension}
+    <buffer time,tag>
+      @type file
+      path  /var/log/td-agent/s3buffer
+      timekey {{ fluentd_s3_timekey }}
+      timekey_wait 0s
+      flush_at_shutdown true
+    </buffer>
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
 
 <system>
   log_level {{ fluentd_loglevel }}
