@@ -110,7 +110,7 @@
     s3_region {{ fluentd_s3_region }}
     s3_bucket {{ fluentd_s3_bucket }}
     path logs/{{ stack }}
-    s3_object_key_format %{path}/%{hostname}/${tag}/%Y%m%d%H%M_%{index}.%{file_extension}
+    s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/s3buffer
