@@ -4,11 +4,15 @@ eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 
 rsyslog_max_message_size=$config_rsyslog_max_message_size
 rsyslog_aws_metadata=$config_rsyslog_aws_metadata
+rsyslog_application_log_format="$config_rsyslog_application_log_format"
 rsyslog_config=/etc/rsyslog.conf
+
+need_rsyslog_restart='n'
 
 if [[ -n "$rsyslog_max_message_size" ]]; then
     echo "setting rsyslog_max_message_size..."
     grep -q '^$MaxMessageSize' $rsyslog_config || sed -i "1s/^/\$MaxMessageSize ${rsyslog_max_message_size}\n/" $rsyslog_config
+    need_rsyslog_restart='y'
 fi
 
 if [[ -n "$rsyslog_aws_metadata" ]]; then
@@ -31,9 +35,19 @@ template(name="DefaultFormat" type="list") {
 
 \$ActionFileDefaultTemplate DefaultFormat
 EOF
+      need_rsyslog_restart='y'
     fi
 fi
 
-if [[ -n "$rsyslog_max_message_size" ]] || [[ -n "$rsyslog_aws_metadata" ]]; then
+if [[ -n "$rsyslog_application_log_format" ]]; then
+  cat >/etc/rsyslog.d/24-application.conf <<EOF
+\$template customApplicationLogFormat,"$rsyslog_application_log_format"
+:syslogtag, startswith, "docker" /var/log/application.log; customApplicationLogFormat
+& ~
+EOF
+  need_rsyslog_restart='y'
+fi
+
+if [[ 'y' == "$need_rsyslog_restart" ]]; then
     service rsyslog restart
 fi

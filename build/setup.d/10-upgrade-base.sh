@@ -18,7 +18,7 @@ function configure_dkms() {
     local MODULE_NAME=$3
     local MODULE_LOCATION=$4
 
-    cat > ${PACKAGE_NAME}-${PACKAGE_VERSION}/dkms.conf << EOF
+    cat > "${PACKAGE_NAME}-${PACKAGE_VERSION}/dkms.conf" << EOF
 PACKAGE_NAME="${MODULE_NAME}"
 PACKAGE_VERSION="${PACKAGE_VERSION}"
 CLEAN="cd ${MODULE_LOCATION}; make clean"
@@ -30,28 +30,35 @@ DEST_MODULE_NAME[0]="${MODULE_NAME}"
 AUTOINSTALL="yes"
 EOF
 
-    dkms add -m ${PACKAGE_NAME} -v ${PACKAGE_VERSION}
+    dkms add -m "${PACKAGE_NAME}" -v "${PACKAGE_VERSION}"
 }
 
 pushd /usr/src
 # download and configure ixgbevf: https://downloadcenter.intel.com/download/27160/
 IXGBEVF_VERSION=4.2.1
 IXGBEVF_DOWNLOAD=27160 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
-IXGBEVF_MD5=1e6bb9804cd475872db82f487e28e45f
-curl --fail -s -L https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz > ixgbevf-${IXGBEVF_VERSION}.tar.gz
-if [[ $(md5sum ixgbevf-${IXGBEVF_VERSION}.tar.gz | awk '{print $1}') != $IXGBEVF_MD5 ]]; then
-    echo "ixgbevf-${IXGBEVF_VERSION}.tar.gz: bad md5 sum"
+IXGBEVF_SHA="68fd32bc83d849d81c7d22af382c7866fe66673569c85888abf26ab59586c698"
+IXGBEVF_FILENAME="ixgbevf-${IXGBEVF_VERSION}.tar.gz"
+curl --fail -s -L "https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/${IXGBEVF_FILENAME}" > "${IXGBEVF_FILENAME}"
+if ! (echo "$IXGBEVF_SHA ${IXGBEVF_FILENAME}" | sha256sum -c); then
+    echo "${IXGBEVF_FILENAME}: bad shasum"
     exit 1
 fi
-tar xzf ixgbevf-${IXGBEVF_VERSION}.tar.gz && rm ixgbevf-${IXGBEVF_VERSION}.tar.gz
+tar xzf "${IXGBEVF_FILENAME}" && rm "${IXGBEVF_FILENAME}"
 configure_dkms ixgbevf ${IXGBEVF_VERSION} ixgbevf src/
 
 # download and configure ena
-ENA_VERSION=1.2.0
-curl --fail -L https://github.com/amzn/amzn-drivers/archive/ena_linux_${ENA_VERSION}.tar.gz | tar xz
-# We don't know checksums of archives on github
-mv amzn-drivers-ena_linux_${ENA_VERSION} amzn-drivers-${ENA_VERSION}
-configure_dkms amzn-drivers ${ENA_VERSION} ena kernel/linux/ena
+ENA_VERSION=1.5.3
+ENA_SHA="6a0dcd42c28e19dee6759c7aec34a56b72e4187c9652731c0e2b371b92e79a14"
+ENA_FILENAME="ena_linux_${ENA_VERSION}.tar.gz"
+curl --fail -L "https://github.com/amzn/amzn-drivers/archive/${ENA_FILENAME}" > "${ENA_FILENAME}"
+if ! (echo "$ENA_SHA ${ENA_FILENAME}" | sha256sum -c); then
+    echo "${ENA_FILENAME}: bad shasum"
+    exit 1
+fi
+tar xzf "${ENA_FILENAME}" && rm "${ENA_FILENAME}"
+mv "amzn-drivers-ena_linux_${ENA_VERSION}" "amzn-drivers-${ENA_VERSION}"
+configure_dkms amzn-drivers "${ENA_VERSION}" ena kernel/linux/ena
 popd
 
 # install 3.16. LTS kernel and make sure it updates to the last version
