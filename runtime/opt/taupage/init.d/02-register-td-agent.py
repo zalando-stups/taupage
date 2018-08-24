@@ -56,18 +56,19 @@ def update_configuration_from_template():
     instance_data = boto.utils.get_instance_identity()['document']
     aws_region = instance_data['region']
     aws_account = instance_data['accountId']
-    scalyr_application_log_parser = config.get('scalyr_application_log_parser', "slf4j")
+    scalyr_application_log_parser = config.get('scalyr_application_log_parser', 'slf4j')
     if config.get('rsyslog_aws_metadata'):
-        scalyr_syslog_log_parser = "systemLogMetadata"
+        scalyr_syslog_log_parser = 'systemLogMetadata'
     else:
-        scalyr_syslog_log_parser = "systemLog"
-    fluentd_syslog_destination = config.get('fluentd_syslog_destination', "scalyr")
-    fluentd_applog_destination = config.get('fluentd_applog_destination', "scalyr")
-    fluentd_authlog_destination = config.get('fluentd_authlog_destination', "scalyr")
-    fluentd_loglevel = config.get('fluentd_loglevel', "info")
-    fluentd_s3_region = config.get('fluentd_s3_region', "eu-central-1")
+        scalyr_syslog_log_parser = 'systemLog'
+    fluentd_log_destination = config.get('fluentd_log_destination', 'scalyr')
+    fluentd_syslog_destination = config.get('fluentd_syslog_destination', fluentd_log_destination)
+    fluentd_applog_destination = config.get('fluentd_applog_destination', fluentd_log_destination)
+    fluentd_authlog_destination = config.get('fluentd_authlog_destination', fluentd_log_destination)
+    fluentd_loglevel = config.get('fluentd_loglevel', 'info')
+    fluentd_s3_region = config.get('fluentd_s3_region', 'eu-central-1')
     fluentd_s3_bucket = config.get('fluentd_s3_bucket')
-    fluentd_s3_timekey = config.get('fluentd_s3_timekey', "1m")
+    fluentd_s3_timekey = config.get('fluentd_s3_timekey', '1m')
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
