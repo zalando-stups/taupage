@@ -68,6 +68,19 @@
   </metric>
 </filter>
 
+<filter rsyslog.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
 {% if scalyr_api_key %}
 <match scalyr.**>
   @type copy
@@ -118,6 +131,33 @@
       timekey_wait 0s
       flush_at_shutdown true
     </buffer>
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
+
+{% if fluentd_rsyslog_host %}
+<match rsyslog.**>
+  @type copy
+  <store>
+  @type remote_syslog
+  host {{ fluentd_rsyslog_host }}
+  port {{ fluentd_rsyslog_port }}
+  protocol {{ fluentd_rsyslog_protocol }}
+  severity {{ fluentd_rsyslog_severity }}
+  program {{ fluentd_rsyslog_program }}
+  hostname {{ fluentd_rsyslog_hostname }}
   </store>
   <store>
     @type prometheus

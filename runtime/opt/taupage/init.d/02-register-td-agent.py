@@ -56,6 +56,7 @@ def update_configuration_from_template():
     instance_data = boto.utils.get_instance_identity()['document']
     aws_region = instance_data['region']
     aws_account = instance_data['accountId']
+    hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
     scalyr_application_log_parser = config.get('scalyr_application_log_parser', 'slf4j')
     if config.get('rsyslog_aws_metadata'):
         scalyr_syslog_log_parser = 'systemLogMetadata'
@@ -69,6 +70,12 @@ def update_configuration_from_template():
     fluentd_s3_region = config.get('fluentd_s3_region', 'eu-central-1')
     fluentd_s3_bucket = config.get('fluentd_s3_bucket')
     fluentd_s3_timekey = config.get('fluentd_s3_timekey', '1m')
+    fluentd_rsyslog_host = config.get('fluentd_rsyslog_host')
+    fluentd_rsyslog_port = config.get('fluentd_rsyslog_port', '514')
+    fluentd_rsyslog_protocol = config.get('fluentd_rsyslog_protocol', 'tcp')
+    fluentd_rsyslog_severity = config.get('fluentd_rsyslog_severity', 'notice')
+    fluentd_rsyslog_program = config.get('fluentd_rsyslog_program', 'fluentd')
+    fluentd_rsyslog_hostname = config.get('fluentd_rsyslog_hostname', hostname)
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -88,7 +95,13 @@ def update_configuration_from_template():
         fluentd_loglevel=fluentd_loglevel,
         fluentd_s3_region=fluentd_s3_region,
         fluentd_s3_bucket=fluentd_s3_bucket,
-        fluentd_s3_timekey=fluentd_s3_timekey
+        fluentd_s3_timekey=fluentd_s3_timekey,
+        fluentd_rsyslog_host=fluentd_rsyslog_host,
+        fluentd_rsyslog_port=fluentd_rsyslog_port,
+        fluentd_rsyslog_protocol=fluentd_rsyslog_protocol,
+        fluentd_rsyslog_severity=fluentd_rsyslog_severity,
+        fluentd_rsyslog_program=fluentd_rsyslog_program,
+        fluentd_rsyslog_hostname=fluentd_rsyslog_hostname
     )
 
     try:
