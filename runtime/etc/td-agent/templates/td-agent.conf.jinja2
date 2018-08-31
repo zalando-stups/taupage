@@ -97,7 +97,9 @@
       "source": "{{ source }}",
       "stack": "{{ stack }}"
     }
-    ssl_verify_peer false
+    ssl_ca_bundle_path /etc/ssl/certs/scalyr-ca-bundle.crt
+    ssl_verify_peer true
+    ssl_verify_depth 5
     scalyr_server https://eu.scalyr.com/
   </store>
   <store>
