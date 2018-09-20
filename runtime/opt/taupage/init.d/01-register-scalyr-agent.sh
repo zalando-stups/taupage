@@ -4,24 +4,63 @@
 #read taupage.yaml file
 eval $(/opt/taupage/bin/parse-yaml.py /meta/taupage.yaml "config")
 #set more readable variables
-ACCOUNTKEY=$config_scalyr_account_key
 APPID=$config_application_id
 APPVERSION=$config_application_version
-SCALYR_REGION=$config_scalyr_region
-SCALYR_AGENT_ENABLED=$config_scalyr_agent_enabled
 SOURCE=$config_source
 STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
-LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
-CUSTOMLOG=$config_mount_custom_log
-CUSTOMPARSER=${config_scalyr_custom_log_parser:-slf4j}
 AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .accountId)
 AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .region)
+CUSTOMLOG=$config_mount_custom_log
+#set Scalyr Variables
+if [ $(set -o posix;set|grep -c config_logging_) -eq 0 ];
+then
+  ACCOUNTKEY=$config_scalyr_account_key
+  SCALYR_REGION=$config_scalyr_region
+  LOGPARSER=${config_scalyr_application_log_parser:-slf4j}
+  CUSTOMPARSER=${config_scalyr_custom_log_parser:-slf4j}
+else
+  FLUENTD_ENABLED=$config_logging_fluentd_enabled
+  ACCOUNTKEY=$config_logging_scalyr_account_key
+  SCALYR_REGION=$config_logging_scalyr_region
+  SCALYR_AGENT_ENABLED=$config_logging_scalyr_agent_enabled
+  LOGPARSER=${config_logging_scalyr_application_log_parser:-slf4j}
+  CUSTOMPARSER=${config_logging_scalyr_custom_log_parser:-slf4j}
+  if [ "$FLUENTD_ENABLED" = "True" ];
+  then
+    USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-False}
+  else
+    USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-True}
+  fi
+  USE_SCALYR_AGENT_APPLOG=${config_logging_use_scalyr_agent_applog:-${USE_SCALYR_AGENT_ALL}}
+  USE_SCALYR_AGENT_SYSLOG=${config_logging_use_scalyr_agent_syslog:-${USE_SCALYR_AGENT_ALL}}
+  USE_SCALYR_AGENT_AUTHLOG=${config_logging_use_scalyr_agent_authlog:-${USE_SCALYR_AGENT_ALL}}
+  USE_SCALYR_AGENT_CUSTOMLOG=${config_logging_use_scalyr_agent_customlog:-${USE_SCALYR_AGENT_ALL}}
+fi
 
 # Skip Scalyr Agent setup if Scalyr Agent was disabled.
-if [ "$SCALYR_AGENT_ENABLED" = "false" ] || [ "$SCALYR_AGENT_ENABLED" = "False" ];
+if [ "$SCALYR_AGENT_ENABLED" = "False" ];
 then
   echo "Scalyr Agent disabled: Skipping Scalyr Agent setup"
+  exit
+fi
+
+# Skip Scalyr Agent setup if Fluentd was enabled && Scalyr agent was not enabled
+if [ "$FLUENTD_ENABLED" = "True" ];
+then
+  if [ -z "$SCALYR_AGENT_ENABLED" ];
+  then
+    echo "Fluentd enabled and Scalyr Agent not enabled: Skipping Scalyr Agent setup"
+    exit
+  fi
+fi
+
+if [ "$USE_SCALYR_AGENT_SYSLOG" = "False" ] && \
+   [ "$USE_SCALYR_AGENT_APPLOG" = "False" ] && \
+   [ "$USE_SCALYR_AGENT_AUTHLOG" = "False" ] && \
+   [ "$USE_SCALYR_AGENT_CUSTOMLOG" = "False" ]
+then
+  echo "No file for Scalyr to follow: Skipping Scalyr Agent setup"
   exit
 fi
 
@@ -89,41 +128,50 @@ else
 fi
 
 #follow syslog
-echo -n "insert syslog to follow... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
-
-if [ $? -eq 0 ];
+if [ "$USE_SCALYR_AGENT_SYSLOG" = "True" ]
 then
-    echo "DONE"
-else
-    echo "ERROR"
-    exit
+  echo -n "insert syslog to follow... ";
+  sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
+
+  if [ $? -eq 0 ];
+  then
+      echo "DONE"
+  else
+      echo "ERROR"
+      exit
+  fi
 fi
 
 #follow auth.log
-echo -n "insert authlog to follow... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
-if [ $? -eq 0 ];
+if [ "$USE_SCALYR_AGENT_AUTHLOG" = "True" ]
 then
-    echo "DONE"
-else
-    echo "ERROR"
-    exit
+  echo -n "insert authlog to follow... ";
+  sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
+  if [ $? -eq 0 ];
+  then
+      echo "DONE"
+  else
+      echo "ERROR"
+      exit
+  fi
 fi
 
 #follow application.log
-echo -n "insert application to follow... ";
-sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"} } " $scalyr_config
-if [ $? -eq 0 ];
+if [ "$USE_SCALYR_AGENT_APPLOG" = "True" ]
 then
-    echo "DONE"
-else
-    echo -n "ERROR"
-    exit
+  echo -n "insert application to follow... ";
+  sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"} } " $scalyr_config
+  if [ $? -eq 0 ];
+  then
+      echo "DONE"
+  else
+      echo -n "ERROR"
+      exit
+  fi
 fi
 
 #follow custom logs if it's enabled in senza.yaml
-if [ -n "$CUSTOMLOG" ];
+if [ -n "$CUSTOMLOG" ] && [ "$USE_SCALYR_AGENT_CUSTOMLOG" = "True" ];
 then
   echo "insert custom log directory to follow... ";
   sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\"} } " $scalyr_config

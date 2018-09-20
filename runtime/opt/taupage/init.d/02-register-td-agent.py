@@ -26,8 +26,12 @@ def restart_td_agent_process():
 
 def get_scalyr_api_key():
     ''' Read Scalyr API key from Taupage config and set in template file '''
-    config = get_config()
-    scalyr_api_key = config.get('scalyr_account_key', False)
+    mainconfig = get_config()
+    config = mainconfig.get('logging')
+    if config:
+        scalyr_api_key = config.get('scalyr_account_key', False)
+    else:
+        scalyr_api_key = False
 
     if scalyr_api_key:
         # If scalyr_api_key starts with "aws:kms:" then decrypt key
@@ -46,7 +50,9 @@ def get_scalyr_api_key():
 
 def update_configuration_from_template():
     ''' Update Jinja Template to create configuration file for Scalyr '''
+    fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
     config = get_config()
+    logging_config = config.get('logging')
     scalyr_api_key = get_scalyr_api_key()
     application_id = config.get('application_id')
     application_version = config.get('application_version')
@@ -57,25 +63,34 @@ def update_configuration_from_template():
     aws_region = instance_data['region']
     aws_account = instance_data['accountId']
     hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
-    scalyr_application_log_parser = config.get('scalyr_application_log_parser', 'slf4j')
+    customlog = config.get('mount_custom_log')
     if config.get('rsyslog_aws_metadata'):
         scalyr_syslog_log_parser = 'systemLogMetadata'
     else:
         scalyr_syslog_log_parser = 'systemLog'
-    fluentd_log_destination = config.get('fluentd_log_destination', 'scalyr')
-    fluentd_syslog_destination = config.get('fluentd_syslog_destination', fluentd_log_destination)
-    fluentd_applog_destination = config.get('fluentd_applog_destination', fluentd_log_destination)
-    fluentd_authlog_destination = config.get('fluentd_authlog_destination', fluentd_log_destination)
-    fluentd_loglevel = config.get('fluentd_loglevel', 'info')
-    fluentd_s3_region = config.get('fluentd_s3_region', 'eu-central-1')
-    fluentd_s3_bucket = config.get('fluentd_s3_bucket')
-    fluentd_s3_timekey = config.get('fluentd_s3_timekey', '1m')
-    fluentd_rsyslog_host = config.get('fluentd_rsyslog_host')
-    fluentd_rsyslog_port = config.get('fluentd_rsyslog_port', '514')
-    fluentd_rsyslog_protocol = config.get('fluentd_rsyslog_protocol', 'tcp')
-    fluentd_rsyslog_severity = config.get('fluentd_rsyslog_severity', 'notice')
-    fluentd_rsyslog_program = config.get('fluentd_rsyslog_program', 'fluentd')
-    fluentd_rsyslog_hostname = config.get('fluentd_rsyslog_hostname', hostname)
+    scalyr_application_log_parser = logging_config.get('scalyr_application_log_parser', 'slf4j')
+    scalyr_custom_log_parser = logging_config.get('scalyr_custom_log_parser', 'slf4j')
+    fluentd_log_destination = logging_config.get('log_destination', 'scalyr')
+    fluentd_syslog_destination = logging_config.get('syslog_destination', fluentd_log_destination)
+    fluentd_applog_destination = logging_config.get('applog_destination', fluentd_log_destination)
+    fluentd_authlog_destination = logging_config.get('authlog_destination', fluentd_log_destination)
+    fluentd_customlog_destination = logging_config.get('customlog_destination', fluentd_log_destination)
+    fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
+    fluentd_s3_region = logging_config.get('s3_region', 'eu-central-1')
+    fluentd_s3_bucket = logging_config.get('s3_bucket')
+    fluentd_s3_timekey = logging_config.get('s3_timekey', '1m')
+    fluentd_rsyslog_host = logging_config.get('rsyslog_host')
+    fluentd_rsyslog_port = logging_config.get('rsyslog_port', '514')
+    fluentd_rsyslog_protocol = logging_config.get('rsyslog_protocol', 'tcp')
+    fluentd_rsyslog_severity = logging_config.get('rsyslog_severity', 'notice')
+    fluentd_rsyslog_program = logging_config.get('rsyslog_program', 'fluentd')
+    fluentd_rsyslog_hostname = logging_config.get('rsyslog_hostname', hostname)
+
+    for destination in (fluentd_applog_destination,
+                        fluentd_authlog_destination,
+                        fluentd_customlog_destination,
+                        fluentd_syslog_destination):
+        fluentd_destinations[destination] = True
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -87,8 +102,10 @@ def update_configuration_from_template():
         image=image,
         aws_region=aws_region,
         aws_account=aws_account,
+        customlog=customlog,
         scalyr_application_log_parser=scalyr_application_log_parser,
         scalyr_syslog_log_parser=scalyr_syslog_log_parser,
+        scalyr_custom_log_parser=scalyr_custom_log_parser,
         fluentd_syslog_destination=fluentd_syslog_destination,
         fluentd_applog_destination=fluentd_applog_destination,
         fluentd_authlog_destination=fluentd_authlog_destination,
@@ -101,7 +118,8 @@ def update_configuration_from_template():
         fluentd_rsyslog_protocol=fluentd_rsyslog_protocol,
         fluentd_rsyslog_severity=fluentd_rsyslog_severity,
         fluentd_rsyslog_program=fluentd_rsyslog_program,
-        fluentd_rsyslog_hostname=fluentd_rsyslog_hostname
+        fluentd_rsyslog_hostname=fluentd_rsyslog_hostname,
+        fluentd_destinations=fluentd_destinations
     )
 
     try:
@@ -113,8 +131,12 @@ def update_configuration_from_template():
 
 if __name__ == '__main__':
     config = get_config()
+    logging_config = config.get('logging')
+    if not logging_config:
+        logger.info('Found no logging section in senza.yaml')
+        raise SystemExit()
 
     # HACK: Only run Fluentd if it's set to enabled in senza.yaml
-    if config.get('fluentd_enabled'):
+    if logging_config.get('fluentd_enabled'):
         update_configuration_from_template()
         restart_td_agent_process()
