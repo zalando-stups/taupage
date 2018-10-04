@@ -26,8 +26,8 @@ def restart_td_agent_process():
 
 def get_scalyr_api_key():
     ''' Read Scalyr API key from Taupage config and set in template file '''
-    mainconfig = get_config()
-    config = mainconfig.get('logging')
+    main_config = get_config()
+    config = main_config.get('logging')
     if config:
         scalyr_api_key = config.get('scalyr_account_key', False)
     else:
@@ -44,7 +44,10 @@ def get_scalyr_api_key():
                                                           scalyr_api_key]).decode('UTF-8').strip()
             except Exception:
                 logger.error('Failed to run /opt/taupage/bin/decrypt-kms.py')
-
+                raise SystemExit()
+        if scalyr_api_key == "Invalid KMS key.":
+            logger.error('Failed to decrypt KMS Key')
+            raise SystemExit()
         return scalyr_api_key
 
 
@@ -53,7 +56,6 @@ def update_configuration_from_template():
     fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
     config = get_config()
     logging_config = config.get('logging')
-    scalyr_api_key = get_scalyr_api_key()
     application_id = config.get('application_id')
     application_version = config.get('application_version')
     stack = config.get('notify_cfn')['stack']
@@ -91,6 +93,10 @@ def update_configuration_from_template():
                         fluentd_customlog_destination,
                         fluentd_syslog_destination):
         fluentd_destinations[destination] = True
+
+    # Get Scalyr key only if configured
+    if fluentd_destinations.get('scalyr') or fluentd_destinations.get('scalyr_s3'):
+        scalyr_api_key = get_scalyr_api_key()
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
