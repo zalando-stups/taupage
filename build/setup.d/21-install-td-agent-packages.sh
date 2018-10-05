@@ -1,4 +1,6 @@
 #!/bin/bash
+#make script fail on error
+set -e 
 
 # Ensure that /etc/init.d/td-agent is removed
 rm /etc/init.d/td-agent
