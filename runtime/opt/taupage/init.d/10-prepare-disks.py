@@ -73,6 +73,7 @@ def delete_tags(ec2, resource_ids, tags):
 def find_volume(ec2, name):
     """Looks up the EBS volume with a given Name tag"""
     tries = 10
+    sleep_sec = 120
     volumes = []
     while not volumes:
         try:
@@ -88,8 +89,8 @@ def find_volume(ec2, name):
             logging.error('No matching "available" EBS volume with name %s found.', name)
             tries -= 1
             if tries > 0:
-                logging.error('Sleeping for 60 seconds and hope volume will become "available"')
-                time.sleep(120)
+                logging.info('Sleeping for %d seconds and hope volume will become "available"', sleep_sec)
+                time.sleep(sleep_sec)
             else:
                 sys.exit(2)
 
