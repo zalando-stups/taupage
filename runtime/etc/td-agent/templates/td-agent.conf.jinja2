@@ -1,0 +1,278 @@
+<source>
+  @type tail
+  path /var/log/syslog
+  pos_file /var/log/td-agent/syslog.pos
+  tag {{ fluentd_syslog_destination }}.*
+  <parse>
+    @type none
+  </parse>
+</source>
+
+<source>
+  @type tail
+  path /var/log/application.log
+  pos_file /var/log/td-agent/application.log.pos
+  tag {{ fluentd_applog_destination }}.*
+  <parse>
+    @type none
+  </parse>
+</source>
+
+<source>
+  @type tail
+  path /var/log/auth.log
+  pos_file /var/log/td-agent/auth.log.pos
+  tag {{ fluentd_authlog_destination }}.*
+  <parse>
+    @type none
+  </parse>
+</source>
+
+{% if customlog %}
+<source>
+  @type tail
+  path /var/log-custom/*.log
+  pos_file /var/log/td-agent/custom.log.pos
+  tag {{ fluentd_customlog_destination }}.*
+  <parse>
+    @type none
+  </parse>
+</source>
+{% endif %}
+
+<filter scalyr.**.application.log scalyr_s3.**.application.log>
+  @type record_transformer
+  <record>
+    parser {{ scalyr_application_log_parser }}
+  </record>
+</filter>
+
+<filter scalyr.**.syslog scalyr.**.auth.log scalyr_s3.**.syslog scalyr_s3.**.auth.log>
+  @type record_transformer
+  <record>
+    parser {{ scalyr_syslog_log_parser }}
+  </record>
+</filter>
+
+<filter scalyr.**.log-custom.** scalyr_s3.**.log-custom.**>
+  @type record_transformer
+  <record>
+    parser {{ scalyr_custom_log_parser }}
+  </record>
+</filter>
+
+<filter scalyr.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
+<filter s3.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
+<filter scalyr_s3.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
+<filter rsyslog.**>
+  @type prometheus
+  <metric>
+    name fluentd_input_status_num_records_total
+    type counter
+    desc The total number of incoming records
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
+
+{% if fluentd_destinations['scalyr'] %}
+<match scalyr.**>
+  @type copy
+  <store>
+    @type scalyr
+    api_write_token  {{ scalyr_api_key }}
+    server_attributes {
+      "application_id": "{{ application_id }}",
+      "application_version": "{{ application_version }}",
+      "aws_account": "{{ aws_account }}",
+      "aws_region": "{{ aws_region }}",
+      "image": "{{ image }}",
+      "serverHost": "{{ application_id }}",
+      "source": "{{ source }}",
+      "stack": "{{ stack }}"
+    }
+    ssl_ca_bundle_path /etc/ssl/certs/scalyr-ca-bundle.crt
+    ssl_verify_peer true
+    ssl_verify_depth 5
+    scalyr_server https://eu.scalyr.com/
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
+
+{% if fluentd_destinations['s3'] %}
+<match s3.**>
+  @type copy
+  <store>
+    @type s3
+    s3_region {{ fluentd_s3_region }}
+    s3_bucket {{ fluentd_s3_bucket }}
+    path logs/{{ stack }}
+    s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
+    <buffer time,tag>
+      @type file
+      path  /var/log/td-agent/s3buffer
+      timekey {{ fluentd_s3_timekey }}
+      timekey_wait 0s
+      flush_at_shutdown true
+    </buffer>
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
+
+{% if fluentd_destinations['scalyr_s3'] %}
+<match scalyr_s3.**>
+  @type copy
+  <store>
+    @type scalyr
+    api_write_token  {{ scalyr_api_key }}
+    server_attributes {
+      "application_id": "{{ application_id }}",
+      "application_version": "{{ application_version }}",
+      "aws_account": "{{ aws_account }}",
+      "aws_region": "{{ aws_region }}",
+      "image": "{{ image }}",
+      "serverHost": "{{ application_id }}",
+      "source": "{{ source }}",
+      "stack": "{{ stack }}"
+    }
+    ssl_ca_bundle_path /etc/ssl/certs/scalyr-ca-bundle.crt
+    ssl_verify_peer true
+    ssl_verify_depth 5
+    scalyr_server https://eu.scalyr.com/
+  </store>
+  <store>
+    @type s3
+    s3_region {{ fluentd_s3_region }}
+    s3_bucket {{ fluentd_s3_bucket }}
+    path logs/{{ stack }}
+    s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
+    <buffer time,tag>
+      @type file
+      path  /var/log/td-agent/scalyr_s3buffer
+      timekey {{ fluentd_s3_timekey }}
+      timekey_wait 0s
+      flush_at_shutdown true
+    </buffer>
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
+
+{% if fluentd_destinations['rsyslog'] %}
+<match rsyslog.**>
+  @type copy
+  <store>
+  @type remote_syslog
+  host {{ fluentd_rsyslog_host }}
+  port {{ fluentd_rsyslog_port }}
+  protocol {{ fluentd_rsyslog_protocol }}
+  severity {{ fluentd_rsyslog_severity }}
+  program {{ fluentd_rsyslog_program }}
+  hostname {{ fluentd_rsyslog_hostname }}
+  </store>
+  <store>
+    @type prometheus
+    <metric>
+      name fluentd_output_status_num_records_total
+      type counter
+      desc The total number of outgoing records
+      <labels>
+        tag ${tag}
+        hostname ${hostname}
+      </labels>
+    </metric>
+  </store>
+</match>
+{% endif %}
+
+<system>
+  log_level {{ fluentd_loglevel }}
+</system>
+
+<source>
+  @type prometheus
+  bind 0.0.0.0
+  port 9110
+  metrics_path /metrics
+</source>
+
+<source>
+  @type prometheus_output_monitor
+  interval 60
+  <labels>
+    hostname ${hostname}
+  </labels>
+</source>
