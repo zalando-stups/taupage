@@ -26,17 +26,19 @@ else
   SCALYR_AGENT_ENABLED=$config_logging_scalyr_agent_enabled
   LOGPARSER=${config_logging_scalyr_application_log_parser:-slf4j}
   CUSTOMPARSER=${config_logging_scalyr_custom_log_parser:-slf4j}
-  if [ "$FLUENTD_ENABLED" = "True" ];
-  then
-    USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-False}
-  else
-    USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-True}
-  fi
-  USE_SCALYR_AGENT_APPLOG=${config_logging_use_scalyr_agent_applog:-${USE_SCALYR_AGENT_ALL}}
-  USE_SCALYR_AGENT_SYSLOG=${config_logging_use_scalyr_agent_syslog:-${USE_SCALYR_AGENT_ALL}}
-  USE_SCALYR_AGENT_AUTHLOG=${config_logging_use_scalyr_agent_authlog:-${USE_SCALYR_AGENT_ALL}}
-  USE_SCALYR_AGENT_CUSTOMLOG=${config_logging_use_scalyr_agent_customlog:-${USE_SCALYR_AGENT_ALL}}
 fi
+
+if [ "$FLUENTD_ENABLED" = "True" ];
+then
+   USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-False}
+else
+   USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-True}
+fi
+
+USE_SCALYR_AGENT_APPLOG=${config_logging_use_scalyr_agent_applog:-${USE_SCALYR_AGENT_ALL}}
+USE_SCALYR_AGENT_SYSLOG=${config_logging_use_scalyr_agent_syslog:-${USE_SCALYR_AGENT_ALL}}
+USE_SCALYR_AGENT_AUTHLOG=${config_logging_use_scalyr_agent_authlog:-${USE_SCALYR_AGENT_ALL}}
+USE_SCALYR_AGENT_CUSTOMLOG=${config_logging_use_scalyr_agent_customlog:-${USE_SCALYR_AGENT_ALL}}
 
 # Skip Scalyr Agent setup if Scalyr Agent was disabled.
 if [ "$SCALYR_AGENT_ENABLED" = "False" ];
