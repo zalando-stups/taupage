@@ -81,3 +81,6 @@ sysctl:
 # Edit sysfs paths
 sysfs:
   /sys/kernel/mm/transparent_hugepage/enabled: never
+
+# Set Scalyr config
+scalyr_account_key: 123
