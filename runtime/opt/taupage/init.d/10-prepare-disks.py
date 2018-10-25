@@ -231,22 +231,22 @@ ERASE_ON_BOOT_TAG_NAME = 'Taupage:erase-on-boot'
 
 def should_format_volume(region, partition, erase_on_boot):
     """
-We need to take a safe decision whether to format a volume or not
-based on two inputs: value of user data flag and EBS volume tag.  The
-tag can either be or not be there, which we model with values True and
-False.  The user data flag can have 3 possible values: True, False and
-None (when not given at all).
+    We need to take a safe decision whether to format a volume or not
+    based on two inputs: value of user data flag and EBS volume tag.  The
+    tag can either be or not be there, which we model with values True and
+    False.  The user data flag can have 3 possible values: True, False and
+    None (when not given at all).
 
-In the following table we mark the decision to format with exclamation
-mark:
+    In the following table we mark the decision to format with exclamation
+    mark:
 
-Data \ Tag | T | F
------------+---+---
-         T | ! | !
------------+---+---
-         F | - | -
------------+---+---
-         N | ! | -
+    Data / Tag | T | F
+    -----------+---+---
+            T | ! | !
+    -----------+---+---
+            F | - | -
+    -----------+---+---
+            N | ! | -
     """
     erase_tag_set = False
     #
