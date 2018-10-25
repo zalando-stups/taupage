@@ -22,7 +22,7 @@ end
 # Ensure that /var/log/application.log is readable (chmod 644
 describe file('/var/log/application.log') do
   it { should be_mode 644 }
-end)
+end
 
 # Check if Scalyr output plugin is installed
 describe command('td-agent-gem list') do
