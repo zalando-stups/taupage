@@ -83,4 +83,4 @@ sysfs:
   /sys/kernel/mm/transparent_hugepage/enabled: never
 
 # Dummy Scalyr key
-scalyr_account_key: 123
+scalyr_account_key: foo1234
