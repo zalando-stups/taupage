@@ -84,11 +84,8 @@ def get_secret_envs(config: dict):
     >>> get_secret_envs({"environment": {"abc": "aws:kms:kmsencval", "def": "unencval"}})
     frozenset({'abc'})
     """
-    secret_keys = []
     env_vars = config.get('environment', {})
-    for k, v in env_vars.items():
-        if v.startswith(AWS_KMS_PREFIX):
-            secret_keys.append(k)
+    secret_keys = [k for k, v in env_vars.items() if v.startswith(AWS_KMS_PREFIX)]
     return frozenset(secret_keys)
 
 
@@ -328,8 +325,8 @@ def run_docker(cmd, dry_run):
                 out = subprocess.check_output(cmd)
                 break
             except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                if i + 1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
@@ -366,7 +363,7 @@ def wait_for_health_check(config: dict):
         time.sleep(2)
 
     logging.error('Timeout of {}s expired for health check :{}{}'.format(
-                  health_check_timeout_seconds, health_check_port, health_check_path))
+        health_check_timeout_seconds, health_check_port, health_check_path))
     sys.exit(2)
 
 
