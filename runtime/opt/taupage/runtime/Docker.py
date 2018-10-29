@@ -59,21 +59,37 @@ def decrypt(val):
         return val
 
 
-def mask_command(cmd: list):
+def mask_command(cmd: list, secret_envs: frozenset):
     '''
-    >>> mask_command([])
+    >>> mask_command([], frozenset({}))
     ''
 
-    >>> mask_command(['-e', 'SECRET=abc'])
+    >>> mask_command(['-e', 'SECRET=abc'], frozenset({}))
     '-e SECRET=MASKED'
+
+    >>> mask_command(['-e', 'DB_PW=abc'], frozenset({"DB_PW"}))
+    '-e DB_PW=MASKED'
     '''
     masked_cmd = []
     for arg in cmd:
         key, sep, val = arg.partition('=')
-        if is_sensitive_key(key):
+        if is_sensitive_key(key) or key in secret_envs:
             val = 'MASKED'
         masked_cmd.append(key + sep + val)
     return ' '.join(masked_cmd)
+
+
+def get_secret_envs(config: dict):
+    """
+    >>> get_secret_envs({"abc": "aws:kms:kmsencval", "def": "unencval"})
+    frozenset({"abc"})
+    """
+    secret_keys = []
+    env_vars = config.get('environment', {})
+    for k, v in env_vars:
+        if v.startswith(AWS_KMS_PREFIX):
+            secret_keys.append(k)
+    return frozenset(secret_keys)
 
 
 def wait_for_local_planb_tokeninfo():
@@ -100,8 +116,7 @@ def wait_for_local_planb_tokeninfo():
 
         time.sleep(2)
 
-    logging.error('Timeout of {}s expired for local Plan B Token Info'.format(
-                  timeout_seconds))
+    logging.error('Timeout of {}s expired for local Plan B Token Info'.format(timeout_seconds))
     # failed to start local Token Info
     # => use global one
     return None
@@ -306,7 +321,6 @@ def registry_login(config: dict, registry: str):
 
 
 def run_docker(cmd, dry_run):
-    logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
     if not args.dry_run:
         max_tries = 3
         for i in range(max_tries):
@@ -388,7 +402,6 @@ def is_valid_source(source):
 
 
 def main(args):
-
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
@@ -429,6 +442,9 @@ def main(args):
             cmd += list(f(config))
         cmd += [source]
 
+        secret_envs = get_secret_envs(config)
+
+        logging.info('Starting Docker container: {}'.format(mask_command(cmd, secret_envs)))
         try:
             run_docker(cmd, args.dry_run)
         except Exception as e:
