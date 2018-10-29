@@ -81,12 +81,12 @@ def mask_command(cmd: list, secret_envs: frozenset):
 
 def get_secret_envs(config: dict):
     """
-    >>> get_secret_envs({"abc": "aws:kms:kmsencval", "def": "unencval"})
-    frozenset({"abc"})
+    >>> get_secret_envs({"environment": {"abc": "aws:kms:kmsencval", "def": "unencval"}})
+    frozenset({'abc'})
     """
     secret_keys = []
     env_vars = config.get('environment', {})
-    for k, v in env_vars:
+    for k, v in env_vars.items():
         if v.startswith(AWS_KMS_PREFIX):
             secret_keys.append(k)
     return frozenset(secret_keys)
