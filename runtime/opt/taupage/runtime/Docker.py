@@ -59,21 +59,34 @@ def decrypt(val):
         return val
 
 
-def mask_command(cmd: list):
+def mask_command(cmd: list, secret_envs: frozenset):
     '''
-    >>> mask_command([])
+    >>> mask_command([], frozenset({}))
     ''
 
-    >>> mask_command(['-e', 'SECRET=abc'])
+    >>> mask_command(['-e', 'SECRET=abc'], frozenset({}))
     '-e SECRET=MASKED'
+
+    >>> mask_command(['-e', 'DB_PW=abc'], frozenset({"DB_PW"}))
+    '-e DB_PW=MASKED'
     '''
     masked_cmd = []
     for arg in cmd:
         key, sep, val = arg.partition('=')
-        if is_sensitive_key(key):
+        if is_sensitive_key(key) or key in secret_envs:
             val = 'MASKED'
         masked_cmd.append(key + sep + val)
     return ' '.join(masked_cmd)
+
+
+def get_secret_envs(config: dict):
+    """
+    >>> get_secret_envs({"environment": {"abc": "aws:kms:kmsencval", "def": "unencval"}})
+    frozenset({'abc'})
+    """
+    env_vars = config.get('environment', {})
+    secret_keys = [k for k, v in env_vars.items() if v.startswith(AWS_KMS_PREFIX)]
+    return frozenset(secret_keys)
 
 
 def wait_for_local_planb_tokeninfo():
@@ -100,8 +113,7 @@ def wait_for_local_planb_tokeninfo():
 
         time.sleep(2)
 
-    logging.error('Timeout of {}s expired for local Plan B Token Info'.format(
-                  timeout_seconds))
+    logging.error('Timeout of {}s expired for local Plan B Token Info'.format(timeout_seconds))
     # failed to start local Token Info
     # => use global one
     return None
@@ -306,7 +318,6 @@ def registry_login(config: dict, registry: str):
 
 
 def run_docker(cmd, dry_run):
-    logging.info('Starting Docker container: {}'.format(mask_command(cmd)))
     if not args.dry_run:
         max_tries = 3
         for i in range(max_tries):
@@ -314,8 +325,8 @@ def run_docker(cmd, dry_run):
                 out = subprocess.check_output(cmd)
                 break
             except Exception as e:
-                if i+1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i+1, max_tries))
+                if i + 1 < max_tries:
+                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
                     time.sleep(5)
                 else:
                     raise e
@@ -352,7 +363,7 @@ def wait_for_health_check(config: dict):
         time.sleep(2)
 
     logging.error('Timeout of {}s expired for health check :{}{}'.format(
-                  health_check_timeout_seconds, health_check_port, health_check_path))
+        health_check_timeout_seconds, health_check_port, health_check_path))
     sys.exit(2)
 
 
@@ -388,7 +399,6 @@ def is_valid_source(source):
 
 
 def main(args):
-
     with open(args.config) as fd:
         config = yaml.safe_load(fd)
 
@@ -429,6 +439,9 @@ def main(args):
             cmd += list(f(config))
         cmd += [source]
 
+        secret_envs = get_secret_envs(config)
+
+        logging.info('Starting Docker container: {}'.format(mask_command(cmd, secret_envs)))
         try:
             run_docker(cmd, args.dry_run)
         except Exception as e:
