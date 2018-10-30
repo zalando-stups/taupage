@@ -34,6 +34,7 @@ rsyslog-gnutls
 ruby
 scalyr-agent-2
 sysstat
+td-agent
 unhide.rb
 unzip
 xfsprogs

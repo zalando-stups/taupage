@@ -73,6 +73,7 @@ def delete_tags(ec2, resource_ids, tags):
 def find_volume(ec2, name):
     """Looks up the EBS volume with a given Name tag"""
     tries = 10
+    sleep_sec = 120
     volumes = []
     while not volumes:
         try:
@@ -88,8 +89,8 @@ def find_volume(ec2, name):
             logging.error('No matching "available" EBS volume with name %s found.', name)
             tries -= 1
             if tries > 0:
-                logging.error('Sleeping for 60 seconds and hope volume will become "available"')
-                time.sleep(120)
+                logging.info('Sleeping for %d seconds and hope volume will become "available"', sleep_sec)
+                time.sleep(sleep_sec)
             else:
                 sys.exit(2)
 
@@ -230,22 +231,22 @@ ERASE_ON_BOOT_TAG_NAME = 'Taupage:erase-on-boot'
 
 def should_format_volume(region, partition, erase_on_boot):
     """
-We need to take a safe decision whether to format a volume or not
-based on two inputs: value of user data flag and EBS volume tag.  The
-tag can either be or not be there, which we model with values True and
-False.  The user data flag can have 3 possible values: True, False and
-None (when not given at all).
+    We need to take a safe decision whether to format a volume or not
+    based on two inputs: value of user data flag and EBS volume tag.  The
+    tag can either be or not be there, which we model with values True and
+    False.  The user data flag can have 3 possible values: True, False and
+    None (when not given at all).
 
-In the following table we mark the decision to format with exclamation
-mark:
+    In the following table we mark the decision to format with exclamation
+    mark:
 
-Data / Tag | T | F
------------+---+---
-         T | ! | !
------------+---+---
-         F | - | -
------------+---+---
-         N | ! | -
+    Data / Tag | T | F
+    -----------+---+---
+            T | ! | !
+    -----------+---+---
+            F | - | -
+    -----------+---+---
+            N | ! | -
     """
     erase_tag_set = False
     #
