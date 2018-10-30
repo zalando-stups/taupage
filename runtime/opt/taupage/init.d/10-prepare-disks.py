@@ -239,7 +239,7 @@ None (when not given at all).
 In the following table we mark the decision to format with exclamation
 mark:
 
-Data \ Tag | T | F
+Data / Tag | T | F
 -----------+---+---
          T | ! | !
 -----------+---+---
