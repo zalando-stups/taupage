@@ -39,7 +39,7 @@ def retry(name, max_tries=3, retry_delay=5):
                     return fn(*args, **kwargs)
                 except PermanentError:
                     raise
-                except Exception as e:
+                except Exception:
                     if attempt >= max_tries:
                         raise
                     else:
