@@ -24,6 +24,11 @@ from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 AWS_KMS_PREFIX = 'aws:kms:'
 
 
+class PermanentError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 def retry(name, max_tries=3, retry_delay=5):
     def decorator(fn):
         @functools.wraps(fn)
@@ -32,6 +37,8 @@ def retry(name, max_tries=3, retry_delay=5):
             while True:
                 try:
                     return fn(*args, **kwargs)
+                except PermanentError:
+                    raise
                 except Exception as e:
                     if attempt >= max_tries:
                         raise
@@ -329,7 +336,7 @@ def registry_login(config: dict, registry: str):
 
 
 @retry("verifying trusted image", max_tries=3, retry_delay=5)
-def image_trusted(registry, org, name, tag):
+def verify_image_trusted(registry, org, name, tag):
     if registry_requires_auth(registry):
         headers = {"Authorization": "Basic {}".format(pierone.api.iid_auth())}
     else:
@@ -338,12 +345,12 @@ def image_trusted(registry, org, name, tag):
     url = "https://{}/v2/{}/{}/manifests/{}".format(registry, org, name, tag)
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
-    return response.headers.get("X-Trusted") == "true"
 
+    if response.headers.get("X-Production-Ready-Taupage") == "true" or response.headers.get("X-Trusted") == "true":
+        return
 
-def verify_image_trusted(registry, org, name, tag):
-    if not image_trusted(registry, org, name, tag):
-        raise ValueError("image is untrusted")
+    message = response.headers.get("X-Production-Ready-Reason") or "image is untrusted"
+    raise PermanentError(message)
 
 
 @retry("Docker run", max_tries=3, retry_delay=5)
