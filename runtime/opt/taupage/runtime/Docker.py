@@ -346,7 +346,8 @@ def verify_image_trusted(registry, org, name, tag):
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
 
-    if response.headers.get("X-Production-Ready-Taupage") == "true" or response.headers.get("X-Trusted") == "true":
+    ready = response.headers.get("X-Production-Ready-Taupage") or response.headers.get("X-Trusted")
+    if ready == "true":
         return
 
     message = response.headers.get("X-Production-Ready-Reason") or "image is untrusted"
