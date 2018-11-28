@@ -7,6 +7,7 @@ import argparse
 import base64
 import boto.kms
 import boto.utils
+import functools
 import logging
 import pierone.api
 import pwd
@@ -21,6 +22,32 @@ import glob
 from taupage import is_sensitive_key, CREDENTIALS_DIR, get_or, get_default_port
 
 AWS_KMS_PREFIX = 'aws:kms:'
+
+
+class PermanentError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+def retry(name, max_tries=3, retry_delay=5):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def decorated(*args, **kwargs):
+            attempt = 1
+            while True:
+                try:
+                    return fn(*args, **kwargs)
+                except PermanentError:
+                    raise
+                except Exception:
+                    if attempt >= max_tries:
+                        raise
+                    else:
+                        logging.warning('{} failed (try {}/{}), retrying...'.format(name, attempt, max_tries))
+                        attempt += 1
+                        time.sleep(retry_delay)
+        return decorated
+    return decorator
 
 
 def get_region():
@@ -298,42 +325,43 @@ def get_other_options(config: dict):
         yield '--shm-size={}'.format(config.get('shm_size'))
 
 
-def extract_registry(docker_image: str) -> str:
-    """
-    >>> extract_registry('nginx')
-
-    >>> extract_registry('foo.bar.example.com:2195/namespace/my_repo:1.0')
-    'foo.bar.example.com:2195'
-    """
-
-    parts = docker_image.split('/')
-    if len(parts) == 3:
-        return parts[0]
-    return None
+def registry_requires_auth(registry: str):
+    return registry == 'pierone.stups.zalan.do'
 
 
 def registry_login(config: dict, registry: str):
-    if 'pierone' not in registry:
-        logging.warning('Docker registry seems not to be Pier One, skipping OAuth login')
+    if registry_requires_auth(registry):
+        pierone_url = 'https://{}'.format(registry)
+        pierone.api.docker_login_with_iid(pierone_url)
+
+
+@retry("verifying trusted image", max_tries=3, retry_delay=5)
+def verify_image_trusted(registry, org, name, tag):
+    if registry_requires_auth(registry):
+        headers = {"Authorization": "Basic {}".format(pierone.api.iid_auth())}
+    else:
+        headers = {}
+
+    url = "https://{}/v2/{}/{}/manifests/{}".format(registry, org, name, tag)
+    response = requests.get(url, headers=headers, timeout=30)
+    response.raise_for_status()
+
+    ready = response.headers.get("X-Production-Ready-Taupage") or response.headers.get("X-Trusted")
+    if ready == "true":
         return
-    pierone_url = 'https://{}'.format(registry)
-    pierone.api.docker_login_with_iid(pierone_url)
+
+    message = response.headers.get("X-Production-Ready-Reason") or "image is untrusted"
+    raise PermanentError(message)
+
+
+@retry("Docker run", max_tries=3, retry_delay=5)
+def start_docker(cmd):
+    return subprocess.check_output(cmd).decode('utf-8').strip()
 
 
 def run_docker(cmd, dry_run):
     if not args.dry_run:
-        max_tries = 3
-        for i in range(max_tries):
-            try:
-                out = subprocess.check_output(cmd)
-                break
-            except Exception as e:
-                if i + 1 < max_tries:
-                    logging.info('Docker run failed (try {}/{}), retrying in 5s..'.format(i + 1, max_tries))
-                    time.sleep(5)
-                else:
-                    raise e
-        container_id = out.decode('utf-8').strip()
+        container_id = start_docker(cmd)
         logging.info('Container {} is running'.format(container_id))
 
 
@@ -370,35 +398,63 @@ def wait_for_health_check(config: dict):
     sys.exit(2)
 
 
-def is_valid_source(source):
-    '''
-    >>> is_valid_source('')
-    False
+def parse_image_tag(source):
+    '''Parse a docker tag into image, org, name, tag, throwing an error if any of the components are missing.
 
-    >>> is_valid_source('foo/bar')
-    False
+    >>> parse_image_tag('')
+    Traceback (most recent call last):
+    ...
+    ValueError: Image tag not specified
 
-    >>> is_valid_source('foo/bar:latest')
-    False
+    >>> parse_image_tag('nginx:1.2.3')
+    Traceback (most recent call last):
+    ...
+    ValueError: No registry specified or invalid image name: nginx
 
-    >>> is_valid_source('foo/bar:1.0-SNAPSHOT')
-    False
+    >>> parse_image_tag('foo/nginx:1.2.3')
+    Traceback (most recent call last):
+    ...
+    ValueError: No registry specified or invalid image name: foo/nginx
 
-    >>> is_valid_source('foo/bar:1.0')
-    True
-    '''
-    parts = source.rsplit(':', 1)
-    if len(parts) != 2:
-        # missing tag
-        return False
-    _, tag = parts
-    if tag == 'latest':
-        # mutable "latest" images are not allowed
-        return False
-    elif 'SNAPSHOT' in tag:
-        # mutable *-SNAPSHOT images are not allowed
-        return False
-    return True
+    >>> parse_image_tag('registry.example.org/foo/nginx')
+    Traceback (most recent call last):
+    ...
+    ValueError: Image tag not specified
+
+    >>> parse_image_tag('registry.example.org/foo/nginx:')
+    Traceback (most recent call last):
+    ...
+    ValueError: Image tag not specified
+
+    >>> parse_image_tag('registry.example.org/foo/nginx:latest')
+    Traceback (most recent call last):
+    ...
+    ValueError: latest and snapshot tags are non-compliant
+
+    >>> parse_image_tag('registry.example.org/foo/nginx:foo-SNAPSHOT')
+    Traceback (most recent call last):
+    ...
+    ValueError: latest and snapshot tags are non-compliant
+
+    >>> parse_image_tag('registry.example.org/foo/nginx:1.2.3')
+    ('registry.example.org', 'foo', 'nginx', '1.2.3')
+'''
+    if ":" not in source:
+        raise ValueError("Image tag not specified")
+
+    image, tag = source.split(":", 1)
+    if tag == "":
+        raise ValueError("Image tag not specified")
+
+    if tag == "latest" or "SNAPSHOT" in tag:
+        raise ValueError("latest and snapshot tags are non-compliant".format(tag))
+
+    image_parts = image.split("/", 2)
+    if len(image_parts) != 3:
+        raise ValueError("No registry specified or invalid image name: {}".format(image))
+
+    registry, org, name = image_parts
+    return registry, org, name, tag
 
 
 def main(args):
@@ -407,8 +463,10 @@ def main(args):
 
     source = config['source']
 
-    if not is_valid_source(source):
-        logging.error('Invalid source Docker image: %s', source)
+    try:
+        registry, org, name, tag = parse_image_tag(source)
+    except ValueError as e:
+        logging.error('Invalid source Docker image: %s', e)
         sys.exit(1)
 
     docker_cmd = get_docker_command(config)
@@ -432,10 +490,12 @@ def main(args):
             logging.error('Docker start of existing container failed: %s', str(e))
             sys.exit(1)
     else:
-        registry = extract_registry(source)
-
-        if registry:
-            registry_login(config, registry)
+        registry_login(config, registry)
+        try:
+            verify_image_trusted(registry, org, name, tag)
+        except Exception as e:
+            logging.error("Trusted image check failed: %s", e)
+            sys.exit(1)
 
         cmd = [docker_cmd, 'run', '-d', '--log-driver=syslog', '--name=taupageapp', '--restart=on-failure:10']
         for f in get_env_options, get_volume_options, get_port_options, get_other_options:
