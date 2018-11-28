@@ -4,7 +4,7 @@ application_id: my-http-test-batch-ami
 application_version: "1.0"
 
 runtime: Docker
-source: registry.opensource.zalan.do/teapot/docker-simple-job:0.1
+source: registry.opensource.zalan.do/teapot/docker-simple-job:master-12
 
 environment:
   EXIT: 0
