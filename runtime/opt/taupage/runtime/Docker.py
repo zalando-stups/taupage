@@ -113,8 +113,16 @@ def get_secret_envs(config: dict):
 
     >>> get_secret_envs({"environment": {"abc": False, "def" : "aws:kms:secrev"}})
     frozenset({'def'})
+
+    >>> get_secret_envs({"environment": None})
+    frozenset()
+
+    >>> get_secret_envs({"environment": ["abc","def"]})
+    frozenset()
     """
     env_vars = config.get('environment', {})
+    if not env_vars or type(env_vars) != dict:
+        return frozenset()
     secret_keys = [k for k, v in env_vars.items() if type(v) == str and v.startswith(AWS_KMS_PREFIX)]
     return frozenset(secret_keys)
 
