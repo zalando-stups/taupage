@@ -21,6 +21,9 @@ share_ami() {
     local ami_data=$(aws ec2 describe-images --region "$region" --filters "Name=name,Values=TaupageBuild-$TAUPAGE_VERSION" --query 'Images[0]' --output json)
     local imageid=$(echo "$ami_data" | jq -r '.ImageId')
     local build_date=$(echo "$ami_data" | jq -r '.Tags[] | select(.Key == "BuildDate") | .Value')
+    local build_date_parsed="$(echo "$build_date" | sed -E 's/([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3T\4:\5:\6Z/')"
+    local ami_expiration="$(date -d "${build_date_parsed} + ${expire_time}" '+%Y-%m-%dT%H:%M:%SZ')"
+
     if [[ -z "$build_date" ]]; then
         echo "BuildDate not set, cannot copy the image" >2
         exit 1
@@ -50,7 +53,7 @@ share_ami() {
     done
 
     # Update the image tags
-    local tags="$(jq -n --arg build_date "$build_date" --arg version "$TAUPAGE_VERSION" --arg source_ami "$imageid" --arg commit_id "$commit_id" '[{Key: "BuildDate", Value: $build_date}, {Key: "SourceAMI", Value: $source_ami}, {Key: "CommitID", Value: $commit_id}, {Key: "Version", Value: $version}]')"
+    local tags="$(jq -n --arg build_date "$build_date" --arg version "$TAUPAGE_VERSION" --arg source_ami "$imageid" --arg commit_id "$commit_id" --arg ami_expiration "$ami_expiration" '[{Key: "BuildDate", Value: $build_date}, {Key: "SourceAMI", Value: $source_ami}, {Key: "CommitID", Value: $commit_id}, {Key: "Version", Value: $version}, {Key: "ExpirationTime", Value: $ami_expiration}]')"
     aws ec2 create-tags --region "$region" --resources "$target_imageid" --tags "$tags"
 
     echo "Sharing the AMI with AWS accounts: $all_accounts"
