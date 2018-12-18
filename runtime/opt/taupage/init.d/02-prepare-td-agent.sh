@@ -4,3 +4,5 @@
 mkdir -p -m0755 /var/run/td-agent
 
 service td-agent start
+sleep 5
+service td-agent stop
