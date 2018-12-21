@@ -516,7 +516,7 @@ def main(args):
         try:
             run_docker(cmd, args.dry_run)
         except Exception as e:
-            logging.error('Docker run failed: %s', mask_command(str(e).split(' ')))
+            logging.error('Docker run failed: %s', mask_command(str(e).split(' '), secret_envs))
             sys.exit(1)
 
     wait_for_health_check(config)
