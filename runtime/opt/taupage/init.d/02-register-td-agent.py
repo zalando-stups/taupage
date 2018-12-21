@@ -115,6 +115,7 @@ def update_configuration_from_template():
         fluentd_syslog_destination=fluentd_syslog_destination,
         fluentd_applog_destination=fluentd_applog_destination,
         fluentd_authlog_destination=fluentd_authlog_destination,
+        fluentd_customlog_destination=fluentd_customlog_destination,
         fluentd_loglevel=fluentd_loglevel,
         fluentd_s3_region=fluentd_s3_region,
         fluentd_s3_bucket=fluentd_s3_bucket,
