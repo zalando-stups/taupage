@@ -78,9 +78,11 @@ def update_configuration_from_template():
     fluentd_authlog_destination = logging_config.get('authlog_destination', fluentd_log_destination)
     fluentd_customlog_destination = logging_config.get('customlog_destination', fluentd_log_destination)
     fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
+    fluentd_s3_raw_log_format = logging_config.get('s3_raw_log_format', 'true')
     fluentd_s3_region = logging_config.get('s3_region', 'eu-central-1')
     fluentd_s3_bucket = logging_config.get('s3_bucket')
     fluentd_s3_timekey = logging_config.get('s3_timekey', '1m')
+    fluentd_s3_acl = logging_config.get('s3_acl', 'private')
     fluentd_rsyslog_host = logging_config.get('rsyslog_host')
     fluentd_rsyslog_port = logging_config.get('rsyslog_port', '514')
     fluentd_rsyslog_protocol = logging_config.get('rsyslog_protocol', 'tcp')
@@ -97,6 +99,8 @@ def update_configuration_from_template():
     # Get Scalyr key only if configured
     if fluentd_destinations.get('scalyr') or fluentd_destinations.get('scalyr_s3'):
         scalyr_api_key = get_scalyr_api_key()
+    else:
+        scalyr_api_key = None
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -117,9 +121,11 @@ def update_configuration_from_template():
         fluentd_authlog_destination=fluentd_authlog_destination,
         fluentd_customlog_destination=fluentd_customlog_destination,
         fluentd_loglevel=fluentd_loglevel,
+        fluentd_s3_raw_log_format=fluentd_s3_raw_log_format,
         fluentd_s3_region=fluentd_s3_region,
         fluentd_s3_bucket=fluentd_s3_bucket,
         fluentd_s3_timekey=fluentd_s3_timekey,
+        fluentd_s3_acl=fluentd_s3_acl,
         fluentd_rsyslog_host=fluentd_rsyslog_host,
         fluentd_rsyslog_port=fluentd_rsyslog_port,
         fluentd_rsyslog_protocol=fluentd_rsyslog_protocol,

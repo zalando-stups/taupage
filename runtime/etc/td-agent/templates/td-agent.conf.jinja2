@@ -1,5 +1,6 @@
 <source>
   @type tail
+  read_from_head true
   path /var/log/syslog
   pos_file /var/log/td-agent/syslog.pos
   tag {{ fluentd_syslog_destination }}.*
@@ -10,6 +11,7 @@
 
 <source>
   @type tail
+  read_from_head true
   path /var/log/application.log
   pos_file /var/log/td-agent/application.log.pos
   tag {{ fluentd_applog_destination }}.*
@@ -20,6 +22,7 @@
 
 <source>
   @type tail
+  read_from_head true
   path /var/log/auth.log
   pos_file /var/log/td-agent/auth.log.pos
   tag {{ fluentd_authlog_destination }}.*
@@ -31,6 +34,7 @@
 {% if customlog %}
 <source>
   @type tail
+  read_from_head true
   path /var/log-custom/*.log
   pos_file /var/log/td-agent/custom.log.pos
   tag {{ fluentd_customlog_destination }}.*
@@ -158,6 +162,7 @@
     s3_bucket {{ fluentd_s3_bucket }}
     path logs/{{ stack }}
     s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
+    acl {{ fluentd_s3_acl }}
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/s3buffer
@@ -165,6 +170,11 @@
       timekey_wait 0s
       flush_at_shutdown true
     </buffer>
+    {% if fluentd_s3_raw_log_format %}
+    <format>
+      @type single_value
+    </format>
+    {% endif %}
   </store>
   <store>
     @type prometheus
@@ -208,6 +218,7 @@
     s3_bucket {{ fluentd_s3_bucket }}
     path logs/{{ stack }}
     s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
+    acl {{ fluentd_s3_acl }}
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/scalyr_s3buffer
@@ -215,6 +226,11 @@
       timekey_wait 0s
       flush_at_shutdown true
     </buffer>
+    {% if fluentd_s3_raw_log_format %}
+    <format>
+      @type single_value
+    </format>
+    {% endif %}
   </store>
   <store>
     @type prometheus
