@@ -100,7 +100,7 @@ def update_configuration_from_template():
     if fluentd_destinations.get('scalyr') or fluentd_destinations.get('scalyr_s3'):
         scalyr_api_key = get_scalyr_api_key()
     else:
-        scalyr_api_key = False
+        scalyr_api_key = None
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
