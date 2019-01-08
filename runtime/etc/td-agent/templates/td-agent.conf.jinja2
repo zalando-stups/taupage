@@ -218,6 +218,7 @@
     s3_bucket {{ fluentd_s3_bucket }}
     path logs/{{ stack }}
     s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
+    acl {{ fluentd_s3_acl }}
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/scalyr_s3buffer
@@ -225,6 +226,11 @@
       timekey_wait 0s
       flush_at_shutdown true
     </buffer>
+    {% if fluentd_s3_raw_log_format %}
+    <format>
+      @type single_value
+    </format>
+    {% endif %}
   </store>
   <store>
     @type prometheus
