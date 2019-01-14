@@ -11,6 +11,8 @@ STACK=$config_notify_cfn_stack
 IMAGE=$(echo "$SOURCE" | awk -F \: '{ print $1 }')
 AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .accountId)
 AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq --raw-output .region)
+AWS_EC2_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+AWS_EC2_HOSTNAME=$(curl -s http://169.254.169.254/latest/meta-data/hostname)
 CUSTOMLOG=$config_mount_custom_log
 #set Scalyr Variables
 if [ $(set -o posix;set|grep -c config_logging_) -eq 0 ];
@@ -108,7 +110,7 @@ scalyr_config=/etc/scalyr-agent-2/agent.json
 
 #set serverhost to application_id
 echo -n "set app name and version... ";
-sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\", aws_account:\"$AWS_ACCOUNT\", aws_region:\"$AWS_REGION\"@" $scalyr_config
+sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\", aws_account:\"$AWS_ACCOUNT\", aws_region:\"$AWS_REGION\", aws_ec2_instance_id:\"$AWS_EC2_INSTANCE_ID\", aws_ec2_hostname:\"$AWS_EC2_HOSTNAME\"@" $scalyr_config
 if [ $? -eq 0 ];
 then
     echo "DONE"

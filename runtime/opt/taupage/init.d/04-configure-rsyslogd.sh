@@ -39,7 +39,22 @@ EOF
     fi
 fi
 
-if [[ -n "$rsyslog_application_log_format" ]]; then
+if [[ ! -n "$rsyslog_application_log_format" ]]; then
+  cat >/etc/rsyslog.d/24-application.conf <<EOF
+\$template customApplicationLogFormat,"%msg%\\n"
+:syslogtag, startswith, "docker" /var/log/application.log; customApplicationLogFormat
+& ~
+EOF
+  need_rsyslog_restart='y'
+fi
+
+if [[ "$rsyslog_application_log_format" == "legacy"]]; then
+  cat >/etc/rsyslog.d/24-application.conf <<EOF
+:syslogtag, startswith, "docker" /var/log/application.log
+& ~
+EOF
+  need_rsyslog_restart='y'
+elif [[ -n "$rsyslog_application_log_format" ]]; then
   cat >/etc/rsyslog.d/24-application.conf <<EOF
 \$template customApplicationLogFormat,"$rsyslog_application_log_format"
 :syslogtag, startswith, "docker" /var/log/application.log; customApplicationLogFormat
