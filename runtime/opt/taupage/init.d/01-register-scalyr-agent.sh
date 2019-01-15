@@ -42,6 +42,11 @@ USE_SCALYR_AGENT_SYSLOG=${config_logging_use_scalyr_agent_syslog:-${USE_SCALYR_A
 USE_SCALYR_AGENT_AUTHLOG=${config_logging_use_scalyr_agent_authlog:-${USE_SCALYR_AGENT_ALL}}
 USE_SCALYR_AGENT_CUSTOMLOG=${config_logging_use_scalyr_agent_customlog:-${USE_SCALYR_AGENT_ALL}}
 
+SCALYR_AGENT_APPLOG_SAMPLING=${config_logging_scalyr_agent_applog_sampling:-1}
+SCALYR_AGENT_SYSLOG_SAMPLING=${config_logging_scalyr_agent_syslog_sampling:-1}
+SCALYR_AGENT_AUTHLOG_SAMPLING=${config_logging_scalyr_agent_authlog_sampling:-1}
+SCALYR_AGENT_CUSTOMLOG_SAMPLING=${config_logging_scalyr_agent_customlog_sampling:-1}
+
 # Skip Scalyr Agent setup if Scalyr Agent was disabled.
 if [ "$SCALYR_AGENT_ENABLED" = "False" ];
 then
@@ -135,7 +140,8 @@ fi
 if [ "$USE_SCALYR_AGENT_SYSLOG" = "True" ]
 then
   echo -n "insert syslog to follow... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"}, \
+  sampling_rules: [{ match_expression: \".\", sampling_rate: $SCALYR_AGENT_SYSLOG_SAMPLING }] } " $scalyr_config
 
   if [ $? -eq 0 ];
   then
@@ -150,7 +156,8 @@ fi
 if [ "$USE_SCALYR_AGENT_AUTHLOG" = "True" ]
 then
   echo -n "insert authlog to follow... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"}, \
+  sampling_rules: [{ match_expression: \".\", sampling_rate: $SCALYR_AGENT_AUTHLOG_SAMPLING }] } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo "DONE"
@@ -164,7 +171,8 @@ fi
 if [ "$USE_SCALYR_AGENT_APPLOG" = "True" ]
 then
   echo -n "insert application to follow... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"}, \
+  sampling_rules: [{ match_expression: \".\", sampling_rate: $SCALYR_AGENT_APPLOG_SAMPLING }] } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo "DONE"
@@ -178,7 +186,8 @@ fi
 if [ -n "$CUSTOMLOG" ] && [ "$USE_SCALYR_AGENT_CUSTOMLOG" = "True" ];
 then
   echo "insert custom log directory to follow... ";
-  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\"} } " $scalyr_config
+  sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\"}, \
+  sampling_rules: [{ match_expression: \".\", sampling_rate: $SCALYR_AGENT_CUSTOMLOG_SAMPLING }] } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo "DONE"
