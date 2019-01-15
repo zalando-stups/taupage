@@ -48,7 +48,7 @@ EOF
   need_rsyslog_restart='y'
 fi
 
-if [[ "$rsyslog_application_log_format" == "legacy"]]; then
+if [[ "$rsyslog_application_log_format" == "legacy" ]]; then
   cat >/etc/rsyslog.d/24-application.conf <<EOF
 :syslogtag, startswith, "docker" /var/log/application.log
 & ~
