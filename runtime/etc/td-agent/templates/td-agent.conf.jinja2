@@ -158,11 +158,14 @@
   @type copy
   <store>
     @type s3
+    auto_create_bucket false
+    check_bucket false
+    check_apikey_on_start false
     s3_region {{ fluentd_s3_region }}
     s3_bucket {{ fluentd_s3_bucket }}
-    path logs/{{ stack }}
-    s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
-    acl {{ fluentd_s3_acl }}
+    path taupage/{{ application_id }}/{{ application_version }}
+    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%Y%m%dT%H%M-%{hostname}_%{index}.%{file_extension}
+    acl bucket-owner-full-control
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/s3buffer
@@ -214,11 +217,14 @@
   </store>
   <store>
     @type s3
+    auto_create_bucket false
+    check_bucket false
+    check_apikey_on_start false
     s3_region {{ fluentd_s3_region }}
     s3_bucket {{ fluentd_s3_bucket }}
-    path logs/{{ stack }}
-    s3_object_key_format %{path}/%{hostname}/${tag}/%Y/%m/%d/%H/%M_%{index}.%{file_extension}
-    acl {{ fluentd_s3_acl }}
+    path taupage/{{ application_id }}/{{ application_version }}
+    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%Y%m%dT%H%M-%{hostname}_%{index}.%{file_extension}
+    acl bucket-owner-full-control
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/scalyr_s3buffer
