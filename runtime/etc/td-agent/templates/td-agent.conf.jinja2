@@ -179,7 +179,7 @@
     s3_region {{ fluentd_s3_region }}
     s3_bucket {{ fluentd_s3_bucket }}
     path taupage/{{ application_id }}/{{ application_version }}
-    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%Y%m%dT%H%M_%{hostname}_%{index}.%{file_extension}
+    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%{hostname}/%Y%m%dT%H%M_%{index}.%{file_extension}
     acl {{ fluentd_s3_acl }}
     <buffer time,tag>
       @type file
@@ -238,7 +238,7 @@
     s3_region {{ fluentd_s3_region }}
     s3_bucket {{ fluentd_s3_bucket }}
     path taupage/{{ application_id }}/{{ application_version }}
-    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%Y%m%dT%H%M_%{hostname}_%{index}.%{file_extension}
+    s3_object_key_format %{path}/${tag}/%Y/%m/%d/%H/%{hostname}/%Y%m%dT%H%M_%{index}.%{file_extension}
     acl {{ fluentd_s3_acl }}
     <buffer time,tag>
       @type file
