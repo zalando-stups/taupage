@@ -25,8 +25,8 @@
 
 {% if fluentd_applog_filter_exclude %}
 <filter **.application.log>
-@type grep
-<exclude>
+  @type grep
+  <exclude>
     key message
     pattern {{ fluentd_applog_filter_exclude }}
   </exclude>
@@ -62,8 +62,8 @@
 
 {% if fluentd_customlog_filter_exclude %}
 <filter **.log-custom.**>
-@type grep
-<exclude>
+  @type grep
+  <exclude>
     key message
     pattern {{ fluentd_customlog_filter_exclude }}
   </exclude>
