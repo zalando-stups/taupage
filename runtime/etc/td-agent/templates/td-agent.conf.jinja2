@@ -22,6 +22,17 @@
     @type none
   </parse>
 </source>
+
+{% if fluentd_applog_filter_exclude %}
+<filter **.application.log>
+  @type grep
+  <exclude>
+    key message
+    pattern {{ fluentd_applog_filter_exclude }}
+  </exclude>
+</filter>
+{% endif %}
+
 {% endif %}
 
 {% if fluentd_authlog_destination %}
@@ -48,6 +59,16 @@
     @type none
   </parse>
 </source>
+
+{% if fluentd_customlog_filter_exclude %}
+<filter **.log-custom.**>
+  @type grep
+  <exclude>
+    key message
+    pattern {{ fluentd_customlog_filter_exclude }}
+  </exclude>
+</filter>
+{% endif %}
 {% endif %}
 
 <filter scalyr.**.application.log scalyr_s3.**.application.log>
