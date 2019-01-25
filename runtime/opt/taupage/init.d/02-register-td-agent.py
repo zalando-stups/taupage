@@ -77,6 +77,8 @@ def update_configuration_from_template():
     fluentd_applog_destination = logging_config.get('applog_destination', fluentd_log_destination)
     fluentd_authlog_destination = logging_config.get('authlog_destination', fluentd_log_destination)
     fluentd_customlog_destination = logging_config.get('customlog_destination', fluentd_log_destination)
+    fluentd_applog_filter_exclude = logging_config.get('applog_filter_exclude', None)
+    fluentd_customlog_filter_exclude = logging_config.get('customlog_filter_exclude', None)
     fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
     fluentd_s3_raw_log_format = logging_config.get('s3_raw_log_format', 'true')
     fluentd_s3_region = logging_config.get('s3_region', 'eu-central-1')
@@ -118,8 +120,10 @@ def update_configuration_from_template():
         scalyr_custom_log_parser=scalyr_custom_log_parser,
         fluentd_syslog_destination=fluentd_syslog_destination,
         fluentd_applog_destination=fluentd_applog_destination,
+        fluentd_applog_filter_exclude=fluentd_applog_filter_exclude,
         fluentd_authlog_destination=fluentd_authlog_destination,
         fluentd_customlog_destination=fluentd_customlog_destination,
+        fluentd_customlog_filter_exclude=fluentd_customlog_filter_exclude,
         fluentd_loglevel=fluentd_loglevel,
         fluentd_s3_raw_log_format=fluentd_s3_raw_log_format,
         fluentd_s3_region=fluentd_s3_region,
