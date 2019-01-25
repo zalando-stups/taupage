@@ -42,6 +42,12 @@ if [ "$config_application_logrotate_disable_delaycompress" = True ]; then
 	sed -i '/^\s*delaycompress\s*$/d' $application_logrotate
 fi
 
+#disable the compress and use the default behavior for logrotate
+if [ "$config_application_logrotate_disable_compress" = True ]; then
+	echo "INFO: Disable compress for previous application.log"
+	sed -i 's/^\(\s*\)compress\s*$/\1nocompress/' $application_logrotate
+fi
+
 #settings for all custom logs.
 
 #set custom filesize
