@@ -1,3 +1,15 @@
+<source>
+  @type exec
+  command /opt/taupage/bin/get-fluentd-process-metrics.sh
+  <parse>
+    @type csv
+    keys cpu,mem
+    types cpu:float,mem:integer
+  </parse>
+  tag td-agent
+  run_interval 10s
+</source>
+
 {% if fluentd_syslog_destination %}
 <source>
   @type tail
@@ -92,6 +104,29 @@
   </record>
 </filter>
 
+<filter td-agent>
+  @type prometheus
+  <metric>
+    name fluentd_process_cpu
+    type gauge
+    desc td-agent cpu usage
+    key cpu
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+  <metric>
+    name fluentd_process_mem
+    type gauge
+    desc td-agent memory usage
+    key mem
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
 
 {% if fluentd_destinations['scalyr'] %}
 <filter scalyr.**>
@@ -315,6 +350,10 @@
   </store>
 </match>
 {% endif %}
+
+<match td-agent>
+  @type null
+</match>
 
 <system>
   log_level {{ fluentd_loglevel }}
