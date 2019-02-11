@@ -155,7 +155,7 @@ if __name__ == '__main__':
     else:
         try:
             file = open('/var/local/textfile_collector/fluentd_enabled.prom', 'w')
-            file.write('machine_role{role="fluentd"} 1\n')
+            file.write('machine_role{role="fluentd"} 1.0\n')
             file.close()
         except Exception:
             logger.exception('Failed to write file /var/local/textfile_collector/fluentd_enabled.prom')
