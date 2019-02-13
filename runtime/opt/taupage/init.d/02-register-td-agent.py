@@ -154,11 +154,6 @@ if __name__ == '__main__':
         raise SystemExit()
     else:
         try:
-            with open('/var/local/textfile_collector/fluentd_enabled.prom', 'w') as file:
-                file.write('machine_role{role="fluentd"} 1.0\n')
-        except Exception:
-            logger.exception('Failed to write file /var/local/textfile_collector/fluentd_enabled.prom')
-        try:
             with open('/etc/cron.d/get_fluentd_metrics', 'w') as file:
                 file.write('#!/bin/bash\n')
                 file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')

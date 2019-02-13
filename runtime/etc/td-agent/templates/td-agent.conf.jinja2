@@ -13,6 +13,8 @@
 {% if fluentd_syslog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/syslog
   pos_file /var/log/td-agent/syslog.pos
@@ -26,6 +28,8 @@
 {% if fluentd_applog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/application.log
   pos_file /var/log/td-agent/application.log.pos
@@ -50,6 +54,8 @@
 {% if fluentd_authlog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/auth.log
   pos_file /var/log/td-agent/auth.log.pos
@@ -63,6 +69,8 @@
 {% if customlog %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log-custom/*.log
   pos_file /var/log/td-agent/custom.log.pos
