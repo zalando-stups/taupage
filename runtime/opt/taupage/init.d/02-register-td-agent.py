@@ -152,6 +152,14 @@ if __name__ == '__main__':
     if not logging_config:
         logger.info('Found no logging section in senza.yaml')
         raise SystemExit()
+    else:
+        try:
+            with open('/etc/cron.d/get_fluentd_metrics', 'w') as file:
+                file.write('#!/bin/bash\n')
+                file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')
+                file.write('* * * * * root /opt/taupage/bin/get-fluentd-metrics.sh\n')
+        except Exception:
+            logger.exception('Failed to write file /etc/cron.d/get_fluentd_metrics')
 
     # HACK: Only run Fluentd if it's set to enabled in senza.yaml
     if logging_config.get('fluentd_enabled'):

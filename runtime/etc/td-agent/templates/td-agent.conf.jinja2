@@ -1,6 +1,20 @@
+<source>
+  @type exec
+  command /opt/taupage/bin/get-fluentd-process-metrics.sh
+  <parse>
+    @type csv
+    keys cpu,mem
+    types cpu:float,mem:integer
+  </parse>
+  tag td-agent
+  run_interval 10s
+</source>
+
 {% if fluentd_syslog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/syslog
   pos_file /var/log/td-agent/syslog.pos
@@ -14,6 +28,8 @@
 {% if fluentd_applog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/application.log
   pos_file /var/log/td-agent/application.log.pos
@@ -38,6 +54,8 @@
 {% if fluentd_authlog_destination %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log/auth.log
   pos_file /var/log/td-agent/auth.log.pos
@@ -51,6 +69,8 @@
 {% if customlog %}
 <source>
   @type tail
+  encoding utf-8
+  from_encoding utf-8
   read_from_head true
   path /var/log-custom/*.log
   pos_file /var/log/td-agent/custom.log.pos
@@ -92,6 +112,29 @@
   </record>
 </filter>
 
+<filter td-agent>
+  @type prometheus
+  <metric>
+    name fluentd_process_cpu
+    type gauge
+    desc td-agent cpu usage
+    key cpu
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+  <metric>
+    name fluentd_process_mem
+    type gauge
+    desc td-agent memory usage
+    key mem
+    <labels>
+      tag ${tag}
+      hostname ${hostname}
+    </labels>
+  </metric>
+</filter>
 
 {% if fluentd_destinations['scalyr'] %}
 <filter scalyr.**>
@@ -315,6 +358,10 @@
   </store>
 </match>
 {% endif %}
+
+<match td-agent>
+  @type null
+</match>
 
 <system>
   log_level {{ fluentd_loglevel }}
