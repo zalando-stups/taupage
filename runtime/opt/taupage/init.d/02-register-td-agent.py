@@ -147,6 +147,7 @@ def update_configuration_from_template():
 
 
 if __name__ == '__main__':
+    hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
     config = get_config()
     logging_config = config.get('logging')
     if logging_config:
@@ -157,7 +158,7 @@ if __name__ == '__main__':
         logger.info('Found no logging section in senza.yaml; enable dafault logging to s3')
         try:
             with open('/var/local/textfile_collector/fluentd_default_s3.prom', 'w') as file:
-                file.write('fluentd_default_s3_logging{tag=\"td-agent\",hostname=\"$(hostname)\"} 1.0\n')
+                file.write('fluentd_default_s3_logging{tag=\"td-agent\",hostname=\"'+hostname+'\"} 1.0\n')
         except Exception:
             logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
     try:
