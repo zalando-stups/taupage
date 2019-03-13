@@ -85,7 +85,7 @@ def update_configuration_from_template():
     fluentd_s3_bucket = logging_config.get('s3_bucket', 'zalando-logging-'+aws_account+'-'+aws_region)
     fluentd_s3_timekey = logging_config.get('s3_timekey', '5m')
     fluentd_s3_acl = logging_config.get('s3_acl', 'bucket-owner-full-control')
-    fluentd_rsyslog_host = logging_config.get('rsyslog_host', None)
+    fluentd_rsyslog_host = logging_config.get('rsyslog_host')
     fluentd_rsyslog_port = logging_config.get('rsyslog_port', '514')
     fluentd_rsyslog_protocol = logging_config.get('rsyslog_protocol', 'tcp')
     fluentd_rsyslog_severity = logging_config.get('rsyslog_severity', 'notice')
