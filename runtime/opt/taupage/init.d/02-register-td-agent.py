@@ -47,7 +47,7 @@ def get_scalyr_api_key():
                 raise SystemExit()
         if scalyr_api_key == "Invalid KMS key.":
             logger.error('Failed to decrypt KMS Key')
-            raise SystemExit()
+            raise SystemExit(1)
         return scalyr_api_key
 
 
@@ -144,6 +144,7 @@ def update_configuration_from_template():
             f.write(template_data)
     except Exception:
         logger.exception('Failed to write file td-agent.conf')
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
@@ -158,9 +159,11 @@ if __name__ == '__main__':
         logger.info('Found no logging section in senza.yaml; enable dafault logging to s3')
         try:
             with open('/var/local/textfile_collector/fluentd_default_s3.prom', 'w') as file:
-                file.write('fluentd_default_s3_logging{tag=\"td-agent\",hostname=\"'+hostname+'\"} 1.0\n')
+                file.write('fluentd_default_s3_logging{{tag=\"td-agent\",hostname=\"{!s}\"}} 1.0\n'
+                           .format(hostname))
         except Exception:
             logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
+            raise SystemExit(1)
     try:
         with open('/etc/cron.d/get_fluentd_metrics', 'w') as file:
             file.write('#!/bin/bash\n')
@@ -168,5 +171,6 @@ if __name__ == '__main__':
             file.write('* * * * * root /opt/taupage/bin/get-fluentd-metrics.sh\n')
     except Exception:
         logger.exception('Failed to write file /etc/cron.d/get_fluentd_metrics')
+        raise SystemExit(1)
     update_configuration_from_template()
     restart_td_agent_process()
