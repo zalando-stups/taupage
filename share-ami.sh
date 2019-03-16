@@ -66,11 +66,13 @@ for target_rgn in $copy_regions; do
     share_ami $target_rgn
 done
 
-# git add new release tag
-git tag $ami_name
-git push --tags
-if [ -d "$CONFIG_DIR" ]; then
-    cd "$CONFIG_DIR"
-    git tag "$ami_name"
+if [[ -n "${NO_RELEASE_TAG+set}" ]]; then
+    # git add new release tag
+    git tag $ami_name
     git push --tags
+    if [ -d "$CONFIG_DIR" ]; then
+        cd "$CONFIG_DIR"
+        git tag "$ami_name"
+        git push --tags
+    fi
 fi

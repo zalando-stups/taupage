@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER Team Teapot @ Zalando SE <team-teapot@zalando.de>
 
 # add scm-source

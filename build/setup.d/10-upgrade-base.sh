@@ -5,6 +5,7 @@ set -x
 echo "Updating system..."
 
 # sudo rm -rf /var/lib/apt/lists/*
+chmod 777 /tmp
 apt-get update -y  # -q >>/tmp/build/upgrade.log
 
 echo "nvme" >> /etc/initramfs-tools/modules

@@ -2,9 +2,7 @@ require 'spec_helper'
 
 packages = [
 	'build-essential',
-	'g++',
 	'g++-4.8',
-	'gcc',
 	'gcc-4.8',
 	'laptop-detect'
 ]

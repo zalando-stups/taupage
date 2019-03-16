@@ -9,11 +9,6 @@ describe package('td-agent') do
   it { should be_installed }
 end
 
-describe service('td-agent') do
-  it { should_not be_enabled   }
-  it { should_not be_running   }
-end
-
 # Ensure that td-agent init script has been removed
 describe file('/etc/init.d/td-agent') do
   it { should_not exist }

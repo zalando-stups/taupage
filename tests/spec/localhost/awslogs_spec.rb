@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-describe service('awslogs') do
-  it { should be_running }
-end
-
 describe file('/var/awslogs/etc/aws.conf') do
   it { should contain 'cwlogs = cwlogs' }
 end

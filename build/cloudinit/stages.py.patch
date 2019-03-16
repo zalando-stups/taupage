@@ -1,28 +1,27 @@
---- stages.py	2014-04-01 20:26:07.000000000 +0200
-+++ stages.changed.py	2015-02-11 15:39:28.257049100 +0100
-@@ -35,6 +35,7 @@
- from cloudinit.handlers import cloud_config as cc_part
- from cloudinit.handlers import shell_script as ss_part
- from cloudinit.handlers import upstart_job as up_part
-+from cloudinit.handlers import zalando_ami_config as zac_part
+--- stages.py	2018-10-02 20:52:24.000000000 +0000
++++ stages.changed.py	2019-03-12 10:53:51.212415699 +0000
+@@ -22,6 +22,7 @@
+ from cloudinit.handlers.jinja_template import JinjaTemplatePartHandler
+ from cloudinit.handlers.shell_script import ShellScriptPartHandler
+ from cloudinit.handlers.upstart_job import UpstartJobPartHandler
++from cloudinit.handlers.zalando_ami_config import ZalandoAMIConfigPartHandler
  
- from cloudinit import cloud
- from cloudinit import config
-@@ -344,10 +345,12 @@
-         })
-         # TODO(harlowja) Hmmm, should we dynamically import these??
+ from cloudinit.event import EventType
+ 
+@@ -417,10 +418,12 @@
+         cloudconfig_handler = CloudConfigPartHandler(**opts)
+         shellscript_handler = ShellScriptPartHandler(**opts)
          def_handlers = [
--            cc_part.CloudConfigPartHandler(**opts),
--            ss_part.ShellScriptPartHandler(**opts),
--            bh_part.BootHookPartHandler(**opts),
--            up_part.UpstartJobPartHandler(**opts),
+-            cloudconfig_handler,
+-            shellscript_handler,
+-            BootHookPartHandler(**opts),
+-            UpstartJobPartHandler(**opts),
 +            # yes, it sucks that this is static
-+            #cc_part.CloudConfigPartHandler(**opts),
-+            #ss_part.ShellScriptPartHandler(**opts),
-+            #bh_part.BootHookPartHandler(**opts),
-+            #up_part.UpstartJobPartHandler(**opts),
-+            zac_part.ZalandoAMIConfigPartHandler(**opts),
++            #cloudconfig_handler,
++            #shellscript_handler,
++            #BootHookPartHandler(**opts),
++            #UpstartJobPartHandler(**opts),
++            ZalandoAMIConfigPartHandler(**opts),
          ]
-         return def_handlers
- 
-
+         opts.update(
+             {'sub_handlers': [cloudconfig_handler, shellscript_handler]})
