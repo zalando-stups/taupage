@@ -61,6 +61,8 @@ def update_configuration_from_template():
     notify_cfn = config.get('notify_cfn')
     if notify_cfn:
         stack = notify_cfn['stack']
+    else:
+       stack = None
     source = config.get('source')
     image = config.get('source').split(':', 1)[0]
     instance_data = boto.utils.get_instance_identity()['document']
