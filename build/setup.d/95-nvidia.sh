@@ -5,9 +5,9 @@
 set -euo pipefail
 
 DRIVER_ARCH="Linux-x86_64"
-DRIVER_VERSION="384.90"
+DRIVER_VERSION="410.104"
 DRIVER_FILENAME="NVIDIA-${DRIVER_ARCH}-${DRIVER_VERSION}.run"
-DRIVER_CHECKSUM="0ddf6820f2fcca3ec3021e42a028f8bc08bca123fcea4c0c3f41c8c0ffa5febd"
+DRIVER_CHECKSUM="6ac4f7355a11e4b6ea2ff5b3d6ea677247f286daecf2e9373ef947ee08682cb7"
 
 DOCKER_DRIVER_VERSION="1.0.1"
 DOCKER_DRIVER_FILENAME="nvidia-docker_${DOCKER_DRIVER_VERSION}-1_amd64.deb"
@@ -27,7 +27,7 @@ apt-get install -y -q --no-install-recommends -o Dpkg::Options::="--force-confol
 echo "Installing NVIDIA driver ver: ${DRIVER_VERSION}"
 
 # Using the run File
-wget -P /tmp "http://us.download.nvidia.com/XFree86/${DRIVER_ARCH}/${DRIVER_VERSION}/${DRIVER_FILENAME}"
+wget -P /tmp "https://download.nvidia.com/XFree86/${DRIVER_ARCH}/${DRIVER_VERSION}/${DRIVER_FILENAME}"
 
 echo "$DRIVER_CHECKSUM /tmp/$DRIVER_FILENAME" | sha256sum -c
 
