@@ -47,7 +47,7 @@ def get_scalyr_api_key():
                 raise SystemExit()
         if scalyr_api_key == "Invalid KMS key.":
             logger.error('Failed to decrypt KMS Key')
-            raise SystemExit()
+            raise SystemExit(1)
         return scalyr_api_key
 
 
@@ -55,7 +55,7 @@ def update_configuration_from_template():
     ''' Update Jinja Template to create configuration file for Scalyr '''
     fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
     config = get_config()
-    logging_config = config.get('logging')
+    logging_config = config.get('logging', {})
     application_id = config.get('application_id')
     application_version = config.get('application_version')
     stack = config.get('notify_cfn')['stack']
@@ -72,7 +72,7 @@ def update_configuration_from_template():
         scalyr_syslog_log_parser = 'systemLog'
     scalyr_application_log_parser = logging_config.get('scalyr_application_log_parser', 'slf4j')
     scalyr_custom_log_parser = logging_config.get('scalyr_custom_log_parser', 'slf4j')
-    fluentd_log_destination = logging_config.get('log_destination', 'scalyr')
+    fluentd_log_destination = logging_config.get('log_destination', 's3')
     fluentd_syslog_destination = logging_config.get('syslog_destination', fluentd_log_destination)
     fluentd_applog_destination = logging_config.get('applog_destination', fluentd_log_destination)
     fluentd_authlog_destination = logging_config.get('authlog_destination', fluentd_log_destination)
@@ -81,8 +81,8 @@ def update_configuration_from_template():
     fluentd_customlog_filter_exclude = logging_config.get('customlog_filter_exclude', None)
     fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
     fluentd_s3_raw_log_format = logging_config.get('s3_raw_log_format', 'true')
-    fluentd_s3_region = logging_config.get('s3_region', 'eu-central-1')
-    fluentd_s3_bucket = logging_config.get('s3_bucket')
+    fluentd_s3_region = logging_config.get('s3_region', aws_region)
+    fluentd_s3_bucket = logging_config.get('s3_bucket', 'zalando-logging-'+aws_account+'-'+aws_region)
     fluentd_s3_timekey = logging_config.get('s3_timekey', '5m')
     fluentd_s3_acl = logging_config.get('s3_acl', 'bucket-owner-full-control')
     fluentd_rsyslog_host = logging_config.get('rsyslog_host')
@@ -144,24 +144,33 @@ def update_configuration_from_template():
             f.write(template_data)
     except Exception:
         logger.exception('Failed to write file td-agent.conf')
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
+    hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
     config = get_config()
     logging_config = config.get('logging')
+    if logging_config:
+        if not logging_config.get('fluentd_enabled'):
+            logger.info('Fluentd disabled; skipping Fluentd initialization')
+            raise SystemExit()
     if not logging_config:
-        logger.info('Found no logging section in senza.yaml')
-        raise SystemExit()
-    else:
+        logger.info('Found no logging section in senza.yaml; enable dafault logging to s3')
         try:
-            with open('/etc/cron.d/get_fluentd_metrics', 'w') as file:
-                file.write('#!/bin/bash\n')
-                file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')
-                file.write('* * * * * root /opt/taupage/bin/get-fluentd-metrics.sh\n')
+            with open('/var/local/textfile_collector/fluentd_default_s3.prom', 'w') as file:
+                file.write('fluentd_default_s3_logging{{tag=\"td-agent\",hostname=\"{!s}\"}} 1.0\n'
+                           .format(hostname))
         except Exception:
-            logger.exception('Failed to write file /etc/cron.d/get_fluentd_metrics')
-
-    # HACK: Only run Fluentd if it's set to enabled in senza.yaml
-    if logging_config.get('fluentd_enabled'):
-        update_configuration_from_template()
-        restart_td_agent_process()
+            logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
+            raise SystemExit(1)
+    try:
+        with open('/etc/cron.d/get_fluentd_metrics', 'w') as file:
+            file.write('#!/bin/bash\n')
+            file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')
+            file.write('* * * * * root /opt/taupage/bin/get-fluentd-metrics.sh\n')
+    except Exception:
+        logger.exception('Failed to write file /etc/cron.d/get_fluentd_metrics')
+        raise SystemExit(1)
+    update_configuration_from_template()
+    restart_td_agent_process()
