@@ -12,7 +12,25 @@ function finally() {
        aws ec2 terminate-instances --region $region --instance-ids $instanceid > /dev/null
     fi
 }
-trap finally EXIT
+
+function wait_for_server() {
+    local ip=$1
+    while [ true ]; do
+        echo "Waiting for server..."
+        set +e
+        ssh $ssh_args ubuntu@$ip echo >/dev/null
+        alive=$?
+        set -e
+        if [ $alive -eq 0 ]; then
+            break
+        fi
+        sleep 2
+    done
+}
+
+if [ -z "$NO_TERMINATE" ]; then
+    trap finally EXIT
+fi
 
 # argument parsing
 if [ "$1" = "--dry-run" ]; then
@@ -56,6 +74,7 @@ result=$(aws ec2 run-instances \
     --security-group-ids $security_group \
     --output json \
     --region $region \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Taupage,Value=BuildMachine}]' \
     --subnet-id $subnet)
 
 instanceid=$(echo $result | jq -r .Instances\[0\].InstanceId)
@@ -76,24 +95,18 @@ done
 echo "IP: $ip"
 
 # wait for server
-while [ true ]; do
-    echo "Waiting for server..."
-
-    set +e
-    ssh $ssh_args ubuntu@$ip echo >/dev/null
-    alive=$?
-    set -e
-
-    if [ $alive -eq 0 ]; then
-        break
-    fi
-    sleep 2
-done
+wait_for_server $ip
 
 if [[ $OSTYPE == darwin* ]]; then
     # Disable tar'ing resource forks on Macs
     export COPYFILE_DISABLE=true
 fi
+
+# upload systemd purge script
+scp $ssh_args $(dirname $0)/build/install_upstart.sh ubuntu@$ip:/tmp/install_upstart.sh
+ssh $ssh_args ubuntu@$ip sudo /tmp/install_upstart.sh
+sleep 2
+wait_for_server $ip
 
 # upload files
 echo "Uploading runtime/* files to server..."

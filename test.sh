@@ -87,6 +87,7 @@ for testinstance_type in $testinstance_types; do
 	    --subnet-id $subnet \
 	    --output json \
 	    --region $region \
+        --tag-specifications 'ResourceType=instance,Tags=[{Key=Taupage,Value=TestMachine}]' \
 	    --user-data file://$(pwd)/test-userdata.yaml)
 
 	instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')
@@ -200,6 +201,7 @@ result=$(aws ec2 run-instances \
     --subnet-id $subnet \
     --output json \
     --region $region \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Taupage,Value=TestMachine}]' \
     --user-data file://$(pwd)/test-batchdata.yaml)
 
 instanceid=$(echo $result | jq .Instances\[0\].InstanceId | sed 's/"//g')

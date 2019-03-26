@@ -76,6 +76,7 @@ create_test_volumes()
             --output json \
             --region ${region} \
             --availability-zone ${AVAILABILITY_ZONE} \
+            --tag-specifications 'ResourceType=volume,Tags=[{Key=Taupage,Value=TestVolume}]' \
             --volume-type gp2)
         volumeid=$(echo ${result} | jq .VolumeId | sed 's/"//g')
         aws ec2 create-tags --region ${region} --resources ${volumeid} --tags "Key=Name,Value=taupage-ami-test-vol$i"

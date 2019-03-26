@@ -4,7 +4,7 @@ application_id: my-http-test-app-ami
 application_version: "0.3"
 
 runtime: Docker
-source: registry.opensource.zalan.do/teapot/tiny-docker-http-test:master-12
+source: registry.opensource.zalan.do/teapot/tiny-docker-http:0.2
 
 environment:
   STAGE: ami-test
