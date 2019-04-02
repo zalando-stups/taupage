@@ -47,7 +47,7 @@ def get_scalyr_api_key():
                 raise SystemExit()
         if scalyr_api_key == "Invalid KMS key.":
             logger.error('Failed to decrypt KMS Key')
-            raise SystemExit()
+            raise SystemExit(1)
         return scalyr_api_key
 
 
@@ -55,10 +55,10 @@ def update_configuration_from_template():
     ''' Update Jinja Template to create configuration file for Scalyr '''
     fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
     config = get_config()
-    logging_config = config.get('logging')
+    logging_config = config.get('logging', {})
     application_id = config.get('application_id')
     application_version = config.get('application_version')
-    stack = config.get('notify_cfn')['stack']
+    stack = config.get('notify_cfn', {}).get('stack')
     source = config.get('source')
     image = config.get('source').split(':', 1)[0]
     instance_data = boto.utils.get_instance_identity()['document']
@@ -81,7 +81,7 @@ def update_configuration_from_template():
     fluentd_customlog_filter_exclude = logging_config.get('customlog_filter_exclude', None)
     fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
     fluentd_s3_raw_log_format = logging_config.get('s3_raw_log_format', 'true')
-    fluentd_s3_region = logging_config.get('s3_region', 'eu-central-1')
+    fluentd_s3_region = logging_config.get('s3_region', aws_region)
     fluentd_s3_bucket = logging_config.get('s3_bucket')
     fluentd_s3_timekey = logging_config.get('s3_timekey', '5m')
     fluentd_s3_acl = logging_config.get('s3_acl', 'bucket-owner-full-control')
