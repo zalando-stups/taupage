@@ -248,6 +248,7 @@
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/s3buffer
+      total_limit_size 250MB
       timekey {{ fluentd_s3_timekey }}
       timekey_wait 0s
       flush_at_shutdown true
@@ -307,6 +308,7 @@
     <buffer time,tag>
       @type file
       path  /var/log/td-agent/scalyr_s3buffer
+      total_limit_size 250MB
       timekey {{ fluentd_s3_timekey }}
       timekey_wait 0s
       flush_at_shutdown true
