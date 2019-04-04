@@ -4,6 +4,8 @@ import logging
 import subprocess
 import re
 import boto.utils
+import boto3
+import time
 
 from jinja2 import Environment, FileSystemLoader
 from taupage import get_config
@@ -49,6 +51,47 @@ def get_scalyr_api_key():
             logger.error('Failed to decrypt KMS Key')
             raise SystemExit(1)
         return scalyr_api_key
+
+
+def s3_iam_check(bucketname):
+    hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
+    test_get_object = True
+    s3_iam_error = 0
+    inst_id = boto.utils.get_instance_identity()['document']['instanceId']
+    ts = int(time.time())
+    key = 'iamtest/{!s}_{}'.format(inst_id, ts)
+    testobject = boto3.resource('s3').Object(bucketname, key)
+    
+    try:
+        boto3.client('s3').list_objects_v2(Bucket=bucketname)
+    except Exception:
+        logger.error('S3 IAM check for \'listBucket\' failed')
+        s3_iam_error = 1
+    
+    try:
+        testobject.put(Body=str.encode(str(ts)))
+    except Exception:
+        logger.error('S3 IAM check for \'putObject\' failed; skipping test for \'getObject\'')
+        s3_iam_error = 1
+        test_get_object = False
+    
+    if (test_get_object):
+        try:
+            testobject.get()
+        except Exception:
+            logger.error('S3 IAM check for \'getObject\' failed')
+            s3_iam_error = 1
+    
+    try:
+        with open('/var/local/textfile_collector/fluentd_s3_iam_check.prom',
+                  'w') as file:
+            file.write('fluentd_s3_iam_error{{tag=\"td-agent\",hostname=\"{:s}\"}} {:.1f}\n'
+                       .format(hostname, s3_iam_error))
+    except Exception:
+        logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
+        raise SystemExit(1)
+    
+    return s3_iam_error
 
 
 def update_configuration_from_template():
@@ -103,6 +146,11 @@ def update_configuration_from_template():
         scalyr_api_key = get_scalyr_api_key()
     else:
         scalyr_api_key = None
+
+    if fluentd_destinations.get('s3') or fluentd_destinations.get('scalyr_s3'):
+        if s3_iam_check(fluentd_s3_bucket) > 0:
+            logger.exception('missing iam roles to write to s3')
+            raise SystemExit(1)
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
