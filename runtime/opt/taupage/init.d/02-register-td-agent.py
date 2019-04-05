@@ -94,7 +94,7 @@ def s3_iam_check(bucketname):
     return s3_iam_error
 
 
-def update_configuration_from_template():
+def update_configuration_from_template(s3_default):
     ''' Update Jinja Template to create configuration file for Scalyr '''
     fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
     config = get_config()
@@ -150,7 +150,7 @@ def update_configuration_from_template():
     if fluentd_destinations.get('s3') or fluentd_destinations.get('scalyr_s3'):
         if s3_iam_check(fluentd_s3_bucket) > 0:
             logger.exception('missing iam roles to write to s3')
-            raise SystemExit(1)
+            raise SystemExit()
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
@@ -199,12 +199,14 @@ if __name__ == '__main__':
     hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
     config = get_config()
     logging_config = config.get('logging')
+    s3_default = False
     if logging_config:
         if not logging_config.get('fluentd_enabled'):
             logger.info('Fluentd disabled; skipping Fluentd initialization')
             raise SystemExit()
     if not logging_config:
         logger.info('Found no logging section in senza.yaml; enable dafault logging to s3')
+        s3_default = True
         try:
             with open('/var/local/textfile_collector/fluentd_default_s3.prom', 'w') as file:
                 file.write('fluentd_default_s3_logging{{tag=\"td-agent\",hostname=\"{!s}\"}} 1.0\n'
@@ -220,5 +222,5 @@ if __name__ == '__main__':
     except Exception:
         logger.exception('Failed to write file /etc/cron.d/get_fluentd_metrics')
         raise SystemExit(1)
-    update_configuration_from_template()
+    update_configuration_from_template(s3_default)
     restart_td_agent_process()
