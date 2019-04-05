@@ -61,27 +61,27 @@ def s3_iam_check(bucketname):
     ts = int(time.time())
     key = 'iamtest/{!s}_{}'.format(inst_id, ts)
     testobject = boto3.resource('s3').Object(bucketname, key)
-    
+
     try:
         boto3.client('s3').list_objects_v2(Bucket=bucketname)
     except Exception:
         logger.error('S3 IAM check for \'listBucket\' failed')
         s3_iam_error = 1
-    
+
     try:
         testobject.put(Body=str.encode(str(ts)))
     except Exception:
         logger.error('S3 IAM check for \'putObject\' failed; skipping test for \'getObject\'')
         s3_iam_error = 1
         test_get_object = False
-    
+
     if (test_get_object):
         try:
             testobject.get()
         except Exception:
             logger.error('S3 IAM check for \'getObject\' failed')
             s3_iam_error = 1
-    
+
     try:
         with open('/var/local/textfile_collector/fluentd_s3_iam_check.prom',
                   'w') as file:
@@ -90,7 +90,7 @@ def s3_iam_check(bucketname):
     except Exception:
         logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
         raise SystemExit(1)
-    
+
     return s3_iam_error
 
 
