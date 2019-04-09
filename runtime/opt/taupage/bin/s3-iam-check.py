@@ -31,13 +31,13 @@ def test(ctx, bucketname):
     try:
         boto3.client('s3').list_objects_v2(Bucket=bucketname)
     except Exception:
-        logger.error('S3 IAM check for \'listBucket\' failed')
+        logger.info('S3 IAM check for \'listBucket\' failed')
         s3_iam_error = 1
 
     try:
         testobject.put(Body=str.encode(str(ts)))
     except Exception:
-        logger.error('S3 IAM check for \'putObject\' failed; skipping test for \'getObject\'')
+        logger.info('S3 IAM check for \'putObject\' failed; skipping test for \'getObject\'')
         s3_iam_error = 1
         test_get_object = False
 
@@ -45,7 +45,7 @@ def test(ctx, bucketname):
         try:
             testobject.get()
         except Exception:
-            logger.error('S3 IAM check for \'getObject\' failed')
+            logger.info('S3 IAM check for \'getObject\' failed')
             s3_iam_error = 1
 
     try:
@@ -54,7 +54,7 @@ def test(ctx, bucketname):
             file.write('fluentd_s3_iam_error{{tag=\"td-agent\",hostname=\"{:s}\"}} {:.1f}\n'
                        .format(hostname, s3_iam_error))
     except Exception:
-        logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
+        logger.exception('Failed to write file /var/local/textfile_collector/fluentd_s3_iam_check.prom')
         raise SystemExit(1)
 
 
