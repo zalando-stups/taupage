@@ -174,9 +174,7 @@ if [ "$USE_SCALYR_AGENT_APPLOG" = "True" ]
 then
   echo -n "insert application to follow... ";
   sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"}, \
-  sampling_rules: $SCALYR_AGENT_APPLOG_SAMPLING, \
-  redaction_rules: [{\"match_expression\": \"eyJ[a-zA-Z0-9/+_=-]{5,}\\.eyJ[a-zA-Z0-9/+_=-]{5,}\\.[a-zA-Z0-9/+_=-]{5,}\", \
-  \"replacement\": \"+++JWT_TOKEN_REDACTED+++\"}]}" $scalyr_config
+  sampling_rules: $SCALYR_AGENT_APPLOG_SAMPLING } " $scalyr_config
   if [ $? -eq 0 ];
   then
       echo "DONE"
