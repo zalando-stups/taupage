@@ -51,47 +51,6 @@ def get_scalyr_api_key():
         return scalyr_api_key
 
 
-def s3_iam_check(bucketname):
-    hostname = boto.utils.get_instance_metadata()['local-hostname'].split('.')[0]
-    test_get_object = True
-    s3_iam_error = 0
-    inst_id = boto.utils.get_instance_identity()['document']['instanceId']
-    ts = int(time.time())
-    key = 'iamtest/{!s}_{}'.format(inst_id, ts)
-    testobject = boto3.resource('s3').Object(bucketname, key)
-
-    try:
-        boto3.client('s3').list_objects_v2(Bucket=bucketname)
-    except Exception:
-        logger.error('S3 IAM check for \'listBucket\' failed')
-        s3_iam_error = 1
-
-    try:
-        testobject.put(Body=str.encode(str(ts)))
-    except Exception:
-        logger.error('S3 IAM check for \'putObject\' failed; skipping test for \'getObject\'')
-        s3_iam_error = 1
-        test_get_object = False
-
-    if (test_get_object):
-        try:
-            testobject.get()
-        except Exception:
-            logger.error('S3 IAM check for \'getObject\' failed')
-            s3_iam_error = 1
-
-    try:
-        with open('/var/local/textfile_collector/fluentd_s3_iam_check.prom',
-                  'w') as file:
-            file.write('fluentd_s3_iam_error{{tag=\"td-agent\",hostname=\"{:s}\"}} {:.1f}\n'
-                       .format(hostname, s3_iam_error))
-    except Exception:
-        logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
-        raise SystemExit(1)
-
-    return s3_iam_error
-
-
 def update_configuration_from_template(s3_default):
     ''' Update Jinja Template to create configuration file for Scalyr '''
     fluentd_destinations = dict(scalyr=False, s3=False, rsyslog=False, scalyr_s3=False)
@@ -150,7 +109,7 @@ def update_configuration_from_template(s3_default):
             with open('/etc/cron.d/s3-iam-check', 'w') as file:
                 file.write('#!/bin/bash\n')
                 file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')
-                file.write('*/5 * * * * root /opt/taupage/bin/s3-iam-check.py test {!s}\n').format(fluentd_s3_bucket)
+                file.write('*/5 * * * * root /opt/taupage/bin/s3-iam-check.py test {!s}\n'.format(fluentd_s3_bucket))
         except Exception:
             logger.exception('Failed to write file /etc/cron.d/s3-iam-check')
             raise SystemExit(1)

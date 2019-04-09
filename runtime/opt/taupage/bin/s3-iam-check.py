@@ -57,8 +57,6 @@ def test(ctx, bucketname):
         logger.exception('Failed to write file /var/local/textfile_collector/fluentd_default_s3.prom')
         raise SystemExit(1)
 
-    print(s3_iam_error)
-
 
 if __name__ == '__main__':
     cli()
