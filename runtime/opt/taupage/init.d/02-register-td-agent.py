@@ -148,9 +148,14 @@ def update_configuration_from_template(s3_default):
         scalyr_api_key = None
 
     if fluentd_destinations.get('s3') or fluentd_destinations.get('scalyr_s3'):
-        if s3_iam_check(fluentd_s3_bucket) > 0:
-            logger.exception('missing iam roles to write to s3')
-            raise SystemExit()
+        try:
+            with open('/etc/cron.d/s3-iam-check', 'w') as file:
+                file.write('#!/bin/bash\n')
+                file.write('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n')
+                file.write('*/5 * * * * root /opt/taupage/bin/s3-iam-check.py test {!s}\n').format(fluentd_s3_bucket)
+        except Exception:
+            logger.exception('Failed to write file /etc/cron.d/s3-iam-check')
+            raise SystemExit(1)
 
     env = Environment(loader=FileSystemLoader(TD_AGENT_TEMPLATE_PATH), trim_blocks=True)
     template_data = env.get_template(TPL_NAME).render(
