@@ -129,10 +129,10 @@ def create_config_skeleton():
             'stack': main_config.get('notify_cfn', {}).get('stack'),
             'source': main_config.get('source'),
             'image': main_config.get('source').split(':', 1)[0],
-            'aws_region': instance_data['region'],
-            'aws_account': instance_data['accountId'],
+            'aws_region': instance_data.get('region'),
+            'aws_account': instance_data.get('accountId'),
             'aws_ec2_hostname': boto.utils.get_instance_metadata()['local-hostname'],
-            'aws_ec2_instance_id': boto.utils.get_instance_identity()['document']['instanceId']
+            'aws_ec2_instance_id': instance_data.get('instanceId')
         },
         'logs': [],
         'monitors': []
