@@ -78,6 +78,14 @@ if not (ship_application_log or ship_custom_log or ship_auth_log or ship_sys_log
     raise SystemExit()
 
 
+def restart_scalyr_agent_process():
+    ''' Restart Fluentd '''
+    process = subprocess.Popen(['/etc/init.d/scalyr-agent-2', 'restart'])
+    exit_code = process.wait(timeout=5)
+    if exit_code:
+        raise Exception('"/etc/init.d/scalyr-agent-2 restart" failed with exit code: {0}'.format(exit_code))
+
+
 def decrypt_scalyr_key():
     match_kms_key = re.search('aws:kms:', account_key, re.IGNORECASE)
     if match_kms_key:
@@ -160,7 +168,7 @@ if __name__ == '__main__':
                 application_log_sampling
             )
         )
-    
+
     if (ship_custom_log and mount_custom_log):
         config['logs'].append(
             create_log_item(
@@ -170,7 +178,7 @@ if __name__ == '__main__':
                 custom_log_sampling
             )
         )
-    
+
     if ship_auth_log:
         config['logs'].append(
             create_log_item(
@@ -180,7 +188,7 @@ if __name__ == '__main__':
                 auth_log_sampling
             )
         )
-    
+
     if ship_sys_log:
         config['logs'].append(
             create_log_item(
@@ -192,9 +200,10 @@ if __name__ == '__main__':
         )
 
     try:
-        with open(scalyr_agent_config_file,
-                  'w') as file:
+        with open(scalyr_agent_config_file, 'w') as file:
             file.write(json.dumps(config, indent=4, sort_keys=True))
     except Exception:
         logger.exception('Failed to write file {!s}'.format(scalyr_agent_config_file))
         raise SystemExit(1)
+
+    restart_scalyr_agent_process()
