@@ -13,6 +13,8 @@ from taupage import get_config
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+scalyr_agent_config_file = '/etc/scalyr-agent-2/agent.json'
+
 main_config = get_config()
 logging_config = main_config.get('logging')
 
@@ -188,5 +190,11 @@ if __name__ == '__main__':
                 sys_log_sampling
             )
         )
-    
-    print(json.dumps(config))
+
+    try:
+        with open(scalyr_agent_config_file,
+                  'w') as file:
+            file.write(json.dumps(config, indent=4, sort_keys=True))
+    except Exception:
+        logger.exception('Failed to write file {!s}'.format(scalyr_agent_config_file))
+        raise SystemExit(1)
