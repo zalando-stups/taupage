@@ -79,7 +79,7 @@ def update_configuration_from_template(s3_default):
     fluentd_customlog_destination = logging_config.get('customlog_destination', fluentd_log_destination)
     fluentd_applog_filter_exclude = logging_config.get('applog_filter_exclude', None)
     fluentd_customlog_filter_exclude = logging_config.get('customlog_filter_exclude', None)
-    fluentd_loglevel = logging_config.get('fluentd_loglevel', 'info')
+    fluentd_loglevel = logging_config.get('fluentd_loglevel', 'error')
     fluentd_s3_raw_log_format = logging_config.get('s3_raw_log_format', 'true')
     fluentd_s3_region = logging_config.get('s3_region', aws_region)
     fluentd_s3_bucket = logging_config.get('s3_bucket', 'zalando-logging-'+aws_account+'-'+aws_region)
