@@ -75,7 +75,7 @@ else
     EC2_AVAIL_ZONE=$( curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone )
     EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-    IAM_ROLE=$( curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials )
+    IAM_ROLE=$( curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ )
 
     echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result, IAM Role: $IAM_ROLE)..."
 
