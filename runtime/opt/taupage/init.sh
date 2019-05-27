@@ -75,12 +75,9 @@ else
     EC2_AVAIL_ZONE=$( curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone )
     EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-    IAM_ROLE=$( curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ )
+    echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result)..."
 
-    echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result, IAM Role: $IAM_ROLE)..."
-
-    ## First tries signal command with the role specified, and if that fails executes the signal command without the role
-    cfn-signal -e "$result" --role "$IAM_ROLE" --stack "$config_notify_cfn_stack" --resource "$config_notify_cfn_resource" --region "$EC2_REGION" || cfn-signal -e "$result" --stack "$config_notify_cfn_stack" --resource "$config_notify_cfn_resource" --region "$EC2_REGION"
+    cfn-signal -e "$result" --stack "$config_notify_cfn_stack" --resource "$config_notify_cfn_resource" --region "$EC2_REGION"
 fi
 
 END_TIME=$(date +"%s")
