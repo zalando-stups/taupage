@@ -66,7 +66,7 @@ for target_rgn in $copy_regions; do
     share_ami $target_rgn
 done
 
-if [[ -n "${NO_RELEASE_TAG+set}" ]]; then
+if [[ -z "${NO_RELEASE_TAG}" ]]; then
     # git add new release tag
     git tag $ami_name
     git push --tags
