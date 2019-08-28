@@ -15,7 +15,7 @@ AWS_EC2_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-i
 AWS_EC2_HOSTNAME=$(curl -s http://169.254.169.254/latest/meta-data/hostname)
 CUSTOMLOG=$config_mount_custom_log
 #set Scalyr Variables
-if [ $(set -o posix;set|grep -c config_logging_) -eq 0 ];
+if [ $(set -o posix;set|grep -c config_logging_) -eq 0 ]
 then
   ACCOUNTKEY=$config_scalyr_account_key
   SCALYR_REGION=$config_scalyr_region
@@ -30,7 +30,7 @@ else
   CUSTOMPARSER=${config_logging_scalyr_custom_log_parser:-slf4j}
 fi
 
-if [ "$FLUENTD_ENABLED" = "True" ];
+if [ "$FLUENTD_ENABLED" = "True" ]
 then
    USE_SCALYR_AGENT_ALL=${config_logging_use_scalyr_agent_all:-False}
 else
@@ -50,16 +50,16 @@ SCALYR_AGENT_AUTHLOG_SAMPLING=${config_logging_scalyr_agent_authlog_sampling:-${
 SCALYR_AGENT_CUSTOMLOG_SAMPLING=${config_logging_scalyr_agent_customlog_sampling:-${STANDARD_SAMPLING}}
 
 # Skip Scalyr Agent setup if Scalyr Agent was disabled.
-if [ "$SCALYR_AGENT_ENABLED" = "False" ];
+if [ "$SCALYR_AGENT_ENABLED" = "False" ]
 then
   echo "Scalyr Agent disabled: Skipping Scalyr Agent setup"
   exit
 fi
 
 # Skip Scalyr Agent setup if Fluentd was enabled && Scalyr agent was not enabled
-if [ "$FLUENTD_ENABLED" = "True" ];
+if [ "$FLUENTD_ENABLED" = "True" ]
 then
-  if [ -z "$SCALYR_AGENT_ENABLED" ];
+  if [ -z "$SCALYR_AGENT_ENABLED" ]
   then
     echo "Fluentd enabled and Scalyr Agent not enabled: Skipping Scalyr Agent setup"
     exit
@@ -77,181 +77,202 @@ fi
 
 SYSLOGPARSER="systemLog"
 
-if [ -n "$config_rsyslog_aws_metadata" ];
+if [ -n "$config_rsyslog_aws_metadata" ]
 then
     SYSLOGPARSER="systemLogMetadata"
 fi
 
 #check if appname and appversion is provided from the yaml
-if [ -z "$APPID" ] && [ -z "$APPVERSION" ];
+if [ -z "$APPID" ] && [ -z "$APPVERSION" ]
 then
-    echo "ERROR: no application_id and application_version are in the yaml files";
-    exit;
+    echo "ERROR: no application_id and application_version are in the yaml files"
+    exit 1
 fi
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
-if [[ $ACCOUNTKEY == "aws:kms:"* ]]; then
+if [[ $ACCOUNTKEY == "aws:kms:"* ]]
+then
   ACCOUNTKEY=${ACCOUNTKEY##aws:kms:}
   ACCOUNTKEY=`python3 /opt/taupage/bin/decrypt-kms.py $ACCOUNTKEY`
 fi
 
 #If Scalyr account exists in the yaml file. Register the Scalyr Daemon to this Account
-if [ -n "$ACCOUNTKEY" ];
+if [ -n "$ACCOUNTKEY" ]
 then
-    echo -n "Configuring scalyr daemon... ";
+    echo -n "Configuring scalyr daemon... "
     /usr/sbin/scalyr-agent-2-config --set-key "$ACCOUNTKEY"
-    if [ $? -eq 0 ];
+    if [ $? -eq 0 ]
     then
         echo "DONE"
     else
-        echo "ERROR: Register to Scalyr account failed";
-        exit;
+        echo "ERROR: Register to Scalyr account failed"
+        exit 1
     fi
 else
-    echo "INFO: scalyr not configured; skipping daemon setup.";
-    exit;
+    echo "INFO: scalyr not configured; skipping daemon setup."
+    exit
 fi
 
 #default path to scalyr config
 scalyr_config=/etc/scalyr-agent-2/agent.json
 
 #set serverhost to application_id
-echo -n "set app name and version... ";
+echo -n "set app name and version... "
 sed -i "/\/\/ serverHost: \"REPLACE THIS\"/s@.*@  serverHost:\ \"$APPID\", application_id: \"$APPID\", application_version: \"$APPVERSION\", stack: \"$STACK\", source: \"$SOURCE\", image:\"$IMAGE\", aws_account:\"$AWS_ACCOUNT\", aws_region:\"$AWS_REGION\", aws_ec2_instance_id:\"$AWS_EC2_INSTANCE_ID\", aws_ec2_hostname:\"$AWS_EC2_HOSTNAME\"@" $scalyr_config
-if [ $? -eq 0 ];
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
     echo "ERROR"
-    exit
+    exit 1
 fi
 
 #disable system metric
-echo -n "disable system metrics... ";
+echo -n "disable system metrics... "
 sed -i "/api_key\:/a\ \ implicit_metric_monitor: false," $scalyr_config
 sed -i "/api_key\:/a\ \ implicit_agent_process_metrics_monitor: false, " $scalyr_config
-if [ $? -eq 0 ];
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
     echo "ERROR"
-    exit
+    exit 1
 fi
 
 #follow syslog
 if [ "$USE_SCALYR_AGENT_SYSLOG" = "True" ]
 then
-  echo -n "insert syslog to follow... ";
+  echo -n "insert syslog to follow... "
   sed -i "/logs\:\ \[/a { path: \"/var/log/syslog\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"}, \
   sampling_rules: $SCALYR_AGENT_SYSLOG_SAMPLING } " $scalyr_config
 
-  if [ $? -eq 0 ];
+  if [ $? -eq 0 ]
   then
       echo "DONE"
   else
       echo "ERROR"
-      exit
+      exit 1
   fi
 fi
 
 #follow auth.log
 if [ "$USE_SCALYR_AGENT_AUTHLOG" = "True" ]
 then
-  echo -n "insert authlog to follow... ";
+  echo -n "insert authlog to follow... "
   sed -i "/logs\:\ \[/a { path: \"/var/log/auth.log\", \"copy_from_start\": true, attributes: {parser: \"$SYSLOGPARSER\"}, \
   sampling_rules: $SCALYR_AGENT_AUTHLOG_SAMPLING } " $scalyr_config
-  if [ $? -eq 0 ];
+  if [ $? -eq 0 ]
   then
       echo "DONE"
   else
       echo "ERROR"
-      exit
+      exit 1
   fi
 fi
 
 #follow application.log
 if [ "$USE_SCALYR_AGENT_APPLOG" = "True" ]
 then
-  echo -n "insert application to follow... ";
+  echo -n "insert application to follow... "
   sed -i "/logs\:\ \[/a { path: \"/var/log/application.log\", \"copy_from_start\": true, attributes: {parser: \"$LOGPARSER\"}, \
   sampling_rules: $SCALYR_AGENT_APPLOG_SAMPLING, \
   redaction_rules: [{\"match_expression\": \"eyJ[a-zA-Z0-9/+_=-]{5,}\\.eyJ[a-zA-Z0-9/+_=-]{5,}\\.[a-zA-Z0-9/+_=-]{5,}\", \
   \"replacement\": \"+++JWT_TOKEN_REDACTED+++\"}]}" $scalyr_config
-  if [ $? -eq 0 ];
+  if [ $? -eq 0 ]
   then
       echo "DONE"
   else
       echo -n "ERROR"
-      exit
+      exit 1
   fi
 fi
 
 #follow custom logs if it's enabled in senza.yaml
-if [ -n "$CUSTOMLOG" ] && [ "$USE_SCALYR_AGENT_CUSTOMLOG" = "True" ];
+if [ -n "$CUSTOMLOG" ] && [ "$USE_SCALYR_AGENT_CUSTOMLOG" = "True" ]
 then
-  echo "insert custom log directory to follow... ";
+  echo "insert custom log directory to follow... "
   sed -i "/logs\:\ \[/a { path: \"/var/log-custom/*.log\", \"copy_from_start\": true, attributes: {parser: \"$CUSTOMPARSER\"}, \
   sampling_rules: $SCALYR_AGENT_CUSTOMLOG_SAMPLING } " $scalyr_config
-  if [ $? -eq 0 ];
+  if [ $? -eq 0 ]
   then
       echo "DONE"
   else
       echo "ERROR"
-      exit
+      exit 1
   fi
 fi
 
-#add max_log_offset_size
-echo -n "adding max_log_offset_size... ";
-sed -i '/api_key/a \  \max_log_offset_size: 30000000,' $scalyr_config
-if [ $? -eq 0 ];
+echo -n "adding max_line_size... "
+sed -i '/api_key/a \  max_line_size: 49900,' $scalyr_config
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
     echo "ERROR"
-    exit
+    exit 1
+fi
+
+echo -n "adding read_page_size... "
+sed -i '/api_key/a \  read_page_size: 131072,' $scalyr_config
+if [ $? -eq 0 ]
+then
+    echo "DONE"
+else
+    echo "ERROR"
+    exit 1
 fi
 
 #add max_log_offset_size
-echo -n "setting debug_init to true... ";
-sed -i '/api_key/a \  \debug_init: true,' $scalyr_config
-if [ $? -eq 0 ];
+echo -n "adding max_log_offset_size... "
+sed -i '/api_key/a \  max_log_offset_size: 30000000,' $scalyr_config
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
     echo "ERROR"
-    exit
+    exit 1
+fi
+
+#add max_log_offset_size
+echo -n "setting debug_init to true... "
+sed -i '/api_key/a \  debug_init: true,' $scalyr_config
+if [ $? -eq 0 ]
+then
+    echo "DONE"
+else
+    echo "ERROR"
+    exit 1
 fi
 
 #add compressionType
-echo -n "setting compressionType to bz2... ";
+echo -n "setting compressionType to bz2... "
 sed -i '/api_key/a \  compressionType: "bz2",' $scalyr_config
-if [ $? -eq 0 ];
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
     echo "ERROR"
-    exit
+    exit 1
 fi
 
 # setting Scalyr region to europe
-echo -n "Configuring Scalyr region to eu.scalyr.com ... ";
-sed -i '/api_key/a \  \scalyr_server: "https://upload.eu.scalyr.com",' $scalyr_config
-if [ $? -eq 0 ];
+echo -n "Configuring Scalyr region to eu.scalyr.com ... "
+sed -i '/api_key/a \  scalyr_server: "https://upload.eu.scalyr.com",' $scalyr_config
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
-    echo "ERROR: Setting custom Scalyr region failed";
-    exit;
+    echo "ERROR: Setting custom Scalyr region failed"
+    exit 1
 fi
 
-echo -n "restarting scalyr daemon ... ";
+echo -n "restarting scalyr daemon ... "
 /usr/sbin/scalyr-agent-2 stop # just in case
 /usr/sbin/scalyr-agent-2 start
-if [ $? -eq 0 ];
+if [ $? -eq 0 ]
 then
     echo "DONE"
 else
-    echo "ERROR: Failed to start scalyr daemon!";
-    exit;
+    echo "ERROR: Failed to start scalyr daemon!"
+    exit 1
 fi
