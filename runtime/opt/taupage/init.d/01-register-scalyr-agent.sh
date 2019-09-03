@@ -86,7 +86,7 @@ fi
 if [ -z "$APPID" ] && [ -z "$APPVERSION" ]
 then
     echo "ERROR: no application_id and application_version are in the yaml files"
-    exit 1
+    exit
 fi
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
@@ -106,7 +106,7 @@ then
         echo "DONE"
     else
         echo "ERROR: Register to Scalyr account failed"
-        exit 1
+        exit
     fi
 else
     echo "INFO: scalyr not configured; skipping daemon setup."
@@ -124,7 +124,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 #disable system metric
@@ -136,7 +136,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 #follow syslog
@@ -151,7 +151,7 @@ then
       echo "DONE"
   else
       echo "ERROR"
-      exit 1
+      exit
   fi
 fi
 
@@ -166,7 +166,7 @@ then
       echo "DONE"
   else
       echo "ERROR"
-      exit 1
+      exit
   fi
 fi
 
@@ -183,7 +183,7 @@ then
       echo "DONE"
   else
       echo -n "ERROR"
-      exit 1
+      exit
   fi
 fi
 
@@ -198,7 +198,7 @@ then
       echo "DONE"
   else
       echo "ERROR"
-      exit 1
+      exit
   fi
 fi
 
@@ -209,7 +209,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 echo -n "adding read_page_size... "
@@ -219,7 +219,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 #add max_log_offset_size
@@ -230,7 +230,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 #add max_log_offset_size
@@ -241,7 +241,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 #add compressionType
@@ -252,7 +252,7 @@ then
     echo "DONE"
 else
     echo "ERROR"
-    exit 1
+    exit
 fi
 
 # setting Scalyr region to europe
@@ -263,7 +263,7 @@ then
     echo "DONE"
 else
     echo "ERROR: Setting custom Scalyr region failed"
-    exit 1
+    exit
 fi
 
 echo -n "restarting scalyr daemon ... "
@@ -274,5 +274,5 @@ then
     echo "DONE"
 else
     echo "ERROR: Failed to start scalyr daemon!"
-    exit 1
+    exit
 fi
