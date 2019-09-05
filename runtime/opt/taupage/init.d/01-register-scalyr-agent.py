@@ -120,6 +120,8 @@ def create_config_skeleton():
         'compressionType': 'bz2',
         'debug_init': True,
         'max_log_offset_size': 30000000,
+        'read_page_size': 131072,
+        'max_line_size': 49900,
         'implicit_agent_process_metrics_monitor': False,
         'implicit_metric_monitor': False,
         'server_attributes': {
