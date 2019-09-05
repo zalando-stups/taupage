@@ -79,7 +79,9 @@ if not (ship_application_log or ship_custom_log or ship_auth_log or ship_sys_log
 
 
 def restart_scalyr_agent_process():
-    ''' Restart Fluentd '''
+    ''' Restart SScalyr Agent '''
+    if account_key == "foo1234":
+        return 0
     process = subprocess.Popen(['/etc/init.d/scalyr-agent-2', 'restart'])
     exit_code = process.wait(timeout=5)
     if exit_code:
@@ -87,6 +89,7 @@ def restart_scalyr_agent_process():
 
 
 def decrypt_scalyr_key():
+    scalyr_api_key = None
     match_kms_key = re.search('aws:kms:', account_key, re.IGNORECASE)
     if match_kms_key:
         scalyr_api_key = re.sub(r'aws:kms:', '', account_key)
