@@ -77,7 +77,7 @@ else
 
     echo "INFO: Notifying CloudFormation (region: $EC2_REGION, stack: $config_notify_cfn_stack, resource: $config_notify_cfn_resource, status: $result)..."
 
-    cfn-signal -e $result --stack $config_notify_cfn_stack --resource $config_notify_cfn_resource --region $EC2_REGION
+    cfn-signal -e "$result" --stack "$config_notify_cfn_stack" --resource "$config_notify_cfn_resource" --region "$EC2_REGION"
 fi
 
 END_TIME=$(date +"%s")
