@@ -35,3 +35,33 @@ fi
 if [ -n "$TOKENINFO_BUSINESS_PARTNERS" ]; then
     echo "tokeninfo_business_partners: $TOKENINFO_BUSINESS_PARTNERS" >> /meta/taupage.yaml
 fi
+if [ -n "$ENABLE_OPENTRACING" ]; then
+    echo "enable_opentracing: $ENABLE_OPENTRACING" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENTRACING_LIGHTSTEP_ACCESS_TOKEN" ]; then
+    echo "opentracing_lightstep_access_token: $OPENTRACING_LIGHTSTEP_ACCESS_TOKEN" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENTRACING_LIGHTSTEP_COMPONENT_NAME" ]; then
+    echo "opentracing_lightstep_component_name: $OPENTRACING_LIGHTSTEP_COMPONENT_NAME" >> /meta/taupage.yaml
+fi
+if [ -n "$ARTIFACT" ]; then
+    echo "artifact: $ARTIFACT" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENTRACING_LIGHTSTEP_COLLECTOR_HOST" ]; then
+    echo "opentracing_lightstep_collector_host: $OPENTRACING_LIGHTSTEP_COLLECTOR_HOST" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENTRACING_LIGHTSTEP_COLLECTOR_PORT" ]; then
+    echo "opentracing_lightstep_collector_port: $OPENTRACING_LIGHTSTEP_COLLECTOR_PORT" >> /meta/taupage.yaml
+fi
+if [ -n "$OPENTRACING_MAX_BUFFERED_SPANS" ]; then
+    echo "opentracing_max_buffered_spans: $OPENTRACING_MAX_BUFFERED_SPANS" >> /meta/taupage.yaml
+fi
+if [ -n "$ACCOUNT" ]; then
+    echo "account: $ACCOUNT" >> /meta/taupage.yaml
+fi
+if [ -n "$ZONE" ]; then
+    echo "zone: $ZONE" >> /meta/taupage.yaml
+fi
+if [ -n "$DEPLOYMENT_ID" ]; then
+    echo "deployment_id: $DEPLOYMENT_ID" >> /meta/taupage.yaml
+fi
