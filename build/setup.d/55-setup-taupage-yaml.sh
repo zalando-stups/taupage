@@ -56,12 +56,6 @@ fi
 if [ -n "$OPENTRACING_MAX_BUFFERED_SPANS" ]; then
     echo "opentracing_max_buffered_spans: $OPENTRACING_MAX_BUFFERED_SPANS" >> /meta/taupage.yaml
 fi
-if [ -n "$ACCOUNT" ]; then
-    echo "account: $ACCOUNT" >> /meta/taupage.yaml
-fi
-if [ -n "$ZONE" ]; then
-    echo "zone: $ZONE" >> /meta/taupage.yaml
-fi
 if [ -n "$DEPLOYMENT_ID" ]; then
     echo "deployment_id: $DEPLOYMENT_ID" >> /meta/taupage.yaml
 fi
