@@ -79,9 +79,10 @@ if not (ship_application_log or ship_custom_log or ship_auth_log or ship_sys_log
 
 
 def restart_scalyr_agent_process():
-    ''' Restart SScalyr Agent '''
+    # Hack to make the build pipeline pass
     if account_key == "foo1234":
         return 0
+
     process = subprocess.Popen(['/etc/init.d/scalyr-agent-2', 'restart'])
     exit_code = process.wait(timeout=5)
     if exit_code:
@@ -117,7 +118,7 @@ def parse_string(value):
 
 def create_config_skeleton():
     instance_data = boto.utils.get_instance_identity()['document']
-    scalyr_config = {
+    return {
         'api_key': decrypt_scalyr_key(),
         'scalyr_server': 'https://upload.eu.scalyr.com',
         'compressionType': 'bz2',
@@ -142,7 +143,6 @@ def create_config_skeleton():
         'logs': [],
         'monitors': []
     }
-    return scalyr_config
 
 
 def create_log_item(logfile, parser, do_jwt_redaction, sampling):
@@ -174,12 +174,12 @@ if __name__ == '__main__':
             )
         )
 
-    if (ship_custom_log and mount_custom_log):
+    if ship_custom_log and mount_custom_log:
         config['logs'].append(
             create_log_item(
                 custom_log_path,
                 custom_log_parser,
-                True,
+                False,
                 custom_log_sampling
             )
         )
