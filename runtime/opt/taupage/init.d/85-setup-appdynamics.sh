@@ -10,7 +10,7 @@ ACCESSKEY=$config_appdynamics_account_access_key
 ACCOUNT_GLOBALNAME=$config_appdynamics_account_globalname
 STACK_NAME=$config_notify_cfn_stack
 ENABLE_LOGGING=$config_appdynamics_enable_logging
-SCALYR_KEY=$config_scalyr_account_key
+SCALYR_KEY=${config_logging_scalyr_account_key:-$config_scalyr_account_key}
 NODEJS_SNAPSHOT=$config_nodejs_disable_snapshots
 
 # If KMS encrypted, decrypt KMS and save to ACCOUNTKEY variable
