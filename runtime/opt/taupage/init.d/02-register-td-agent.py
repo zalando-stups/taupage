@@ -28,10 +28,7 @@ def get_scalyr_api_key():
     ''' Read Scalyr API key from Taupage config and set in template file '''
     main_config = get_config()
     config = main_config.get('logging')
-    if config:
-        scalyr_api_key = config.get('scalyr_account_key', False)
-    else:
-        scalyr_api_key = False
+    scalyr_api_key = config.get('scalyr_account_key', main_config.get('scalyr_account_key'))
 
     if scalyr_api_key:
         # If scalyr_api_key starts with "aws:kms:" then decrypt key
