@@ -5,7 +5,6 @@
         size 256M
         missingok
         notifempty
-        copytruncate
         compress
         delaycompress
         sharedscripts
