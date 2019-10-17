@@ -31,3 +31,4 @@ See the [STUPS documentation](https://docs.stups.io/en/latest/installation/taupa
     * **setup.d/** (all setup scripts that get executed on the server)
 * **/runtime/** (everything, that has to be present during runtime)
 * **/tests/** (contains various tests, such as python, serverspec and shell script tests)
+

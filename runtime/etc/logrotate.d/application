@@ -5,13 +5,10 @@
         size 256M
         missingok
         notifempty
-        copytruncate
         compress
         delaycompress
         sharedscripts
         postrotate
                 reload rsyslog >/dev/null 2>&1 || true
-                /usr/sbin/scalyr-agent-2 stop 
-                /usr/sbin/scalyr-agent-2 start
         endscript
 }
