@@ -89,7 +89,7 @@ def restart_scalyr_agent_process():
 def decrypt_scalyr_key():
     key_prefix = "aws:kms"
     if not account_key.startswith(key_prefix):
-        return
+        return account_key
 
     region_name = requests.get('http://169.254.169.254/latest/meta-data/placement/availability-zone').text[:-1]
     client = boto3.client(service_name='kms', region_name=region_name)
@@ -97,17 +97,22 @@ def decrypt_scalyr_key():
     return response['Plaintext'].decode()
 
 
-def parse_string(value):
-    try:
-        result = yaml.safe_load(value)
-    except Exception:
-        logger.warning('String \"{!s}\" could not be parsed, will be ignored!'.format(value))
-        result = None
-    return result
-
-
 def create_config_skeleton():
     instance_data = boto.utils.get_instance_identity()['document']
+
+    server_attributes = {
+        'application_id': main_config.get('application_id'),
+        "serverHost": main_config.get('application_id'),
+        'application_version': main_config.get('application_version'),
+        'stack': main_config.get('notify_cfn', {}).get('stack'),
+        'source': main_config.get('source'),
+        'image': main_config.get('source', '').split(':', 1)[0] or None,
+        'aws_region': instance_data.get('region'),
+        'aws_account': instance_data.get('accountId'),
+        'aws_ec2_hostname': boto.utils.get_instance_metadata()['local-hostname'],
+        'aws_ec2_instance_id': instance_data.get('instanceId')
+    }
+
     return {
         'api_key': decrypt_scalyr_key(),
         'scalyr_server': 'https://upload.eu.scalyr.com',
@@ -119,16 +124,9 @@ def create_config_skeleton():
         'implicit_agent_process_metrics_monitor': False,
         'implicit_metric_monitor': False,
         'server_attributes': {
-            'application_id': main_config.get('application_id'),
-            "serverHost": main_config.get('application_id'),
-            'application_version': main_config.get('application_version'),
-            'stack': main_config.get('notify_cfn', {}).get('stack'),
-            'source': main_config.get('source'),
-            'image': main_config.get('source').split(':', 1)[0],
-            'aws_region': instance_data.get('region'),
-            'aws_account': instance_data.get('accountId'),
-            'aws_ec2_hostname': boto.utils.get_instance_metadata()['local-hostname'],
-            'aws_ec2_instance_id': instance_data.get('instanceId')
+            k: v
+            for k, v in server_attributes.items()
+            if v is not None
         },
         'logs': [],
         'monitors': []
@@ -147,7 +145,10 @@ def create_log_item(logfile, parser, sampling, do_jwt_redaction):
         item['redaction_rules'] = jwt_redaction
 
     if sampling:
-        item['sampling_rules'] = parse_string(sampling)
+        try:
+            item['sampling_rules'] = yaml.safe_load(sampling)
+        except Exception:
+            logger.warning('String \"{!s}\" could not be parsed, will be ignored!'.format(sampling))
 
     return item
 
