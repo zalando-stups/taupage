@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -b "${1}" ]]; then
+  /usr/sbin/nvme id-ctrl --raw-binary "${1}" | \
+  /usr/bin/cut -c3073-3104 | \
+  /bin/sed 's/^\/dev\///g'| \
+  /bin/sed 's/^sd/xvd/'| \
+  /usr/bin/tr -d '[:space:]'
+else
+  exit 1
+fi
