@@ -20,6 +20,7 @@ libswitch-perl
 libwww-perl
 libyaml-dev
 libyaml-0-2
+nvme-cli
 mdadm
 ntp
 openjdk-8-jre-headless
