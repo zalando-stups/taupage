@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.4"
+  - "3.7"
 env: BOTO_CONFIG=/dev/null
 install:
   - pip install flake8

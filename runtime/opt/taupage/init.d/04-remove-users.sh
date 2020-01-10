@@ -9,15 +9,6 @@ keep_instance_users=$config_keep_instance_users
 if [ "$keep_instance_users" = True ] ; then
     echo "keep_instance_users detected...skipping deletion of users and authorized_keys"
 else
-    # Delete ubuntu user
-    if [ -z "$(getent passwd ubuntu)" ]; then
-        echo "User does not exist...skipping"
-    else
-        echo "Deleting user ubuntu."
-        deluser ubuntu
-        groupdel ubuntu
-    fi
-
     # Delete ubuntu user authorized_keys
     if [ -f /home/ubuntu/.ssh/authorized_keys ]; then
         echo "Deleting /home/ubuntu/.ssh/authorized_keys"
