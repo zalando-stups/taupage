@@ -36,12 +36,13 @@ EOF
 
 pushd /usr/src
 # download and configure ixgbevf: https://downloadcenter.intel.com/download/27160/
-IXGBEVF_VERSION=4.6.1
+IXGBEVF_VERSION=4.6.2
 IXGBEVF_DOWNLOAD=18700 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
-IXGBEVF_SHA="2ca0a0a836d006375fa28a999e0b139bda93110a22ee3742ae1c8d0ac9130a41"
+IXGBEVF_SHA="59a142993698d193ac4424056e60abd1948a9814c98d498d274ccfac38bff595f61ddf740421f44ffbdb4231cbf1a50648659b9a65036787872f637d5ac9336f"
 IXGBEVF_FILENAME="ixgbevf-${IXGBEVF_VERSION}.tar.gz"
-curl --fail -s -L "https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/${IXGBEVF_FILENAME}" > "${IXGBEVF_FILENAME}"
-if ! (echo "$IXGBEVF_SHA ${IXGBEVF_FILENAME}" | sha256sum -c); then
+IXGBEVF_URL="https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz"
+curl --fail -s -L $IXGBEVF_URL > "${IXGBEVF_FILENAME}"
+if ! (echo "$IXGBEVF_SHA ${IXGBEVF_FILENAME}" | sha512sum -c); then
     echo "${IXGBEVF_FILENAME}: bad shasum"
     exit 1
 fi
