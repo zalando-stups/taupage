@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+. ./secret-vars.sh
 
 # check if directory exists
 if [ ! -d /opt/proprietary/appdynamics-machine ]; then
