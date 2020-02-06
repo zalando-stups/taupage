@@ -1,0 +1,20 @@
+services:
+  - name: "${OPA_SERVICE_NAME}"
+    url: "${OPA_SERVICE_URL}"
+    credentials:
+      s3_signing:
+        metadata_credentials:
+          iam_role: "app-${APPLICATION_ID}"
+          aws_region: "${REGION}"
+
+labels:
+  cloud_provider: aws
+  execution_environment: "${OPA_EXECUTION_ENV}"
+  kio_app_ids: "${APPLICATION_ID}"
+  zone: "${AVAIL_ZONE}"
+  region: "${REGION}"
+  environment: "${ENVIRONMENT}"
+
+discovery:
+  name: discovery/zalando_se
+  service: "${OPA_SERVICE_NAME}"
