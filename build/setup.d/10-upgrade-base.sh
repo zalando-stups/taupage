@@ -36,9 +36,9 @@ EOF
 
 pushd /usr/src
 # download and configure ixgbevf: https://downloadcenter.intel.com/download/27160/
-IXGBEVF_VERSION=4.6.2
+IXGBEVF_VERSION=4.6.3
 IXGBEVF_DOWNLOAD=18700 # If you are changing VERSION, don't forget to update this id and MD5 sum on the line below
-IXGBEVF_SHA="59a142993698d193ac4424056e60abd1948a9814c98d498d274ccfac38bff595f61ddf740421f44ffbdb4231cbf1a50648659b9a65036787872f637d5ac9336f"
+IXGBEVF_SHA="82e079f1bb05587c9d70f70df2081480bce67a653cd78adceec77a53b401f78326c7e0a9cf1cf33a92bfbdd703c6cd84de890b1f60aef49e9e094f60d1ed356b"
 IXGBEVF_FILENAME="ixgbevf-${IXGBEVF_VERSION}.tar.gz"
 IXGBEVF_URL="https://downloadmirror.intel.com/${IXGBEVF_DOWNLOAD}/eng/ixgbevf-${IXGBEVF_VERSION}.tar.gz"
 curl --fail -s -L $IXGBEVF_URL > "${IXGBEVF_FILENAME}"
