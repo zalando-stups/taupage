@@ -10,7 +10,7 @@ services:
 labels:
   cloud_provider: aws
   execution_environment: "${OPA_EXECUTION_ENV}"
-  kio_app_ids: "${KIO_APP_ID}"
+  kio_app_ids: "${APPLICATION_ID}"
   zone: "${AVAIL_ZONE}"
   region: "${REGION}"
   environment: "${ENVIRONMENT}"
