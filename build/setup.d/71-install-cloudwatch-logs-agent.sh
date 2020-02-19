@@ -6,6 +6,8 @@ cd /tmp/cw-logs-setup
 # put empty config file as placeholder for the real config file
 touch cloudwatch_logs_empty.conf
 
+pip install --upgrade pip
+
 # download and install latest version of the cloudwatch logs agent
 wget https://s3.amazonaws.com/aws-cloudwatch/downloads/1.3.9/awslogs-agent-setup.py
 chmod +x ./awslogs-agent-setup.py
