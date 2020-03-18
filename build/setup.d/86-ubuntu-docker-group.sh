@@ -1,4 +1,4 @@
 #!/bin/bash
 
-groupadd docker
+getent group docker || groupadd docker
 usermod -aG docker ubuntu
