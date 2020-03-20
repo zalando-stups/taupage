@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import string
 import sys
 import subprocess
 import os
@@ -28,6 +29,29 @@ def detect_region():
 def zone():
     """Helper to return the AZ for the current instance"""
     return boto.utils.get_instance_metadata()['placement']['availability-zone']
+
+
+def select_keys(d, keys):
+    """
+    >>> select_keys({'foo': 1, 'bar': 2, 'baz': 'def'}, ['foo', 'baz'])
+    {'foo': 1, 'baz': 'def'}
+
+    >>> select_keys({'foo': 1, 'bar': 2}, ['foo', 'baz'])
+    {'foo': 1}
+    """
+    return {
+        k: d[k]
+        for k in keys
+        if k in d
+    }
+
+
+def allowed_volume_name_subs():
+    """Helper to return the allowed volume name substitutions from the instance metadata"""
+    return select_keys(
+        boto.utils.get_instance_metadata(),
+        ['local-ipv4', 'public-ipv4']
+    )
 
 
 def retry(func):
@@ -330,6 +354,20 @@ def iterate_mounts(region, config, max_tries=12, wait_time=5):
                     sys.exit(2)
 
 
+def expand_volume_name(name, subs):
+    """
+    >>> expand_volume_name('volume-${foo}-${bar}-x', {'foo': 'abc', 'bar': '123'})
+    'volume-abc-123-x'
+
+    >>> expand_volume_name('volume-${foo}-${bar}-x', {'foo': 'abc'})
+    'volume-abc-${bar}-x'
+
+    >>> expand_volume_name('volume-no-vars', {'foo': 'abc'})
+    'volume-no-vars'
+    """
+    return string.Template(name).safe_substitute(subs)
+
+
 def handle_ebs_volumes(region, ebs_volumes):
     ec2 = ec2_client(region)
     for device, name in ebs_volumes.items():
@@ -338,6 +376,7 @@ def handle_ebs_volumes(region, ebs_volumes):
         if os.path.exists(device) or os.path.exists(xv_device):
             logging.info("Device already exists %s", device)
         else:
+            name = expand_volume_name(name, allowed_volume_name_subs())
             try:
                 attach_volume(ec2, find_volume(ec2, name), device)
             except Exception as e:
