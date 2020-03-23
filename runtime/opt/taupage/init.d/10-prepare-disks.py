@@ -31,27 +31,13 @@ def zone():
     return boto.utils.get_instance_metadata()['placement']['availability-zone']
 
 
-def select_keys(d, keys):
-    """
-    >>> select_keys({'foo': 1, 'bar': 2, 'baz': 'def'}, ['foo', 'baz'])
-    {'foo': 1, 'baz': 'def'}
-
-    >>> select_keys({'foo': 1, 'bar': 2}, ['foo', 'baz'])
-    {'foo': 1}
-    """
-    return {
-        k: d[k]
-        for k in keys
-        if k in d
-    }
-
-
 def allowed_volume_name_subs():
     """Helper to return the allowed volume name substitutions from the instance metadata"""
-    return select_keys(
-        boto.utils.get_instance_metadata(),
-        ['local-ipv4', 'public-ipv4']
-    )
+    metadata = boto.utils.get_instance_metadata()
+    return {
+        'local_ipv4':  metadata.get('local-ipv4'),
+        'public_ipv4': metadata.get('public-ipv4')
+    }
 
 
 def retry(func):
@@ -356,11 +342,11 @@ def iterate_mounts(region, config, max_tries=12, wait_time=5):
 
 def expand_volume_name(name, subs):
     """
-    >>> expand_volume_name('volume-${foo}-${bar}-x', {'foo': 'abc', 'bar': '123'})
-    'volume-abc-123-x'
+    >>> expand_volume_name('volume-${local_ipv4}', {'local_ipv4': '172.31.1.1', 'bar': '123'})
+    'volume-172.31.1.1'
 
-    >>> expand_volume_name('volume-${foo}-${bar}-x', {'foo': 'abc'})
-    'volume-abc-${bar}-x'
+    >>> expand_volume_name('volume-${local_ipv4}', {'foo': 'abc'})
+    'volume-${local_ipv4}'
 
     >>> expand_volume_name('volume-no-vars', {'foo': 'abc'})
     'volume-no-vars'
