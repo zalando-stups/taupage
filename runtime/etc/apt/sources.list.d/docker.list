@@ -1,1 +1,1 @@
-deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+deb https://apt.dockerproject.org/repo ubuntu-xenial main

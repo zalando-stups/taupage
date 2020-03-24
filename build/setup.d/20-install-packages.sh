@@ -3,14 +3,10 @@
 # please keep this list sorted!
 # we need to install linux-image-extra-.. to get aufs!
 # see https://github.com/zalando-stups/taupage/issues/84
-
-DOCKER_VERSION="5:18.09.9~3-0~ubuntu-xenial"
-
 pkgs="
 auditd
 build-essential
-docker-ce=${DOCKER_VERSION}
-docker-ce-cli=${DOCKER_VERSION}
+docker-engine=1.12.6-0~ubuntu-xenial
 gcc
 htop
 iproute
