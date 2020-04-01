@@ -6,7 +6,7 @@
 pkgs="
 auditd
 build-essential
-docker-engine=1.12.6-0~ubuntu-xenial
+docker-ce
 gcc
 htop
 iproute
