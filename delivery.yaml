@@ -1,0 +1,31 @@
+version: "2017-09-20"
+pipeline:
+  - id: build
+    type: script
+    overlay: ci/python
+    commands:
+      - desc: Test
+        cmd: |
+          pip3 install flake8 boto stups-pierone stups-tokens
+          ./run-tests.sh
+
+#  - id: release
+#    type: process
+#    desc: Release to TestPyPI
+#    target: stups
+#    process: microservice_standard_deployment
+#    config:
+#      apply_permanent_resources:
+#        image: pierone.stups.zalan.do/teapot/stups-piu-release:#{CDP_TARGET_REPOSITORY_COUNTER}
+#        env:
+#          - name: USERNAME
+#            valueFrom:
+#              secretKeyRef:
+#                name: teapot-pypi-credentials
+#                key: username
+#          - name: PASSWORD
+#            valueFrom:
+#              secretKeyRef:
+#                name: teapot-pypi-credentials
+#                key: password
+#
